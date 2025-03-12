@@ -9,7 +9,7 @@ function Header() {
   };
 
   return (
-    <nav className="bg-white border border-gray-200 fixed w-full z-10">
+    <nav className="bg-white border border-gray-200  w-full">
       <div className="px-2 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 w-auto max-w-8xl xl:max-w-7xl mx-auto">
           <p className="font-bold text-[#7c3aed] text-[1.6rem] cursor-pointer">SkillBridge</p>
@@ -40,36 +40,48 @@ function Header() {
           <div className="hidden md:flex md:space-x-2 lg:space-x-4 items-center font-semibold">
             <NavLink
               to="/Collaboration"
-              activeClassName="text-[#7c3aed]"
-              className="text-[#4b5563] hover:text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+                  : "text-[#4b5563] hover:text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+              }
             >
               Collaboration Hub
             </NavLink>
 
             <NavLink
               to="/Skill-Exchange"
-              activeClassName="text-[#7c3aed]"
-              className="text-[#4b5563] hover:text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+                  : "text-[#4b5563] hover:text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+              }
             >
               Skill Exchange
             </NavLink>
 
             <NavLink
               to="/Mentor"
-              activeClassName="text-[#7c3aed]"
-              className="text-[#4b5563] hover:text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+                  : "text-[#4b5563] hover:text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+              }
             >
               Mentor Match
             </NavLink>
 
             <NavLink
               to="/Certificate"
-              activeClassName="text-[#7c3aed]"
-              className="text-[#4b5563] hover:text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+                  : "text-[#4b5563] hover:text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+              }
             >
               Certifications
             </NavLink>
-         
+
             <button className="bg-white text-black w-22 h-10 rounded-xl border border-gray-300 hover:bg-[#7c3aed] hover:text-white cursor-pointer text-sm lg:text-base">Sign in</button>
             <button className="gradient-primary text-white w-22 h-10 rounded-xl border border-gray-300 hover:opacity-80 cursor-pointer text-sm lg:text-base">Sign up</button>
           </div>
@@ -80,40 +92,52 @@ function Header() {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
             <NavLink
               to="/Collaboration"
-              activeClassName="text-[#7c3aed]"
-              className="text-[#4b5563] hover:text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+                  : "text-[#4b5563] hover:text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+              }
               onClick={() => setIsMenuOpen(false)}
             >
               Collaboration Hub
             </NavLink>
-            
+
             <NavLink
               to="/Skill-Exchange"
-              activeClassName="text-[#7c3aed]"
-              className="text-[#4b5563] hover:text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+                  : "text-[#4b5563] hover:text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+              }
               onClick={() => setIsMenuOpen(false)}
             >
               Skill Exchange
             </NavLink>
-            
+
             <NavLink
               to="/Mentor"
-              activeClassName="text-[#7c3aed]"
-              className="text-[#4b5563] hover:text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+                  : "text-[#4b5563] hover:text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+              }
               onClick={() => setIsMenuOpen(false)}
             >
               Mentor Match
             </NavLink>
-            
+
             <NavLink
               to="/Certificate"
-              activeClassName="text-[#7c3aed]"
-              className="text-[#4b5563] hover:text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+                  : "text-[#4b5563] hover:text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
+              }
               onClick={() => setIsMenuOpen(false)}
             >
               Certifications
             </NavLink>
-            
+
             <div className="flex flex-col space-y-2 pt-2">
               <button className="bg-white text-black py-2 px-4 rounded-xl border border-gray-300 hover:bg-[#7c3aed] hover:text-white cursor-pointer">
                 Sign in
