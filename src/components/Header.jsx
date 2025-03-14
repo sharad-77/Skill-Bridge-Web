@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import Button from "./ui/Button";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,30 +13,42 @@ function Header() {
     <nav className="bg-white border border-gray-200  w-full">
       <div className="px-2 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 w-auto max-w-8xl xl:max-w-7xl mx-auto">
-          <p className="font-bold text-[#7c3aed] text-[1.6rem] cursor-pointer">SkillBridge</p>
-          
+          <p className="font-bold text-[#7c3aed] text-[1.6rem] cursor-pointer">
+            SkillBridge
+          </p>
+
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button 
+            <button
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-[#7c3aed] focus:outline-none"
             >
-              <svg 
-                className="h-6 w-6" 
-                xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                className="h-6 w-6"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
                 {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 )}
               </svg>
             </button>
           </div>
-          
+
           {/* Desktop nav */}
           <div className="hidden md:flex md:space-x-2 lg:space-x-4 items-center font-semibold">
             <NavLink
@@ -82,13 +95,22 @@ function Header() {
               Certifications
             </NavLink>
 
-            <button className="bg-white text-black w-22 h-10 rounded-xl border border-gray-300 hover:bg-[#7c3aed] hover:text-white cursor-pointer text-sm lg:text-base">Sign in</button>
-            <button className="gradient-primary text-white w-22 h-10 rounded-xl border border-gray-300 hover:opacity-80 cursor-pointer text-sm lg:text-base">Sign up</button>
+            <Button Variant="secondry" size="small">
+              Signin
+            </Button>
+
+            <Button
+              Variant="primary"
+              size="small"
+              className="bg-[#7c3aed] text-white items-center"
+            >
+              Signup
+            </Button>
           </div>
         </div>
-        
+
         {/* Mobile menu */}
-        <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
+        <div className={`${isMenuOpen ? "block" : "hidden"} md:hidden`}>
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
             <NavLink
               to="/Collaboration"
@@ -139,12 +161,16 @@ function Header() {
             </NavLink>
 
             <div className="flex flex-col space-y-2 pt-2">
-              <button className="bg-white text-black py-2 px-4 rounded-xl border border-gray-300 hover:bg-[#7c3aed] hover:text-white cursor-pointer">
-                Sign in
-              </button>
-              <button className="gradient-primary text-white py-2 px-4 rounded-xl border border-gray-300 hover:opacity-80 cursor-pointer">
-                Sign up
-              </button>
+              <Button
+                Variant="primary"
+                size="large"
+                className="text-xl items-center gap-2"
+              >
+                SignUP
+              </Button>
+              <Button Variant="secondry" size="medium">
+                Signin
+              </Button>
             </div>
           </div>
         </div>

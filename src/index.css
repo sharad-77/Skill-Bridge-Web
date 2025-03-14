@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+@layer utilities {
+  .box-pattern {
+    --box-bg: white;
+    --box-color: black;
+    --box-size: 1.03px;
+    --box-space: 22px;
+    background:
+      linear-gradient(90deg, var(--box-bg) calc(var(--box-space) - var(--box-size)), transparent 1%) center / var(--box-space) var(--box-space),
+      linear-gradient(var(--box-bg) calc(var(--box-space) - var(--box-size)), transparent 1%) center / var(--box-space) var(--box-space),
+      var(--box-color);
+  }
+}
+
 :root {
   --primary-color: #7c3aed;
   --secoundry-color: #4b5563;
@@ -7,13 +20,13 @@
 }
 
 .gradient-primary {
-    @apply bg-gradient-to-r from-purple-600 to-indigo-600;
-  }
+  @apply bg-gradient-to-r from-purple-600 to-indigo-600;
+}
 
 .gradient-secondary {
-    @apply bg-gradient-to-r from-pink-500 to-rose-500;
-  }
+  @apply bg-gradient-to-r from-pink-500 to-rose-500;
+}
 
 .text-secondary {
-    @apply text-[#4b5563] hover:text-[#7c3aed] cursor-pointer;
-  }
+  @apply text-[#4b5563] hover:text-[#7c3aed] cursor-pointer;
+}
