@@ -10,8 +10,8 @@ function Header() {
   };
 
   return (
-    <nav className="bg-white border border-gray-200  w-full">
-      <div className="px-2 sm:px-6 lg:px-8">
+    <nav className="border-gray-200 max-w-7xl mx-auto">
+      <div className="px-2 h-full w-full ">
         <div className="flex items-center justify-between h-16 w-auto max-w-8xl xl:max-w-7xl mx-auto">
           <p className="font-bold text-[#7c3aed] text-[1.6rem] cursor-pointer">
             SkillBridge
@@ -55,7 +55,7 @@ function Header() {
               to="/Collaboration"
               className={({ isActive }) =>
                 isActive
-                  ? "text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
+                  ? "text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-md"
                   : "text-[#4b5563] hover:text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"
               }
             >
@@ -180,3 +180,4 @@ function Header() {
 }
 
 export default Header;
+

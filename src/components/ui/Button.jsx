@@ -6,7 +6,8 @@ const Button = ({ children,  Variant = "primary",
   const varientStyles = {
     primary: "gradient-primary text-white hover:opacity-90",
     secondry:
-      "bg-[#ffffff] text-[#000000] hover:bg-[var(--primary-color)] hover:text-[#ffffff]",
+      "text-[#000000] hover:bg-[var(--primary-color)] hover:text-[#ffffff]",
+    normal:"bg-gray-800 text-white hover:bg-white hover:text-black border border-black",
   };
 
   const buttonSize = {

@@ -7,6 +7,17 @@ export default defineConfig({
     tailwindcss({
       theme: {
         extend: {
+          fontFamily: {
+            custom: [
+              'ui-sans-serif',
+              'system-ui',
+              'sans-serif',
+              '"Apple Color Emoji"',
+              '"Segoe UI Emoji"',
+              '"Segoe UI Symbol"',
+              '"Noto Color Emoji"',
+            ],
+          },
           backgroundImage: {
             'dot-pattern': "radial-gradient(currentColor 1px, transparent 1px)",
           },
