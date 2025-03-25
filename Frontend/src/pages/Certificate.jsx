@@ -1,6 +1,6 @@
 import React from "react";
-import { CertificateCard } from "../ui/Card";
-import Button from "../ui/Button";
+import { CertificateCard } from "../components/ui/Card";
+import Button from "../components/ui/Button";
 
 export default function CertificationForm() {
   const handleSubmit = (e) => {

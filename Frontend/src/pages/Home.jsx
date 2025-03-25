@@ -1,6 +1,6 @@
 import React from "react";
-import Button from "../ui/Button";
-import { MiniCard, FeaturesCard } from "../ui/Card";
+import Button from "../components/ui/Button";
+import { MiniCard, FeaturesCard } from "../components/ui/Card";
 import {
   MoveRight,
   ChevronDown,
@@ -9,7 +9,7 @@ import {
   Trophy,
   Star,
 } from "lucide-react";
-import PostComponent from "../PostComponent";
+import PostComponent from "../components/PostComponent";
 
 function Home() {
   return (

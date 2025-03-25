@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { ProjectsCard } from "../ui/Card";
+import { ProjectsCard } from "../components/ui/Card";
 import { X } from "lucide-react";
-import Button from "../ui/Button";
+import Button from "../components/ui/Button";
 
 function Collaboration() {
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);

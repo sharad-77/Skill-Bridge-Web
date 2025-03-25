@@ -1,5 +1,5 @@
 import React from "react";
-import { MentorCard } from "../ui/Card";
+import { MentorCard } from "../components/ui/Card";
 
 export default function MentorshipRequestForm() {
   const handleSubmit = (e) => {

@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import ErrorBoundary from "./components/ErrorBoundry";
 import Footer from "./components/Footer";
-import { Home, Certificate, Collaboration, Mentor, Skill } from "@/components/pages";
+import { Home, Certificate, Collaboration, Mentor, Skill } from "@/pages";
 
 
 
