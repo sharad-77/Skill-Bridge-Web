@@ -27,11 +27,12 @@ function Home() {
           professionals. Transform your skills into success.
         </div>
 
-        <div className="flex gap-4 py-8 items-center md:justify-center md:gap-8 lg:gap-12 xl:gap-16">
+        <div className="flex gap-4 py-8 lg:py-2  items-center md:justify-center md:gap-8">
           <Button
             Variant="primary"
             size="large"
-            className="text-md max-w-[10rem] max-h-[3rem] md:max-w-[14rem] md:text-lg items-center gap-2 sparkle-effect text-black border-2 border-black hover:bg-white md:px-6 py-6"
+            className="text-md max-w-[10rem] max-h-[3.5rem] md:max-w-[14rem] md:text-lg 
+            md:max-h-auto items-center gap-2 sparkle-effect text-black border-2 border-black hover:bg-white md:px-6 py-6"
           >
             Get Started Free
             <MoveRight />
@@ -46,7 +47,7 @@ function Home() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 place-items-center gap-8 py-10 h-full max-w-4xl md:max-w-6xl lg:max-w-full xl:max-w-full">
+        <div className="grid grid-cols-2 md:grid-cols-4 place-items-center gap-8 py-10 md:py-8 h-full max-w-4xl md:max-w-6xl lg:max-w-full xl:max-w-full">
           <MiniCard>
             <div>10k+</div>
             <div>Active Users</div>
@@ -75,7 +76,7 @@ function Home() {
       </div>
 
       {/* CTA Section */}
-      <div className="flex flex-col justify-center items-center py-10 md:px-10 lg:px-20 xl:px-40">
+      <div className="flex flex-col justify-center items-center w-full h-full pt-10">
         <div className="flex flex-col justify-center items-center max-w-7xl">
           <div className="mini-Heading ">Features</div>
           <div className=" text-3xl md:text-4xl text-center lg:text-5xl font-bold py-3">Everything you need to succeed</div>
@@ -84,7 +85,7 @@ function Home() {
             your skills and advance your career.
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 px-4 py-10 h-full w-full md:max-w-6xl lg:max-w-full xl:max-w-full">
+          <div className="grid grid-cols-1 h-full w-full md:grid-cols-2 xl:grid-cols-4 gap-8 py-10 px-10">
             <FeaturesCard
               svg={<Users color="#9333ea" size={38} />}
               title={"Project Collaboration"}

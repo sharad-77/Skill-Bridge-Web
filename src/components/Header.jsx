@@ -10,10 +10,12 @@ function Header() {
   };
 
   return (
-    <nav className="border-gray-200 max-w-7xl mx-auto">
+    <nav className="border-gray-200 max-w-7xl mx-auto ">
       <div className="px-2 h-full w-full ">
-        <div className="flex items-center justify-between h-16 w-auto max-w-8xl xl:max-w-7xl mx-auto">
-          <p className="font-bold text-[#7c3aed] text-[1.6rem] cursor-pointer">
+        <div className="flex items-center justify-between h-16 w-auto max-w-8xl xl:max-w-7xl mx-auto border-b border-gray-400">
+          <p className="font-bold text-[#7c3aed] text-[1.6rem] cursor-pointer"
+          onClick={() => window.location.replace("/")}
+          >
             SkillBridge
           </p>
 
@@ -63,7 +65,7 @@ function Header() {
             </NavLink>
 
             <NavLink
-              to="/Skill-Exchange"
+              to="/Skill"
               className={({ isActive }) =>
                 isActive
                   ? "text-[#7c3aed] py-2 rounded-md md:text-xs lg:text-base"

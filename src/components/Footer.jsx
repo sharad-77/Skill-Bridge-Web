@@ -7,7 +7,9 @@ function Footer() {
       <div className="grid lg:grid-cols-4 lg:gap-8 h-full w-full lg:py-6 lg:px-2 md:px-5 px-4 grid-cols-2 gap-4 max-w-7xl border-t border-gray-200 ">
         
         <div className="text-xs md:text-[14px]">
-          <h1 className="text-lg font-bold pb-2 text-[var(--primary-color)]">
+          <h1 className="text-lg font-bold pb-2 text-[var(--primary-color)] cursor-pointer"
+          onClick={() => window.location.replace("/")}
+          >
             SkillBridge
           </h1>
           <p className="text-[var(--secoundry-color)] text-xs md:text-[14px]">
