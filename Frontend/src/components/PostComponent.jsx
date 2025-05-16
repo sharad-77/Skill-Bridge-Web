@@ -1,5 +1,5 @@
-import { CircleUserRound, MessageSquareText } from "lucide-react";
 import React from "react";
+import { CircleUserRound, MessageSquareText } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 
 const PostComponent = ({ children, className }) => {

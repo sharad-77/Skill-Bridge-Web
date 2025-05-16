@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React ,{ useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import Button from "./ui/Button";
 
@@ -9,12 +9,13 @@ function Header() {
     setIsMenuOpen(!isMenuOpen);
   };
 
+
   return (
     <nav className="border-gray-200 max-w-7xl mx-auto ">
       <div className="px-2 h-full w-full ">
         <div className="flex items-center justify-between h-16 w-auto max-w-8xl xl:max-w-7xl mx-auto border-b border-gray-400">
           <p className="font-bold text-[#7c3aed] text-[1.6rem] cursor-pointer"
-          onClick={() => window.location.replace("/")}
+            onClick={() => window.location.replace("/")}
           >
             SkillBridge
           </p>
@@ -97,17 +98,22 @@ function Header() {
               Certifications
             </NavLink>
 
-            <Button Variant="secondry" size="small">
-              Signin
-            </Button>
+            <Link to="/Signin">
+              <Button Variant="secondry" size="small">
+                Signin
+              </Button>
+            </Link>
 
-            <Button
-              Variant="primary"
-              size="small"
-              className="bg-[#7c3aed] text-white items-center"
-            >
-              Signup
-            </Button>
+            <Link to="/Signup">
+              <Button
+                Variant="primary"
+                size="small"
+                className="bg-[#7c3aed] text-white items-center"
+              >
+                Signup
+              </Button>
+            </Link>
+            
           </div>
         </div>
 
@@ -127,7 +133,7 @@ function Header() {
             </NavLink>
 
             <NavLink
-              to="/Skill-Exchange"
+              to="/Skill"
               className={({ isActive }) =>
                 isActive
                   ? "text-[#7c3aed] block px-3 py-2 rounded-md text-base font-medium"
