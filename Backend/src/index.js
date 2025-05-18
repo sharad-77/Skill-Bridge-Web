@@ -11,7 +11,7 @@ DBconnection();
 // middleware
 app.use(express.json());
 
-// // All routes
+//// All routes
 import userRoute from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
 import skillExchangeRoute from "./routes/skillExchangeRoute.js";
@@ -20,12 +20,12 @@ import findMentorRoute from "./routes/findMentorRoute.js";
 import certificateRoute from "./routes/certificateRoute.js";
 
 
-app.use('/api/User',userRoute);
-app.use('/api/Collaboration',projectCollabRoute);
-app.use('./api/Skill-Exchange',skillExchangeRoute);
-app.use('./api/Mentor',findMentorRoute);
-app.use('./api/Certificate',certificateRoute);
-app.use('./api/Authentication',authRoute);
+app.use('/api/User', userRoute);
+app.use('/api/Collaboration', projectCollabRoute);
+app.use('/api/Skill-Exchange', skillExchangeRoute);
+app.use('/api/Mentor', findMentorRoute);
+app.use('/api/Certificate', certificateRoute);
+app.use('/api/Authentication', authRoute);
 
 app.listen(PORT, () => {
     console.log(`Port Listing ON: ${PORT}`);
