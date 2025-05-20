@@ -1,21 +1,28 @@
-import jwt form "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 const jwtsecret = process.env.JWT_SECRET;
 
+
 const authMiddleware = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'No token provided' });
+    try {
+        const token = req.header("Authorization")?.replace("Bearer ", "");
+
+        if (!token) {
+            return res.status(401).json({ message: "No Token Provided" })
+        }
+
+        const decodedToken = jwt.verify(token, jwtsecret);
+        req.user = decodedToken;
+
+       
+        next();
+
+    } catch (err) {
+        return res.status(401).json({ message: "server error" });
     }
 
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token,jwtsecret);
-        req.user = decoded;
-        next();
-    } catch (err) {
-        return res.status(401).json({ message: 'Invalid token' });
-    }
 };
 
 export default authMiddleware;

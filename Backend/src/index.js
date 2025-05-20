@@ -19,6 +19,12 @@ import projectCollabRoute from "./routes/projectCollabRoute.js";
 import findMentorRoute from "./routes/findMentorRoute.js";
 import certificateRoute from "./routes/certificateRoute.js";
 
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        message: "Internal Server Error"
+    })
+})
 
 app.use('/api/User', userRoute);
 app.use('/api/Collaboration', projectCollabRoute);

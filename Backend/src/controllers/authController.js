@@ -8,70 +8,86 @@ dotenv.config();
 const jwtsecret = process.env.JWT_SECRET;
 
 export const signup = async (req, res) => {
-    const { name, password, email, role } = req.body;
+    try {
 
-    const userSchema = z.object({
-        name: z.string().max(50),
-        password: z.string().max(16),
-        email: z.string().max(50).email(),
-        role: z.enum(["student", "mentor"])
-    });
+        const { name, password, email, role } = req.body;
 
-    const userValidation = userSchema.safeParse(req.body);
-
-    if (!userValidation.success) {
-        return res.status(400).json({
-            message: "Please Enter Valid Information"
+        const userSchema = z.object({
+            name: z.string().max(50),
+            password: z.string().max(16),
+            email: z.string().max(50).email(),
+            role: z.enum(["student", "mentor"])
         });
-    }
 
-    const hashedPass = await bcrypt.hash(password, 10);
+        const userValidation = userSchema.safeParse(req.body);
 
-    const userData = await User.create({
-        name,
-        password: hashedPass,
-        email,
-        role
-    });
+        if (!userValidation.success) {
+            return res.status(400).json({
+                message: "Please Enter Valid Information"
+            });
+        }
 
-    if (userData) {
-        res.status(200).json({
-            name: userData.name,
-            email: userData.email,
-            role: userData.role
+        const hashedPass = await bcrypt.hash(password, 10);
+
+        const userData = await User.create({
+            name,
+            password: hashedPass,
+            email,
+            role
         });
+
+        if (userData) {
+            res.status(200).json({
+                name: userData.name,
+                email: userData.email,
+                role: userData.role
+            });
+        }
+    } catch (err) {
+        return res.status(500).json({
+            message: "Server error"
+        })
     }
 };
 
 export const login = async (req, res) => {
-    const { email, password } = req.body;
 
-    const userExist = await User.findOne({ email });
+    try {
 
-    if (!userExist) {
-        return res.status(400).send({
-            message: "User does not exist Pleas Signup"
+        const { email, password } = req.body;
+        const userExist = await User.findOne({ email });
+
+        if (!userExist) {
+            return res.status(400).send({
+                message: "User does not exist Pleas Signup"
+            });
+        }
+
+        const passCheck = await bcrypt.compare(password, userExist.password);
+
+        if (!passCheck) {
+            return res.status(400).send({
+                message: "Your Credentials are Wrong"
+            });
+        }
+
+        const token = jwt.sign(
+            {
+                id: userExist._id,
+                name: userExist.name,
+                role: userExist.role
+            },
+            jwtsecret
+        );
+
+        return res.json({
+            token: token,
         });
+    } catch (err) {
+        return res.status(500).json({
+            error: err.message
+        })
     }
-
-    const passCheck = await bcrypt.compare(password, userExist.password);
-
-    if (!passCheck) {
-        return res.status(400).send({
-            message: "Your Credentials are Wrong"
-        });
-    }
-
-    const token = jwt.sign(
-        {
-            name: userExist.name,
-            role: userExist.role
-        },
-        jwtsecret
-    );
-
-    res.json({
-        token: token,
-    });
 };
+
 
