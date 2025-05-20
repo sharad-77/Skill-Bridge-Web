@@ -9,7 +9,6 @@ const jwtsecret = process.env.JWT_SECRET;
 
 export const signup = async (req, res) => {
     try {
-
         const { name, password, email, role } = req.body;
 
         const userSchema = z.object({
@@ -20,7 +19,6 @@ export const signup = async (req, res) => {
         });
 
         const userValidation = userSchema.safeParse(req.body);
-
         if (!userValidation.success) {
             return res.status(400).json({
                 message: "Please Enter Valid Information"
@@ -28,7 +26,6 @@ export const signup = async (req, res) => {
         }
 
         const hashedPass = await bcrypt.hash(password, 10);
-
         const userData = await User.create({
             name,
             password: hashedPass,
@@ -51,9 +48,7 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-
     try {
-
         const { email, password } = req.body;
         const userExist = await User.findOne({ email });
 
