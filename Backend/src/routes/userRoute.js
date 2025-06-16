@@ -1,10 +1,8 @@
-import express from "express";
-import authMiddleware from '../middleware/authMiddleware.js';
+import express from "express"
 import userProfileController from '../controllers/userController.js';
 
 const userRoute = express.Router();
 
-userRoute.get('/Profile',authMiddleware,userProfileController);
-// userRoute.get("/");
+userRoute.get('/Profile',userProfileController);
 
 export default userRoute;

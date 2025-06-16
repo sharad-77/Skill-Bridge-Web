@@ -32,7 +32,7 @@ function Home() {
             Variant="primary"
             size="large"
             className="text-md max-w-[10rem] max-h-[3.5rem] md:max-w-[14rem] md:text-lg 
-            md:max-h-auto items-center gap-2 sparkle-effect text-black border-2 border-black hover:bg-white md:px-6 py-6"
+            md:max-h-auto items-center gap-2 bg-gradient-to-r from-[#9333ea] to-[#6c5ce7] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 hover:delay-20 hover:ease-in-out border-2 border-[#000000] hover:border-white md:px-6 py-6"
           >
             Get Started Free
             <MoveRight />
@@ -41,7 +41,8 @@ function Home() {
           <Button
             Variant="secondry"
             size="medium"
-            className="backdrop-blur-[90%] border-black border-2 text-md lg:text-lg md:px-6 lg:px-8 xl:px-10"
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 
+            hover:delay-20 hover:ease-in-out shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-md lg:text-lg md:px-6 lg:px-8 xl:px-10 border-2 border-black hover:border-white text-white"
           >
             Watch Demo
           </Button>

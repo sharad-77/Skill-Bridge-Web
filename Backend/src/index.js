@@ -10,6 +10,7 @@ const PORT = process.env.PORT;
 DBconnection();
 // middleware
 app.use(express.json());
+import authMiddleware from "./middleware/authMiddleware.js";
 
 //// All routes
 import userRoute from "./routes/userRoute.js";
@@ -26,11 +27,11 @@ app.use((err, req, res, next) => {
     })
 })
 
-app.use('/api/User', userRoute);
-app.use('/api/Collaboration', projectCollabRoute);
-app.use('/api/Skill-Exchange', skillExchangeRoute);
-app.use('/api/Mentor', findMentorRoute);
-app.use('/api/Certificate', certificateRoute);
+app.use('/api/User',authMiddleware, userRoute);
+app.use('/api/Collaboration',authMiddleware, projectCollabRoute);
+app.use('/api/Skill-Exchange',authMiddleware, skillExchangeRoute);
+app.use('/api/Mentor',authMiddleware, findMentorRoute);
+app.use('/api/Certificate',authMiddleware, certificateRoute);
 app.use('/api/Authentication', authRoute);
 
 app.listen(PORT, () => {

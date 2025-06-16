@@ -3,46 +3,80 @@ import z from "zod";
 import jwt from "jsonwebtoken";
 import User from '../models/userModel.js';
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 dotenv.config();
 
 const jwtsecret = process.env.JWT_SECRET;
 
+
 export const signup = async (req, res) => {
     try {
-        const { name, password, email, role } = req.body;
+        const { name, password, email, role, roleDetails } = req.body;
 
         const userSchema = z.object({
             name: z.string().max(50),
             password: z.string().max(16),
             email: z.string().max(50).email(),
-            role: z.enum(["student", "mentor"])
+            role: z.enum(["student", "mentor"]),
+            roleDetails: z.record(z.any())
         });
 
         const userValidation = userSchema.safeParse(req.body);
+
         if (!userValidation.success) {
             return res.status(400).json({
                 message: "Please Enter Valid Information"
             });
         }
-
         const hashedPass = await bcrypt.hash(password, 10);
+
+        const userExist = await User.findOne({ email });
+
+        if (userExist) {
+            return res.status(400).json({
+                message: "User already exists"
+            });
+        }
+
+        let validRoleDetails = {};
+
+        if (role === "student") {
+
+            const { instituteName, interests } = roleDetails || {};
+            if (!instituteName || !Array.isArray(interests)) {
+                return res.status(400).json({
+                    message: "Student must provide there Intitute Name and at leat 2 Interests"
+                })
+            }
+            validRoleDetails = { instituteName, interests };
+
+        } else if (role === "mentor") {
+
+            const { location, currentPosition, expertise, availability } = roleDetails || {};
+            if (!location || !currentPosition || !Array.isArray(expertise) || !availability) {
+                return res.status(400).json({
+                    message: "Mentor must provide there details"
+                })
+            }
+            validRoleDetails = { location, currentPosition, expertise, availability };
+        }
+
         const userData = await User.create({
             name,
             password: hashedPass,
             email,
-            role
+            role,
+            roleDetails: validRoleDetails
         });
 
         if (userData) {
             res.status(200).json({
-                name: userData.name,
-                email: userData.email,
-                role: userData.role
+                user: userData
             });
         }
     } catch (err) {
         return res.status(500).json({
-            message: "Server error"
+            message: err.message
         })
     }
 };
@@ -84,5 +118,3 @@ export const login = async (req, res) => {
         })
     }
 };
-
-
