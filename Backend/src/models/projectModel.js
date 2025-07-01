@@ -11,9 +11,9 @@ const projectSchema = new mongoose.Schema({
     projectdeadline: {type: String, required: true},
 
     members: [{
-        position: { type: Number },
+        position: { type: String },
         userId: { type: mongoose.Schema.Types.ObjectId, ref:'User'},
-        name: String,
+        name: { type: String },
         _id:false
     }],
 

@@ -1,9 +1,16 @@
 import express from "express";
-import { login, signup } from '../controllers/authController.js';
+import { login, mentorSignup, signup, studentSignup, changePassword } from '../controllers/authController.js';
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const authRoute = express.Router();
 
-authRoute.get('/signup', signup);
-authRoute.get('/login', login);
+authRoute.post('/signup', signup);
+
+authRoute.post('/signup/Student',authMiddleware, studentSignup);
+authRoute.post('/signup/Mentor', authMiddleware, mentorSignup);
+
+authRoute.post('/login', login);
+
+authRoute.post('/changePassword', changePassword);
 
 export default authRoute;

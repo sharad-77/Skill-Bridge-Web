@@ -1,5 +1,5 @@
 import Project from "../models/projectModel.js";
-import User from "../models/userModel.js";
+import { Student, User } from "../models/userModel.js";
 
 export const AllProject = async (req, res) => {
     try {
@@ -9,7 +9,7 @@ export const AllProject = async (req, res) => {
             Category: project.category,
             Title: project.title,
             Description: project.description,
-            JoinedMembers: project.member,
+            JoinedMembers: project.members,
             Skills: project.requiredSkill
         })));
 
@@ -27,6 +27,7 @@ export const NewProject = async (req, res) => {
         const { title, category, description, introduction, projectGoal, requiredSkill, teamSize, members, projectdeadline } = req.body;
         const UserId = req.user.id;
 
+        const student = await Student.findOne({ userId: UserId });
         const newProject = await Project.create({
             title,
             category,
@@ -37,7 +38,7 @@ export const NewProject = async (req, res) => {
             teamSize,
             members,
             projectdeadline,
-            createdBy: UserId
+            createdBy: student._id ///////////////
         });
 
         res.json({
@@ -50,7 +51,6 @@ export const NewProject = async (req, res) => {
         });
     }
 }
-
 
 export const ProjectbyId = async (req, res) => {
     try {
@@ -82,43 +82,41 @@ export const joinProject = async (req, res) => {
 
     try {
         const project = await Project.findById(projectId);
-
         if (!project) {
-          return res.status(404).json({
-                message: "Project not found"
-            })
+            return res.status(404).json({ message: "Project not found" });
         }
 
         const currentUserId = userId.toString();
 
-        const allreadyJoined = project.members.some(
+        const alreadyJoined = project.members.some(
             (m) => m.userId && m.userId.toString() === currentUserId
         );
 
-        if (allreadyJoined) { return res.status(404).json({ message: "You all ready joined this project" }) }
+        if (alreadyJoined) {
+            return res.status(400).json({ message: "You already joined this project" });
+        }
 
-        const TeamSize = project.teamSize;
-        let currentMemberCount = project.members.length;
-
-        if (currentMemberCount >= TeamSize) {
-            return res.status(404).json({
-                message: "No More Space Left In Project"
-            })
+        if (project.members.length >= project.teamSize) {
+            return res.status(400).json({ message: "No more space left in project" });
         }
 
         project.members.push({ userId, name });
         await project.save();
 
-        await User.findByIdAndUpdate(userId, {
-            $addToSet: { joinedProjects: projectId },
-        })
+        const user = await User.findById(userId);
 
-        res.status(200).json({ message: "Joined project successfully" });
+        // the main logic bro
+
+        if (user && user.role === "student") {
+            await Student.findOneAndUpdate(
+                { userId },
+                { $addToSet: { joinedProjects: projectId } }
+            );
+        }
+
+        return res.status(200).json({ message: "Joined project successfully" });
 
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
+        return res.status(500).json({ message: error.message });
     }
-
-} 
+};

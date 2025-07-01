@@ -1,8 +1,10 @@
 import express from "express"
-import userProfileController from '../controllers/userController.js';
+import { getUserProfile, updateStudentProfile, updateAccountSettings } from '../controllers/userController.js';
 
 const userRoute = express.Router();
 
-userRoute.get('/Profile',userProfileController);
+userRoute.get('/Profile', getUserProfile);
+userRoute.put('/Profile', updateStudentProfile);
+userRoute.put('/Account-Settings', updateAccountSettings);
 
 export default userRoute;
