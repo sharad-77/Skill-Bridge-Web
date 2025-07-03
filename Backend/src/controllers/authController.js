@@ -1,12 +1,11 @@
 import bcrypt from "bcryptjs";
-import z from "zod";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+import z from "zod";
 dotenv.config();
 
-import { User, Student, Mentor } from "../models/userModel.js";
+import { Mentor, Student, User } from "../models/userModel.js";
 const jwtsecret = process.env.JWT_SECRET;
-
 
 export const signup = async (req, res) => {
     try {
@@ -19,7 +18,6 @@ export const signup = async (req, res) => {
             role: z.enum(["student", "mentor"])
         });
 
-
         const userValidation = userSchema.safeParse(req.body);
 
         if (!userValidation.success) {
@@ -27,6 +25,7 @@ export const signup = async (req, res) => {
                 message: "Please Enter Valid Information"
             });
         }
+
         const hashedPass = await bcrypt.hash(password, 10);
 
         const userExist = await User.findOne({ email });
@@ -60,6 +59,20 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        const loginSchema = z.object({
+            email: z.string().email(),
+            password: z.string(),
+        });
+
+        const loginValidation = loginSchema.safeParse(req.body);
+
+        if (!loginValidation.success) {
+            return res.status(400).json({
+                message: "Please Enter Valid Information"
+            });
+        }
+
         const userExist = await User.findOne({ email });
 
         if (!userExist) {
@@ -82,7 +95,7 @@ export const login = async (req, res) => {
                 name: userExist.name,
                 role: userExist.role
             },
-            jwtsecret
+            jwtsecret,
         );
 
         return res.json({
@@ -102,8 +115,27 @@ export const studentSignup = async (req, res) => {
 
         const { introduction, location, instituteName, gradYear, interestedSkills, socialMedia } = req.body;
 
-        const allReadyExist = await Student.findOne({ userId: userID });
+        const studentSchema = z.object({
+            introduction: z.string(),
+            location: z.string(),
+            instituteName: z.string(),
+            gradYear: z.number(),
+            interestedSkills: z.array(z.string()),
+            socialMedia: z.array(z.object({
+                Name: z.string(),
+                URL: z.string().url(),
+            })),
+        });
 
+        const studentValidation = studentSchema.safeParse(req.body);
+
+        if (!studentValidation.success) {
+            return res.status(400).json({
+                message: "Please Enter Valid Information"
+            });
+        }
+
+        const allReadyExist = await Student.findOne({ userId: userID });
 
         if (allReadyExist) {
             return res.status(400).json({
@@ -117,8 +149,8 @@ export const studentSignup = async (req, res) => {
             location,
             instituteName,
             gradYear,
-            interestedSkills, //array of string
-            socialMedia // array object
+            interestedSkills,
+            socialMedia
         })
 
         res.status(200).json({
@@ -141,6 +173,27 @@ export const mentorSignup = async (req, res) => {
 
         const { introduction, location, currentPosition, yearsOfExperience, expertise, socialMedia, availability } = req.body;
 
+        const mentorSchema = z.object({
+            introduction: z.string(),
+            location: z.string(),
+            currentPosition: z.string(),
+            yearsOfExperience: z.number(),
+            expertise: z.array(z.string()),
+            socialMedia: z.array(z.object({
+                name: z.string(),
+                url: z.string().url(),
+            })),
+            availability: z.string(),
+        });
+
+        const mentorValidation = mentorSchema.safeParse(req.body);
+
+        if (!mentorValidation.success) {
+            return res.status(400).json({
+                message: "Please Enter Valid Information"
+            });
+        }
+
         const allReadyExist = await Mentor.findOne({ userId: userID });
 
         if (allReadyExist) {
@@ -155,8 +208,8 @@ export const mentorSignup = async (req, res) => {
             location,
             currentPosition,
             yearsOfExperience,
-            expertise, // array of string
-            socialMedia, // array of object
+            expertise,
+            socialMedia,
             availability,
         });
 

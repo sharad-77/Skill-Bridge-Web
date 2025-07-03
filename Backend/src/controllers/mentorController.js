@@ -2,11 +2,8 @@ import MentorshipRequestSchema from "../models/mentorshipModel.js";
 import { Mentor, Student } from "../models/userModel.js";
 
 export const allMentorsController = async (req, res) => {
-
   try {
-    const allDetialsOfMentor = await Mentor.find()
-      .populate('userId', 'name')
-
+    const allDetialsOfMentor = await Mentor.find().populate('userId', 'name');
     const mentors = allDetialsOfMentor.map(mentor => ({
       id: mentor.userId._id,
       rating: mentor.averageRating,
@@ -16,33 +13,22 @@ export const allMentorsController = async (req, res) => {
       experience: mentor.yearsOfExperience,
       availability: mentor.availability,
       expertise: mentor.expertise
-    }))
-
-    res.json({
-      mentors
-    })
-
+    }));
+    res.json({ mentors });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({
-      message: "Internal Server error"
-    });
+    res.status(500).json({ message: "Internal Server error" });
   }
 }
 
 export const mentorDetails = async (req, res) => {
   try {
     const mentorId = req.params.id;
-    const mentor = await Mentor.findById(mentorId)
-      .populate('userId', 'name');
-
+    const mentor = await Mentor.findById(mentorId).populate('userId', 'name');
     if (!mentor) {
-      return res.status(400).json({
-        message: "Invalid Mentor ID"
-      })
+      return res.status(400).json({ message: "Invalid Mentor ID" });
     }
-
-    const mentorDetails = ({
+    const mentorDetails = {
       name: mentor.userId.name,
       position: mentor.currentPosition,
       location: mentor.location,
@@ -51,64 +37,40 @@ export const mentorDetails = async (req, res) => {
       Student: mentor.studentsGuided,
       expertise: mentor.expertise,
       availability: mentor.availability
-    })
-
-    res.json({
-      mentorDetails
-    })
-
+    };
+    res.json({ mentorDetails });
   } catch (error) {
-    console.error(error.message);;
-    res.status(500).json({
-      message: "Internal Server error"
-    })
+    console.error(error.message);
+    res.status(500).json({ message: "Internal Server error" });
   }
 }
 
-// export const MentorRequest = async (req, res) => {
-//   try {
-//     const mentorId = req.params.id;
-//     const mentor = await Mentor.findById(mentorId)
-//       .populate('userId', 'name');
-
-//     if (!mentor) {
-//       return res.status(400).json({
-//         message: "Invalid Mentor ID"
-//       })
-//     }
-
-//     const mentorDetails = ({
-//       name: mentor.userId.name,
-//       position: mentor.currentPosition,
-//       location: mentor.location,
-//       experience: mentor.yearsOfExperience,
-//       rating: mentor.averageRating,
-//       Student: mentor.studentsGuided,
-//       expertise: mentor.expertise,
-//       availability: mentor.availability
-//     })
-
-//     res.json({
-//       mentorDetails
-//     })
-
-//   } catch (error) {
-//     console.error(error.message);
-//     res.status(500).json({
-//       message: "Internal Server error"
-//     })
-//   }
-// }
+import z from "zod";
 
 export const requestForMentorship = async (req, res) => {
   try {
-    const { typeOfMentorship, PreferredDuration, Goals, currentExperienceLevel, availability, preferredMeetingFormat, specificQuestionsOrTopics, additionalInformation } = req.body;
+    const mentorshipRequestSchema = z.object({
+      typeOfMentorship: z.string(),
+      PreferredDuration: z.string(),
+      Goals: z.string(),
+      currentExperienceLevel: z.string(),
+      availability: z.string(),
+      preferredMeetingFormat: z.string(),
+      specificQuestionsOrTopics: z.string(),
+      additionalInformation: z.string().optional(),
+    });
+
+    const validation = mentorshipRequestSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ message: "Invalid mentorship request data", errors: validation.error.errors });
+    }
+
+    const { typeOfMentorship, PreferredDuration, Goals, currentExperienceLevel, availability, preferredMeetingFormat, specificQuestionsOrTopics, additionalInformation } = validation.data;
 
     const student = await Student.findOne({ userId: req.user.id });
     if (!student) {
       return res.status(404).json({ message: "Student not found, Please try again" });
     }
-
     const mentor = await Mentor.findOne({ userId: req.params.id });
     if (!mentor) return res.status(404).json({ message: "Mentor not found" });
 
@@ -123,19 +85,13 @@ export const requestForMentorship = async (req, res) => {
       preferredMeetingFormat: preferredMeetingFormat,
       specificQuestionsOrTopics: specificQuestionsOrTopics,
       additionalInformation: additionalInformation
-    })
-
-    res.json({
-      message: "Mentorship Request Sent Successfully"
-    })
-
+    });
+    res.json({ message: "Mentorship Request Sent Successfully" });
   } catch (error) {
-    console.error(error.message);;
-    res.status(500).json({
-      message: "Internal Server error"
-    })
+    console.error(error.message);
+    res.status(500).json({ message: "Internal Server error" });
   }
-}
+};
 
 export const AllMentorshipRequest = async (req, res) => {
   try {
@@ -203,33 +159,35 @@ export const AllMentorshipRequest = async (req, res) => {
 export const updateMentorshipRequest = async (req, res) => {
   try {
     if (req.user.role === "student") {
-      return res.status(403).json({
-        message: "Only mentor can access this route"
-      })
+      return res.status(403).json({ message: "Only mentor can access this route" });
     }
 
-    const { requestId, status } = req.body;
+    const updateRequestSchema = z.object({
+      requestId: z.string(),
+      status: z.enum(["pending", "accepted", "rejected", "reject"]), // Assuming these are the valid statuses
+    });
+
+    const validation = updateRequestSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ message: "Invalid request data", errors: validation.error.errors });
+    }
+
+    const { requestId, status } = validation.data;
 
     if (status === 'reject') {
       await MentorshipRequestSchema.findByIdAndDelete(requestId);
-      return res.json({
-        message: "Request deleted successfully"
-      })
+      return res.json({ message: "Request deleted successfully" });
     }
 
     const request = await MentorshipRequestSchema.findByIdAndUpdate(requestId, { status }, { new: true })
       .populate('studentId', 'userId.name')
       .populate('mentorId', 'userId.name currentPosition')
-      .select('mentorshipType preferredDuration goals created_at studentId mentorId status')
+      .select('mentorshipType preferredDuration goals created_at studentId mentorId status');
 
-    res.json({
-      request
-    })
-
+    res.json({ request });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({
-      message: "Internal Server error"
-    })
+    res.status(500).json({ message: "Internal Server error" });
   }
 };
+

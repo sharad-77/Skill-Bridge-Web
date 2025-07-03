@@ -1,4 +1,5 @@
-import { User, Mentor, Student } from "../models/userModel.js";
+import { Mentor, Student, User } from "../models/userModel.js";
+import z from "zod";
 
 export const getUserProfile = async (req, res) => {
   try {
@@ -9,12 +10,17 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    let profileData;
+    const userData = user.toObject({ getters: true });
+    let profileData = { ...userData };
 
     if (user.role === "student") {
       const student = await Student.findOne({ userId });
+      if (!student) {
+        return res.status(404).json({ message: "Student profile not found" });
+      }
+
       profileData = {
-        ...user._doc,
+        ...userData,
         introduction: student.introduction,
         location: student.location,
         instituteName: student.instituteName,
@@ -24,10 +30,15 @@ export const getUserProfile = async (req, res) => {
         interestedSkills: student.interestedSkills,
         socialMedia: student.socialMedia,
       };
+
     } else if (user.role === "mentor") {
       const mentor = await Mentor.findOne({ userId });
+      if (!mentor) {
+        return res.status(404).json({ message: "Mentor profile not found" });
+      }
+
       profileData = {
-        ...user._doc,
+        ...userData,
         introduction: mentor.introduction,
         location: mentor.location,
         currentPosition: mentor.currentPosition,
@@ -44,87 +55,133 @@ export const getUserProfile = async (req, res) => {
     return res.json({ profile: profileData });
 
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ message: "Internal Server error" });
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
- };
+};
 
-export const updateStudentProfile = async (req, res) => {
+export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, introduction, location, instituteName } = req.body;
 
-    const student = await Student.findOneAndUpdate(
-      { userId },
-      { name, introduction, location, instituteName },
-      { new: true }
-    );
+    const profileUpdateSchema = z.object({
+      name: z.string().optional(),
+      introduction: z.string().optional(),
+      location: z.string().optional(),
+    });
 
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+    const validation = profileUpdateSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ message: "Invalid profile data", errors: validation.error.errors });
     }
 
-    return res.json({ message: "Profile updated successfully" });
+    const { name, introduction, location } = validation.data;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (name) {
+      user.name = name;
+      await user.save();
+    }
+
+    let updatedProfile;
+
+    if (user.role === "student") {
+      updatedProfile = await Student.findOneAndUpdate(
+        { userId },
+        { introduction, location },
+        { new: true }
+      );
+      if (!updatedProfile) {
+        return res.status(404).json({ message: "Student profile not found" });
+      }
+    } else if (user.role === "mentor") {
+      updatedProfile = await Mentor.findOneAndUpdate(
+        { userId },
+        { introduction, location },
+        { new: true }
+      );
+      if (!updatedProfile) {
+        return res.status(404).json({ message: "Mentor profile not found" });
+      }
+    } else {
+      return res.status(400).json({ message: "Invalid user role" });
+    }
+
+    return res.json({
+      message: "Profile updated successfully",
+      profile: updatedProfile,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ message: "Internal Server error" });
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const updateAccountSettings = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, email, location, socialMedia } = req.body;
+
+    const accountSettingsSchema = z.object({
+      name: z.string().optional(),
+      email: z.string().email("Invalid email format").optional(),
+      location: z.string().optional(),
+      introduction: z.string().optional(),
+      socialMedia: z.array(z.object({
+        Name: z.string(),
+        URL: z.string().url(),
+      })).optional(),
+    });
+
+    const validation = accountSettingsSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ message: "Invalid account settings data", errors: validation.error.errors });
+    }
+
+    const { name, email, location, introduction, socialMedia } = validation.data;
 
     const user = await User.findById(userId);
-
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.name = name;
-    user.email = email;
-
-    if (user.role === "student") {
-      const student = await Student.findOneAndUpdate(
-        { userId },
-        {
-          location,
-          socialMedia,
-          introduction: req.body.introduction,
-          instituteName: req.body.instituteName,
-          gradYear: req.body.gradYear,
-        },
-        { new: true }
-      );
-
-      if (!student) {
-        return res.status(404).json({ message: "Student not found" });
-      }
-    } else if (user.role === "mentor") {
-      const mentor = await Mentor.findOneAndUpdate(
-        { userId },
-        {
-          location,
-          socialMedia,
-          introduction: req.body.introduction,
-          currentPosition: req.body.currentPosition,
-          yearsOfExperience: req.body.yearsOfExperience,
-          expertise: req.body.expertise,
-        },
-        { new: true }
-      );
-
-      if (!mentor) {
-        return res.status(404).json({ message: "Mentor not found" });
-      }
-    }
-
+    if (name) user.name = name;
+    if (email) user.email = email;
     await user.save();
 
-    return res.json({ message: "Account settings updated successfully" });
+    const profileUpdates = {};
+    if (location) profileUpdates.location = location;
+    if (introduction) profileUpdates.introduction = introduction;
+    if (socialMedia) profileUpdates.socialMedia = socialMedia;
+
+    let updatedProfile;
+
+    if (user.role === "student") {
+      updatedProfile = await Student.findOneAndUpdate({ userId }, profileUpdates, { new: true });
+    } else if (user.role === "mentor") {
+      updatedProfile = await Mentor.findOneAndUpdate({ userId }, profileUpdates, { new: true });
+    }
+
+    if (!updatedProfile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    const userObject = user.toObject();
+    delete userObject.password;
+
+    const fullProfile = { ...userObject, ...updatedProfile.toObject() };
+
+    res.json({
+      message: "Account settings updated successfully",
+      profile: fullProfile,
+    });
+
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ message: "Internal Server error" });
+    console.error("Error updating account settings:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+
