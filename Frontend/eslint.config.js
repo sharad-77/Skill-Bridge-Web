@@ -33,11 +33,9 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
+      'no-unused-vars': ['warn', { 'varsIgnorePattern': 'React|Search|Filter|children|Percentage|props|scrollY' }],
+      'react/prop-types': 'off',
+      'react/no-unescaped-entities': 'off',
     },
   },
-  module.exports = {
-    rules: {
-      'no-unused-vars': 'warn',
-    },
-  };
 ]

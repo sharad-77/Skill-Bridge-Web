@@ -1,192 +1,359 @@
-import React from "react";
-import Button from "../components/ui/Button";
-import { MiniCard, FeaturesCard } from "../components/ui/Card";
 import {
-  MoveRight,
-  ChevronDown,
-  Users,
+  ArrowRight,
+  ArrowUpRight,
   BookOpen,
-  Trophy,
+  Check,
+  ChevronDown,
+  Globe,
+  Play,
   Star,
+  Target,
+  Trophy,
+  Users,
+  Zap,
 } from "lucide-react";
-import PostComponent from "../components/PostComponent";  
+import { Link } from "react-router-dom";
+import Button from "../components/ui/Button";
+import { SkillCard, FloatingCard, DashboardCard, ProjectCard, MentorReviewCard } from "../components/ui/Card.jsx";
 
 function Home() {
   return (
-    <section className="bg-gray-20 h-full w-full">
-      {/* Main Section */}
-      <div className="flex flex-col justify-center items-center h-full w-full pt-20 box-pattern gradient-container md:px-10 lg:px-10 xl:px-20">
-        <div className="text-center md:text-left text-2xl font-normal tracking-tight text-gray-900">The Future of Learning is Here</div>
-
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text max-w-4xl lg:max-w-3xl text-center font-normal leading-none py-4 text-5xl md:text-6xl lg:text-7xl xl:text-[72px]">
-          Unlock Your Potential with SkillBridge
-        </div>
-
-        <div className="text-[#4b5563] max-w-3xl md:max-w-lg lg:max-w-2xl text-center font-normal leading-normal md:py-2 lg:py-5 text-md">
-          Connect, collaborate, and grow with a community of learners and
-          professionals. Transform your skills into success.
-        </div>
-
-        <div className="flex gap-4 py-8 lg:py-2 items-center md:justify-center md:gap-8">
-          <Button
-            Variant="primary"
-            size="large"
-            className="text-md max-w-[10rem] max-h-[3.5rem] md:max-w-[14rem] md:text-lg
-            md:max-h-auto items-center gap-2 bg-gradient-to-r from-[#9333ea] to-[#6c5ce7] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 hover:delay-20 hover:ease-in-out border-2 border-[#000000] hover:border-white md:px-6 py-6"
-          >
-            Get Started Free
-            <MoveRight />
-          </Button>
-
-          <Button
-            Variant="secondry"
-            size="medium"
-            className="bg-gradient-to-r from-purple-600 to-indigo-600
-            hover:delay-20 hover:ease-in-out shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-md lg:text-lg md:px-6 lg:px-8 xl:px-10 border-2 border-black hover:border-white text-white"
-          >
-            Watch Demo
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 place-items-center gap-8 py-10 md:py-8 h-full max-w-4xl md:max-w-6xl lg:max-w-full xl:max-w-full">
-          <MiniCard>
-            <div>10k+</div>
-            <div>Active Users</div>
-          </MiniCard>
-
-          <MiniCard>
-            <div>500+</div>
-            <div>Mentors</div>
-          </MiniCard>
-
-          <MiniCard>
-            <div>1000+</div>
-            <div>Projects</div>
-          </MiniCard>
-
-          <MiniCard>
-            <div>50k+</div>
-            <div>Skills Shared</div>
-          </MiniCard>
-        </div>
-
-        <div className="flex flex-col justify-center items-center bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce ml-20">
-          <p className="text-lg text-[var(--secoundry-color)]">Scroll Down</p>
-          <ChevronDown className="text-[var(--secoundry-color)]" />
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="flex flex-col justify-center items-center w-full h-full pt-10">
-        <div className="flex flex-col justify-center items-center max-w-7xl">
-          <div className="text-2xl font-normal tracking-tight text-gray-900">Features</div>
-          <div className="text-3xl md:text-4xl text-center lg:text-5xl font-normal py-3">Everything you need to succeed</div>
-          <div className="text-[#4b5563] max-w-[23rem] md:max-w-lg p-2 text-center text-md lg:text-lg leading-normal">
-            SkillBridge provides all the tools and resources you need to enhance
-            your skills and advance your career.
+    <section className="bg-white h-full w-full flex justify-center items-center">
+      <div className="flex flex-col justify-center items-center overflow-hidden bg-white h-full w-full">
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center max-w-[1352px]">
+          {/* Background Elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-20 left-[10%] w-72 h-72 bg-purple-200/20 rounded-full blur-3xl animate-pulse-slow" />
+            <div
+              className="absolute bottom-20 right-[15%] w-96 h-96 bg-blue-200/20 rounded-full blur-3xl animate-pulse-slow"
+              style={{ animationDelay: "2s" }}
+            />
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-purple-100/10 to-blue-100/10 rounded-full blur-3xl" />
           </div>
 
-          <div className="grid grid-cols-1 h-full w-full md:grid-cols-2 xl:grid-cols-4 gap-8 py-10 px-10">
-            <FeaturesCard
-              svg={<Users color="#9333ea" size={38} />}
-              title={"Project Collaboration"}
-              description={
-                "Work on real projects with peers and build your portfolio"
-              }
-              className="hover:text-purple-600 hover:bg-pink-50"
-            ></FeaturesCard>
-
-            <FeaturesCard
-              svg={<BookOpen color="#ff4878" size={38} />}
-              title={"Project Collaboration"}
-              description={
-                "Work on real projects with peers and build your portfolio"
-              }
-              className="hover:text-[#ff4878] hover:bg-red-50"
-            ></FeaturesCard>
-
-            <FeaturesCard
-              svg={<Trophy color="#4b86fb" size={38} />}
-              title={"Project Collaboration"}
-              description={
-                "Work on real projects with peers and build your portfolio"
-              }
-              className="hover:text-[#4b86fb] hover:bg-blue-50"
-            ></FeaturesCard>
-
-            <FeaturesCard
-              svg={<Star color="#008a30" size={38} />}
-              title={"Project Collaboration"}
-              description={
-                "Work on real projects with peers and build your portfolio"
-              }
-              className="hover:text-[#008a30] hover:bg-green-50"
-            ></FeaturesCard>
-          </div>
-        </div>
-      </div>
-
-      {/* Join Now Section */}
-      <div className="flex justify-center items-center w-full h-full gradient-primary md:px-10 lg:px-20 xl:px-40">
-        <div className="flex flex-col justify-center items-center max-w-4xl h-[20rem] w-full glass-dark m-20 rounded-3xl text-center md:text-left mx-10">
-          <div className="text-white text-4xl font-normal">
-            Ready to Start Your Journey?
-          </div>
-          <div className="text-white md:max-w-md text-lg xl:text-xl text-center py-8">
-            Join thousands of learners who are already transforming their
-            careers with SkillBridge.
-          </div>
-          <Button Variant="normal" size="large">
-            Join Now Skill-Bridge
-          </Button>
-        </div>
-      </div>
-
-      {/* Testimonial */}
-      <div className="flex items-center justify-center pt-10">
-        <div className="flex flex-col justify-center items-center max-w-7xl">
-          <p className="text-2xl font-normal tracking-tight text-gray-900">Testimonials</p>
-          <div className="text-4xl md:text-5xl lg:text-5xl xl:text-6xl text-center font-normal pt-2">What Our Users Say</div>
-          <div className="max-w-lg md:max-w-md text-center text-gray-600 py-3">
-            Hear from students and professionals who have transformed their
-            careers with SkillBridge.
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 place-items-center gap-8 py-8 px-4 h-full w-full md:max-w-6xl lg:max-w-full xl:max-w-full">
-            <div className="h-full w-full border-t-4 border-[#9333ea]">
-              <PostComponent>
-                <div>
-                  SkillBridge helped me land my dream job through its amazing
-                  mentorship program.
+          <div className="container mx-auto px-4 py-20 relative z-10">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left Content */}
+              <div className="space-y-8">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+                  <Zap className="w-4 h-4 mr-2" />
+                  #1 Platform for Collaborative Learning
                 </div>
-                <div>Chavda Sharad</div>
-                <div>Block-Chain Devloper</div>
-              </PostComponent>
-            </div>
 
-            <div className="h-full w-full border-t-4 border-red-500">
-              <PostComponent>
-                <div>
-                  The project collaboration feature is fantastic. I've built a
-                  strong portfolio here.
-                </div>
-                <div>Belim Uzer-Khan</div>
-                <div>WEB-Developer</div>
-              </PostComponent>
-            </div>
+                <div className="space-y-6 w-full">
+                  <h1 className="text-3xl lg:text-5xl font-bold leading-tight text-gray-900 w-full">
+                    Transform Your
+                    <span className="block bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                      Learning Journey
+                    </span>
+                    with SkillBridge
+                  </h1>
 
-            <div className="h-full w-full border-t-4 border-blue-500">
-              <PostComponent>
-                <div>
-                  The skill exchange marketplace transformed how I learn new
-                  technologies.
+                  <p className="text-md text-gray-500 leading-tight max-w-lg">
+                    Connect with mentors, collaborate on projects, and accelerate your career growth. Join thousands of
+                    learners building their future together.
+                  </p>
                 </div>
-                <div>Jigar Vadher</div>
-                <div>ML-OPS Engineer</div>
-              </PostComponent>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button asChild size="md">
+                    <Link to="/signup">
+                      Start Learning Free
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="md" variant="outline">
+                    <Link to="/demo">
+                      <Play className="mr-2 h-5 w-5" />
+                      Watch Demo
+                    </Link>
+                  </Button>
+                </div>
+
+              </div>
+
+              {/* Right Content - Dashboard Mockup */}
+              <div className="relative">
+                <div className="relative z-10">
+                  <div className="bg-white rounded-2xl shadow-2xl p-6 transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <DashboardCard
+                      activeProjects={3}
+                      mentorshipSessions={12}
+                      skillsLearned={8}
+                    />
+                  </div>
+
+                  {/* Floating Cards */}
+                  <FloatingCard
+                    icon={Check}
+                    title="Project Completed!"
+                    subtitle="React Dashboard"
+                    bgColorClass="bg-green-100"
+                    iconColorClass="text-green-600"
+                    animationClass="absolute -top-4 -right-4 animate-float"
+                  />
+
+                  <FloatingCard
+                    icon={Users}
+                    title="New Mentor Match"
+                    subtitle="Sarah Johnson"
+                    bgColorClass="bg-blue-100"
+                    iconColorClass="text-blue-600"
+                    animationClass="absolute -bottom-4 -left-4 animate-float-slow"
+                  />
+                </div>
+
+                {/* Background Decoration */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-200/30 to-blue-200/30 rounded-3xl transform -rotate-6 scale-105 -z-10"></div>
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Scroll Indicator */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <ChevronDown className="h-6 w-6 text-gray-400" />
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="py-16 bg-white border-b border-gray-100 max-w-[1352px]">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">10,000+</div>
+                <div className="text-gray-600">Active Students</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">500+</div>
+                <div className="text-gray-600">Expert Mentors</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">1,200+</div>
+                <div className="text-gray-600">Projects Completed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">95%</div>
+                <div className="text-gray-600">Success Rate</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-20 bg-gray-50 max-w-[1352px]">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium mb-4">
+                Why Choose SkillBridge
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Everything you need to
+                <span className="block text-purple-600">accelerate your growth</span>
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                From project collaboration to expert mentorship, we provide all the tools and connections you need to
+                succeed in your career.
+              </p>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
+              <div className="space-y-8">
+                <div className="space-y-6">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+                    <Target className="w-4 h-4 mr-2" />
+                    Project Collaboration
+                  </div>
+                  <h3 className="text-3xl font-bold text-gray-900">Build Real Projects with Peers</h3>
+                  <p className="text-lg text-gray-600 leading-relaxed">
+                    Work on meaningful projects with talented peers from around the world. Build your portfolio while
+                    learning from others and making lasting connections.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">Real-world project experience</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">Collaborative learning environment</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">Portfolio-worthy projects</span>
+                  </div>
+                </div>
+
+                <Button asChild>
+                  <Link to="/collaboration">
+                    Explore Projects <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="relative">
+                <ProjectCard
+                  title="AI Study Assistant"
+                  status="Active"
+                  progress={65}
+                  members={4}
+                  tags={["Python", "ML", "NLP"]}
+                />
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="order-2 lg:order-1 relative">
+                <MentorReviewCard
+                  imageUrl="https://via.placeholder.com/50"
+                  name="Sarah Johnson"
+                  title="Senior Software Engineer"
+                  rating="4.9"
+                  review="The mentorship program helped me transition from junior to senior developer in just 8 months. The guidance was invaluable."
+                  tags={["Career Growth", "Technical Skills"]}
+                />
+              </div>
+
+              <div className="order-1 lg:order-2 space-y-8">
+                <div className="space-y-6">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+                    <Users className="w-4 h-4 mr-2" />
+                    Expert Mentorship
+                  </div>
+                  <h3 className="text-3xl font-bold text-gray-900">Learn from Industry Experts</h3>
+                  <p className="text-lg text-gray-600 leading-relaxed">
+                    Get personalized guidance from experienced professionals who have walked the path you want to take.
+                    Accelerate your learning with one-on-one mentorship.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">1-on-1 mentorship sessions</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">Industry expert guidance</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">Career advancement support</span>
+                  </div>
+                </div>
+
+                <Button asChild>
+                  <Link to="/mentor-match">
+                    Find a Mentor <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* skill Section */}
+        <section className="py-20 bg-white max-w-[1352px]">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium mb-4">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Skill Development
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Master In-Demand Skills</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Access a comprehensive library of courses and learning resources designed by industry experts to help you
+                stay ahead of the curve.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              <SkillCard
+                icon={BookOpen}
+                title="Interactive Courses"
+                description="Learn through hands-on projects and interactive exercises designed by industry professionals."
+                linkText="Browse Courses"
+                linkTo="/marketplace"
+                bgColorClass="from-purple-50 to-purple-100"
+                iconBgColorClass="bg-purple-600"
+              />
+
+              <SkillCard
+                icon={Trophy}
+                title="Certifications"
+                description="Earn industry-recognized certifications to validate your skills and boost your career prospects."
+                linkText="View Certifications"
+                linkTo="/certifications"
+                bgColorClass="from-blue-50 to-blue-100"
+                iconBgColorClass="bg-blue-600"
+              />
+
+              <SkillCard
+                icon={Globe}
+                title="Global Community"
+                description="Connect with learners and professionals from around the world in our vibrant community."
+                linkText="Join Community"
+                linkTo="/collaboration"
+                bgColorClass="from-green-50 to-green-100"
+                iconBgColorClass="bg-green-600"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className='w-full h-full bg-gradient-to-br from-purple-600 via-purple-700 to-blue-700'>
+          <div className="py-20  relative overflow-hidden">
+            <div className="absolute inset-0">
+              <div className="absolute top-0 left-0 w-full h-full bg-[url('/placeholder.svg')] bg-repeat opacity-5" />
+            </div>
+
+            <div className="container mx-auto px-4 relative z-10">
+              <div className="max-w-4xl mx-auto text-center">
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Transform Your Career?</h2>
+                <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+                  Join thousands of learners who are already building their future with SkillBridge. Start your journey
+                  today.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-gray-950 border border-white hover:bg-gray-800 transition-colors"
+                  >
+                    <Link to="/signup">
+                      Get Started Free <ArrowUpRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+
+                  <Button
+                    className="bg-white text-black hover:bg-black hover:text-white border-2 border-black hover:border-white cursor-pointer
+                     transition-colors"
+                    iconRight={ArrowRight}
+                  >
+                    Custom
+                  </Button>
+                </div>
+                <p className="text-purple-200 text-sm mt-4">No credit card required • Free forever</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </div>
     </section>
   );
