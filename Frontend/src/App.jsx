@@ -1,23 +1,23 @@
 import React, { Suspense, lazy } from "react";
 import "./index.css";
 import { Routes, Route } from "react-router-dom";
-import Header from "./components/Header";
-import ErrorBoundary from "./components/ErrorBoundry";
-import Footer from "./components/Footer";
-import StudentOnBoarding from "./pages/StudentOnBoarding";
-import MentorOnBoarding from "./pages/MentorOnBoarding";
-import ProfilePage from './pages/ProfilePage';
+import { Header, ErrorBoundary, Footer } from "./components";
+import {
+  StudentOnboardingPage,
+  MentorOnboardingPage,
+  ProfilePage,
+} from "./pages";
 
-const Home = lazy(() => import("./pages/Home"));
-const Certificate = lazy(() => import("./pages/Certificate"));
-const Collaboration = lazy(() => import("./pages/Collaboration"));
-const Mentor = lazy(() => import("./pages/Mentor"));
-const Skill = lazy(() => import("./pages/Skill"));
-const Signin = lazy(() => import("./pages/Signin"));
-const Signup = lazy(() => import("./pages/Signup"));
-const MentorshipRequests = lazy(() => import('./pages/MentorshipRequests'));
-const MentorRequest = lazy(() => import('./pages/MentorRequest'));
-const ChatPage = lazy(() => import('./pages/Chat'));
+const Home = lazy(() => import("./pages/HomePage"));
+const Certificate = lazy(() => import("./pages/CertificatePage"));
+const Collaboration = lazy(() => import("./pages/CollaborationPage"));
+const Mentor = lazy(() => import("./pages/MentorPage"));
+const Skill = lazy(() => import("./pages/SkillPage"));
+const Signin = lazy(() => import("./pages/SigninPage"));
+const Signup = lazy(() => import("./pages/SignupPage"));
+const MentorshipRequests = lazy(() => import('./pages/MentorshipRequestsPage'));
+const MentorRequest = lazy(() => import('./pages/MentorRequestPage'));
+const ChatPage = lazy(() => import('./pages/ChatPage'));
 
 function App() {
   return (
@@ -37,8 +37,8 @@ function App() {
             <Route path="/Profile" element={<ProfilePage />} />
             <Route path="/Signup" element={<Signup />} />
             <Route path="/Signin" element={<Signin />} />
-            <Route path="/onboarding/student" element={<StudentOnBoarding />} />
-            <Route path="/onboarding/mentor" element={<MentorOnBoarding />} />
+            <Route path="/onboarding/student" element={<StudentOnboardingPage />} />
+            <Route path="/onboarding/mentor" element={<MentorOnboardingPage />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>
