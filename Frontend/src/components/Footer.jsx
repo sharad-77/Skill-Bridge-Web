@@ -3,57 +3,64 @@ import { Link } from "react-router-dom";
 
 function Footer() {
   return (
-    <section className="flex flex-col justify-center items-center bg-white">
-      <div className="grid lg:grid-cols-4 lg:gap-8 h-full w-full lg:py-6 lg:px-2 md:px-5 px-4 grid-cols-2 gap-4 max-w-7xl border-t border-gray-200 ">
-        
-        <div className="text-xs md:text-[14px]">
-          <h1 className="text-lg font-bold pb-2 text-[var(--primary-color)] cursor-pointer"
-          onClick={() => window.location.replace("/")}
-          >
-            SkillBridge
-          </h1>
-          <p className="text-[var(--secoundry-color)] text-xs md:text-[14px]">
-            Empowering students through collaborative learning and career
-            growth.
-          </p>
+    <section className="flex flex-col justify-center items-center">
+      <div className="container mx-auto px-4 py-8 max-w-5xl flex flex-col justify-center items-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl grid-items-center ">
+          <div>
+            <h1 className="font-bold mb-4 text-[var(--primary-color)] cursor-pointer"
+              onClick={() => window.location.replace("/")}
+            >
+              SkillBridge
+            </h1>
+            <p className="lg:text-[24px] text-[14px] text-secondary">
+              Empowering students through collaborative learning and career
+              growth.
+            </p>
+          </div>
+
+          <div className="flex flex-col">
+            <p className="font-semibold mb-4 text-gray-800"> Quick Links </p>
+            <Link to="/" className="text-secondary mb-2 text-sm">
+              Home
+            </Link>
+            <Link to="/Collaboration" className="text-secondary mb-2 text-sm">
+              Collaboration Hub
+            </Link>
+            <Link to="/LearnSkill" className="text-secondary mb-2 text-sm">
+              Skill Exchange
+            </Link>
+            <Link to="/Mentor" className="text-secondary text-sm">
+              Mentor Match
+            </Link>
+          </div>
+
+          <div className="flex flex-col">
+            <p className="font-semibold mb-4 text-gray-800">Resources</p>
+            <Link to="/Certificate" className="mb-2 text-secondary text-sm">
+              Certificate
+            </Link>
+            <Link to="/" className="mb-2 text-secondary text-sm">
+              Blog
+            </Link>
+            <Link to="/" className="text-secondary text-sm">
+              FAQ
+            </Link>
+          </div>
+
+          <div>
+            <p className="font-semibold mb-4 text-gray-800">Contact</p>
+            <p className="mb-2 text-secondary text-sm">Email : ChavdaSharad@gmail.com</p>
+            <p className="text-secondary text-sm">Phone : 1234567890</p>
+          </div>
+
         </div>
-        <div className="flex flex-col">
-          <p className="text-lg font-semibold pb-2"> Quick Links </p>
-          <Link to="/" className="text-secondary pb-1 text-sm md:text-[14px]">
-            Home
-          </Link>
-          <Link to="/Collaboration" className="text-secondary pb-1 text-sm md:text-[14px]">
-            Collaboration Hub
-          </Link>
-          <Link to="/Skill" className="text-secondary pb-1 text-sm md:text-[14px]">
-            Skill Exchange
-          </Link>
-          <Link to="/Mentor" className="text-secondary text-sm md:text-[14px]">
-            Mentor Match
-          </Link>
+
+        <div className="mt-8 pt-8 border-t w-full border-gray-200 text-center text-sm text-gray-600 max-w-4xl flex justify-center items-center">
+          <p> © 2025 SkillBridge. All rights reserved. </p>
         </div>
-        <div className="flex flex-col ">
-          <p className="text-lg font-semibold pb-2">Resources</p>
-          <Link to="/Certificate" className="pb-1 text-secondary text-sm md:text-[14px]">
-            Certificate
-          </Link>
-          <Link to="/" className="pb-1 text-secondary text-sm md:text-[14px]">
-            Blog
-          </Link>
-          <Link to="/" className=" text-secondary text-sm md:text-[14px]">
-            FAQ
-          </Link>
-        </div>
-        <div>
-          <p className="text-lg font-semibold pb-2">Contact</p>
-          <p className="pb-1 text-secondary text-xs md:text-[14px]">Email:ChavdaSharad@gmail.com</p>
-          <p className="pb-1 text-secondary text-sm md:text-[14px]">Phone:1234567890</p>
-        </div>
-      </div>
-      <div className="flex justify-center items-center h-20 w-full border-t max-w-7xl border-gray-200 ">
-        <p className="text-[#4b5563] text-sm md:text-[14px]"> © 2025 SkillBridge. All rights reserved. </p>
       </div>
     </section>
+
   );
 }
 

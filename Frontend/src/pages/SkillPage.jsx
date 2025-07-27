@@ -1,9 +1,12 @@
 import { Search } from "lucide-react"
 import { useEffect, useState } from "react"
+import Button from '../components/ui/Button'
 import { CategoryCard, SkillCard } from '../components/ui/Card'
+import { CreateNewSkill } from './formPage/CreateNewSkill';
 
 export default function Skill() {
-  const [scrollY, setScrollY] = useState(0)
+  const [scrollY, setScrollY] = useState(0);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,6 +16,20 @@ export default function Skill() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showForm) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showForm]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -35,7 +52,14 @@ export default function Skill() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <input className="pl-10 bg-white h-12 rounded-xl w-full px-3" placeholder="Search skills or topics" />
                 </div>
-                <button className="bg-white text-rose-500 hover:bg-white/90 btn-shine px-4 py-2 rounded-xl font-medium">Search</button>
+                <Button variant="outline" className="px-4 py-2 rounded-xl font-medium text-white">Search</Button>
+                <Button
+                  variant="outline"
+                  className="px-4 py-2 rounded-xl font-medium ml-2 bg-white"
+                  onClick={() => setShowForm(true)}
+                >
+                  Create New Skill
+                </Button>
               </div>
             </div>
           </div>
@@ -57,8 +81,8 @@ export default function Skill() {
         </div>
       </section>
 
-      {/* Skills Tabs */}
-      <section className="py-6 bg-white sticky top-0 z-20 transition-all duration-300 border-b flex justify-center items-center">
+      {/* Skills Tabs - FIXED Z-INDEX */}
+      <section className="py-6 bg-white sticky top-0 z-10 transition-all duration-300 border-b flex justify-center items-center">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="flex overflow-x-auto pb-2 gap-2">
             <button className="px-4 py-2 rounded-full whitespace-nowrap transition-all bg-purple-100 text-purple-600 font-medium">
@@ -126,10 +150,13 @@ export default function Skill() {
               image="/placeholder.svg?height=200&width=400"
             />
           </div>
-
-
         </div>
       </section>
+
+      {/* MODAL - MOVED TO END AND FIXED Z-INDEX */}
+      {showForm && (
+        <CreateNewSkill onClose={() => setShowForm(false)} />
+      )}
     </div>
   )
 }

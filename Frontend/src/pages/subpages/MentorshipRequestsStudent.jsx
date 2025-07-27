@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { MentorShipRequestCard } from '../components/ui/Card.jsx';
+import { MentorShipRequestCard } from '../../components/ui/Card';
 
-const MyMentorshipRequests = () => {
+const MentorshipRequestsStudent = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -151,5 +151,4 @@ const MyMentorshipRequests = () => {
   );
 };
 
-export default MyMentorshipRequests;
-
+export default MentorshipRequestsStudent;

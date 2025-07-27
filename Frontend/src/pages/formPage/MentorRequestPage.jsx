@@ -1,5 +1,5 @@
 import { ArrowLeft, Star } from 'lucide-react';
-import { AvailabilityCard, ExpertiseAreasCard, MentorInfoCard } from '../components/ui/Card';
+import { AvailabilityCard, ExpertiseAreasCard, MentorInfoCard } from '../../components/ui/Card';
 
 const MentorRequest = () => {
   return (

@@ -6,22 +6,24 @@ import {
   ChevronDown,
   Globe,
   Play,
-  Star,
   Target,
   Trophy,
   Users,
   Zap,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
-import { SkillCard, FloatingCard, DashboardCard, ProjectCard, MentorReviewCard } from "../components/ui/Card.jsx";
+import { DashboardCard, FloatingCard, FloatingNotificationCard, MentorReviewCard, ProjectCard } from "../components/ui/Card.jsx";
 
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <section className="bg-white h-full w-full flex justify-center items-center">
       <div className="flex flex-col justify-center items-center overflow-hidden bg-white h-full w-full">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center max-w-[1352px]">
+        <section className="relative min-h-screen flex items-center max-w-5xl ">
           {/* Background Elements */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-20 left-[10%] w-72 h-72 bg-purple-200/20 rounded-full blur-3xl animate-pulse-slow" />
@@ -75,8 +77,8 @@ function Home() {
 
               {/* Right Content - Dashboard Mockup */}
               <div className="relative">
-                <div className="relative z-10">
-                  <div className="bg-white rounded-2xl shadow-2xl p-6 transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                <div className="relative z-10 animate-fadeIn">
+                  <div className="bg-white rounded-2xl shadow-2xl p-6 transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-700 ease-out hover:shadow-2xl">
                     <DashboardCard
                       activeProjects={3}
                       mentorshipSessions={12}
@@ -85,28 +87,29 @@ function Home() {
                   </div>
 
                   {/* Floating Cards */}
-                  <FloatingCard
+                  <FloatingNotificationCard
                     icon={Check}
                     title="Project Completed!"
                     subtitle="React Dashboard"
                     bgColorClass="bg-green-100"
                     iconColorClass="text-green-600"
-                    animationClass="absolute -top-4 -right-4 animate-float"
+                    animationClass="absolute -top-4 -right-4 animate-bounce bounce-in"
                   />
 
-                  <FloatingCard
+                  <FloatingNotificationCard
                     icon={Users}
                     title="New Mentor Match"
                     subtitle="Sarah Johnson"
                     bgColorClass="bg-blue-100"
                     iconColorClass="text-blue-600"
-                    animationClass="absolute -bottom-4 -left-4 animate-float-slow"
+                    animationClass="absolute -bottom-4 -left-4 animate-bounce bounce-out"
                   />
                 </div>
 
                 {/* Background Decoration */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-200/30 to-blue-200/30 rounded-3xl transform -rotate-6 scale-105 -z-10"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-200/30 to-blue-200/30 rounded-3xl transform -rotate-6 scale-105 -z-10 animate-pulse"></div>
               </div>
+
             </div>
           </div>
 
@@ -117,7 +120,7 @@ function Home() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-white border-b border-gray-100 max-w-[1352px]">
+        <section className="py-16 bg-white border-b border-gray-100 max-w-5xl">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center">
@@ -141,9 +144,9 @@ function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="py-20 bg-gray-50 max-w-[1352px]">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
+        <section className="py-20 bg-gray-50 w-full">
+          <div className="container mx-auto px-4 max-w-5xl flex flex-col items-center justify-center">
+            <div className="text-center mb-16 ">
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium mb-4">
                 Why Choose SkillBridge
               </div>
@@ -257,7 +260,7 @@ function Home() {
                 </div>
 
                 <Button asChild>
-                  <Link to="/mentor-match">
+                  <Link to="/Mentor">
                     Find a Mentor <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -267,7 +270,7 @@ function Home() {
         </section>
 
         {/* skill Section */}
-        <section className="py-20 bg-white max-w-[1352px]">
+        <section className="py-20 bg-white max-w-5xl">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium mb-4">
@@ -282,34 +285,40 @@ function Home() {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              <SkillCard
+              <FloatingCard
                 icon={BookOpen}
                 title="Interactive Courses"
-                description="Learn through hands-on projects and interactive exercises designed by industry professionals."
-                linkText="Browse Courses"
-                linkTo="/marketplace"
-                bgColorClass="from-purple-50 to-purple-100"
-                iconBgColorClass="bg-purple-600"
+                subtitle="Learn through hands-on projects and interactive exercises designed by industry professionals."
+                bgColorClass="bg-gradient-to-br from-purple-50 to-purple-100"
+                iconColorClass="text-purple-600"
+                animationClass="animate-fadeIn"
+                onClick={() => {
+                  navigate("/LearnSkill");
+                }}
               />
 
-              <SkillCard
+              <FloatingCard
                 icon={Trophy}
                 title="Certifications"
-                description="Earn industry-recognized certifications to validate your skills and boost your career prospects."
-                linkText="View Certifications"
-                linkTo="/certifications"
-                bgColorClass="from-blue-50 to-blue-100"
-                iconBgColorClass="bg-blue-600"
+                subtitle="Earn industry-recognized certifications to validate your skills and boost your career prospects."
+                bgColorClass="bg-gradient-to-br from-blue-50 to-blue-100"
+                iconColorClass="text-blue-600"
+                animationClass="animate-fadeIn"
+                onClick={() => {
+                  navigate("/Certificate");
+                }}
               />
 
-              <SkillCard
+              <FloatingCard
                 icon={Globe}
-                title="Global Community"
-                description="Connect with learners and professionals from around the world in our vibrant community."
-                linkText="Join Community"
-                linkTo="/collaboration"
-                bgColorClass="from-green-50 to-green-100"
-                iconBgColorClass="bg-green-600"
+                title="Mentorship Features"
+                subtitle="Get personalized guidance from experienced mentors to set goals, track progress, and overcome obstacles."
+                bgColorClass="bg-gradient-to-br from-green-50 to-green-100"
+                iconColorClass="text-green-600"
+                animationClass="animate-fadeIn"
+                onClick={() => {
+                  navigate("/Mentor");
+                }}
               />
             </div>
           </div>
@@ -317,7 +326,7 @@ function Home() {
 
         {/* CTA Section */}
         <section className='w-full h-full bg-gradient-to-br from-purple-600 via-purple-700 to-blue-700'>
-          <div className="py-20  relative overflow-hidden">
+          <div className="py-20 relative overflow-hidden">
             <div className="absolute inset-0">
               <div className="absolute top-0 left-0 w-full h-full bg-[url('/placeholder.svg')] bg-repeat opacity-5" />
             </div>
@@ -332,8 +341,8 @@ function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button
                     asChild
-                    size="lg"
-                    className="bg-gray-950 border border-white hover:bg-gray-800 transition-colors"
+                    size="md"
+                    className="bg-white text-purple-700 border-2 border-white hover:bg-purple-700 hover:text-white hover:border-white transition-all duration-300 font-semibold"
                   >
                     <Link to="/signup">
                       Get Started Free <ArrowUpRight className="ml-2 h-5 w-5" />
@@ -341,11 +350,11 @@ function Home() {
                   </Button>
 
                   <Button
-                    className="bg-white text-black hover:bg-black hover:text-white border-2 border-black hover:border-white cursor-pointer
-                     transition-colors"
+                    className="bg-transparent text-white border-2 border-white hover:bg-white hover:text-purple-700 transition-all duration-300 font-semibold"
                     iconRight={ArrowRight}
+                    onClick={() => navigate("/Mentor")}
                   >
-                    Custom
+                    Find A Mentor
                   </Button>
                 </div>
                 <p className="text-purple-200 text-sm mt-4">No credit card required • Free forever</p>
@@ -353,6 +362,7 @@ function Home() {
             </div>
           </div>
         </section>
+
 
       </div>
     </section>

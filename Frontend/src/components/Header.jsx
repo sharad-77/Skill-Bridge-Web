@@ -75,9 +75,9 @@ export default function Header() {
   ];
 
   return (
-    <header className="border-b border-gray-200 sticky top-0 z-50 shadow-sm bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-between h-16">
+    <header className="border-b border-gray-200 sticky top-0 z-50 shadow-sm bg-white px-4 md:px-0">
+      <div className="max-w-5xl mx-auto  ">
+        <nav className="flex items-center justify-between h-16 ">
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/" className="text-xl sm:text-2xl font-bold gradient-text-primary">
@@ -169,7 +169,7 @@ export default function Header() {
 
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-200 bg-white">
+        <div className="lg:hidden border-t border-gray-200 bg-white ">
           <div className="px-4 py-4 space-y-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
             {navItems.map((navItem) => (
               <div key={navItem.key} className="space-y-2">

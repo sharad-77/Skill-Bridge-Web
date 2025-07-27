@@ -10,7 +10,7 @@ import {
   Video
 } from "lucide-react";
 import { useState } from 'react';
-import Button from '../components/ui/Button';
+import Button from '../../components/ui/Button';
 
 const ChatPage = () => {
   const [message, setMessage] = useState('');
