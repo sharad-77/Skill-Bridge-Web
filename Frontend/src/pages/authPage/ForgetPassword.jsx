@@ -2,8 +2,10 @@ import React from 'react';
 import { Mail, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/ui/Button.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const ForgetPassword = () => {
+  const navigate = useNavigate();
   return (
     <main className="min-h-screen">
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -25,8 +27,7 @@ const ForgetPassword = () => {
 
             {/* Form Container */}
             <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-10 backdrop-blur-sm">
-              <form className="space-y-4 flex flex-col justify-center items-center w-full h-full">
-
+              <form className="space-y-4 flex flex-col justify-center items-center w-full h-full" onChange={(e) => console.log(e.target.value)}>
                 {/* Email Field */}
                 <div className="space-y-1">
                   <label htmlFor="email" className="block text-sm font-semibold text-gray-800">
@@ -61,7 +62,9 @@ const ForgetPassword = () => {
                 {/* Back to Login Link */}
                 <div className="text-center pt-2 ">
                   <Button
-                    onClick={() => window.location.href = "/signin"}
+                    onClick={() => {
+                      navigate("/signin")
+                    }}
                     variant="none"
                     className="inline-flex items-center text-sm font-medium  transition-colors duration-200 bg-red-500 text-white"
                   >

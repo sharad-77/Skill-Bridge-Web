@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MentorShipRequestCard } from '../../components/ui/Card';
+import { MentorShipRequestStudentCard } from '../../components/ui/Card';
 
 const MentorshipRequestsStudent = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -68,7 +68,7 @@ const MentorshipRequestsStudent = () => {
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-all ${activeTab === tab.id
+                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-all cursor-pointer ${activeTab === tab.id
                     ? 'bg-purple-100 text-purple-700 font-medium'
                     : 'text-gray-600 hover:bg-gray-100'
                     }`}
@@ -128,7 +128,7 @@ const MentorshipRequestsStudent = () => {
       <div className="container mx-auto px-4 py-8 h-full w-full flex justify-center items-center ">
         <div className="space-y-6 max-w-5xl flex flex-col justify-center items-center h-full w-full">
           {mentorshipRequests.map((request) => (
-            <MentorShipRequestCard
+            <MentorShipRequestStudentCard
               key={request.id}
               imageUrl={request.imageUrl}
               name={request.name}
@@ -142,7 +142,8 @@ const MentorshipRequestsStudent = () => {
               lastUpdatedAt={request.lastUpdatedAt}
               onDetails={() => console.log(`View details for ${request.name}`)}
               onCancel={() => console.log(`Cancel request for ${request.name}`)}
-              onChat={() => console.log(`Open chat for ${request.name}`)} // Add this prop
+              onChat={() => console.log(`Open chat for ${request.name}`)}
+              mentorResponse={request.mentorResponse} // Optional: for declined requests
             />
           ))}
         </div>

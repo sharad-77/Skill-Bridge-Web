@@ -1,4 +1,4 @@
-import { Bookmark, Briefcase, Calendar, CheckCircle, ChevronRight, Clock, Eye, Heart, MapPin, MessageSquare, MoveRight, Star, User, Users, X } from "lucide-react";
+import { AlertCircle, Bookmark, BookOpen, Briefcase, Calendar, Check, CheckCircle, ChevronRight, Clock, Eye, Heart, MapPin, MessageSquare, MoveRight, Star, Target, User, Users, X, XCircle } from "lucide-react";
 import { useState } from 'react';
 import { useNavigate } from "react-router";
 import { twMerge } from "tailwind-merge";
@@ -458,7 +458,7 @@ const MentorReviewCard = ({ imageUrl, name, title, rating, review, tags }) => {
   );
 }
 
-const MentorShipRequestCard = ({
+const MentorShipRequestStudentCard = ({
   imageUrl,
   name,
   title,
@@ -471,81 +471,346 @@ const MentorShipRequestCard = ({
   lastUpdatedAt,
   onDetails,
   onCancel,
-  onChat, // Add this prop for chat functionality
+  onChat,
+  mentorResponse, // For declined requests with mentor feedback
+  rejectionReason, // Additional rejection details
 }) => {
-  const showCancelButton = status === "pending";
   const navigate = useNavigate();
+
+  const getStatusConfig = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return {
+          bg: 'bg-amber-50',
+          border: 'border-amber-200',
+          text: 'text-amber-800',
+          badgeBg: 'bg-amber-100',
+          badgeText: 'text-amber-700',
+          icon: Clock,
+          label: 'Pending Review'
+        };
+      case 'accepted':
+        return {
+          bg: 'bg-emerald-50',
+          border: 'border-emerald-200',
+          text: 'text-emerald-800',
+          badgeBg: 'bg-emerald-100',
+          badgeText: 'text-emerald-700',
+          icon: Check,
+          label: 'Accepted'
+        };
+      case 'declined':
+      case 'rejected':
+        return {
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+          text: 'text-red-800',
+          badgeBg: 'bg-red-100',
+          badgeText: 'text-red-700',
+          icon: X,
+          label: 'Declined'
+        };
+      default:
+        return {
+          bg: 'bg-gray-50',
+          border: 'border-gray-200',
+          text: 'text-gray-800',
+          badgeBg: 'bg-gray-100',
+          badgeText: 'text-gray-700',
+          icon: AlertCircle,
+          label: status || 'Unknown'
+        };
+    }
+  };
+
+  const statusConfig = getStatusConfig(status);
+  const StatusIcon = statusConfig.icon;
+
+  const showCancelButton = status?.toLowerCase() === "pending";
+  const showChatButton = status?.toLowerCase() === "accepted";
+  const isDeclined = status?.toLowerCase() === "declined" || status?.toLowerCase() === "rejected";
+
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow w-full">
+    <div className={`bg-white rounded-xl border ${statusConfig.border} shadow-sm hover:shadow-lg transition-all duration-300 w-full overflow-hidden`}>
+      {/* Status indicator bar */}
+      <div className={`h-1 ${statusConfig.badgeBg}`}></div>
+
       <div className="p-6">
         <div className="flex items-start gap-4">
-          <img
-            alt="Mentor"
-            className="w-16 h-16 rounded-full object-cover"
-            src={imageUrl}
-          />
-          <div className="flex-1">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <h3 className="text-lg font-semibold">{name}</h3>
-                <p className="text-gray-600">{title}</p>
+          {/* Mentor Avatar with Rating */}
+          <div className="relative flex-shrink-0">
+            <img
+              alt="Mentor"
+              className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-100"
+              src={imageUrl}
+            />
+            {rating && (
+              <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-md ring-1 ring-gray-100">
+                <div className="flex items-center gap-1 text-xs font-medium">
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <span className="text-gray-700">{rating}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"}`}>
-                  <Clock className="h-4 w-4" />
-                  {status}
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            {/* Header with Name, Title and Status */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate">{name}</h3>
+                <p className="text-gray-600 text-sm mt-0.5">{title}</p>
+              </div>
+              <div className="flex-shrink-0 ml-4">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${statusConfig.badgeBg} ${statusConfig.badgeText}`}>
+                  <StatusIcon className="h-4 w-4" />
+                  {statusConfig.label}
                 </span>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+            {/* Tags/Info Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+              {tags?.[0] && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <BookOpen className="h-4 w-4 text-gray-400" />
+                  <span className="truncate">{tags[0]}</span>
+                </div>
+              )}
+              {tags?.[1] && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <User className="h-4 w-4 text-gray-400" />
+                  <span className="truncate">{tags[1]}</span>
+                </div>
+              )}
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <User className="h-4 w-4" />
-                <span>{tags[0]}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="h-4 w-4" />
-                <span>{tags[1]}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Clock className="h-4 w-4" />
-                <span>{requestedAt}</span>
+                <Calendar className="h-4 w-4 text-gray-400" />
+                <span className="truncate">Requested {requestedAt}</span>
               </div>
             </div>
+
+            {/* Learning Goals */}
             <div className="mb-4">
-              <p className="text-gray-700 text-sm">
-                <strong>Goals:</strong> {goals}
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                Last updated: {lastUpdatedAt}
+              <div className="flex items-start gap-2">
+                <Target className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 mb-1">Learning Goals:</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{goals}</p>
+                </div>
               </div>
-              <div className="flex gap-2">
+            </div>
+
+            {/* Mentor Response for Declined Requests */}
+            {isDeclined && (mentorResponse || rejectionReason) && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-red-800 mb-1">Mentor Response:</p>
+                    <p className="text-sm text-red-700">
+                      {mentorResponse || rejectionReason}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Footer with Last Updated and Actions */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div className="text-sm text-gray-500">
+                Last updated: <span className="font-medium">{lastUpdatedAt}</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* View Details Button */}
                 <Button
-                  variant="success"
-                  leftIcon={<Eye className="h-4 w-4 mr-1" />}
+                  variant="outline"
+                  size="sm"
+                  leftIcon={<Eye className="h-4 w-4" />}
                   onClick={onDetails}
                 >
-                  View Details
+                  Details
                 </Button>
 
-                {showCancelButton ? (
+                {/* Cancel Button (only for pending) */}
+                {showCancelButton && (
                   <Button
-                    variant="danger"
-                    leftIcon={<X className="h-4 w-4 mr-1" />}
+                    variant="destructive"
+                    size="sm"
+                    leftIcon={<X className="h-4 w-4" />}
                     onClick={onCancel}
                   >
                     Cancel Request
                   </Button>
-                ) : (
+                )}
+
+                {/* Chat Button (only for accepted) */}
+                {showChatButton && (
                   <Button
-                    variant="outline"
-                    leftIcon={<MessageSquare className="h-4 w-4 mr-1" />}
-                    onClick={navigate('/Chat')} // Use the onChat prop here
+                    variant="primary"
+                    size="sm"
+                    leftIcon={<MessageSquare className="h-4 w-4" />}
+                    onClick={onChat}
                   >
                     Open Chat
                   </Button>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MentorShipRequestMentorCard = ({
+  imageUrl,
+  name,
+  university,
+  email,
+  skills,
+  duration,
+  goals,
+  requestedAt,
+  lastUpdatedAt,
+  onViewDetails,
+  onAccept,
+  onDecline,
+  urgency = 'normal', // low, normal, high
+  additionalInfo, // Any extra student information
+}) => {
+
+  const getUrgencyConfig = (urgency) => {
+    switch (urgency) {
+      case 'high':
+        return {
+          border: 'border-red-200',
+          bg: 'bg-red-50',
+          indicator: 'bg-red-100 text-red-700'
+        };
+      case 'low':
+        return {
+          border: 'border-blue-200',
+          bg: 'bg-blue-50',
+          indicator: 'bg-blue-100 text-blue-700'
+        };
+      default:
+        return {
+          border: 'border-gray-100',
+          bg: 'bg-white',
+          indicator: 'bg-yellow-100 text-yellow-700'
+        };
+    }
+  };
+
+  const urgencyConfig = getUrgencyConfig(urgency);
+
+  return (
+    <div className={`${urgencyConfig.bg} rounded-xl border ${urgencyConfig.border} shadow-sm hover:shadow-md transition-all duration-300 w-full overflow-hidden`}>
+      {/* Urgency indicator bar */}
+      {urgency === 'high' && (
+        <div className="h-1 bg-red-400"></div>
+      )}
+
+      <div className="px-6 py-3">
+        <div className="flex items-start gap-4">
+          {/* Student Avatar */}
+          <div className="flex-shrink-0">
+            <img
+              alt={name}
+              className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-100"
+              src={imageUrl}
+            />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            {/* Header with Student Info and Status */}
+            <div className="flex items-start justify-between mb-2">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 truncate">{name}</h3>
+                <p className="text-gray-600 text-sm mt-0.5">{university}</p>
+                <p className="text-sm text-gray-500 mt-1">{email}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                {urgency === 'high' && (
+                  <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-medium flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    Urgent
+                  </span>
+                )}
+                <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${urgencyConfig.indicator}`}>
+                  <Clock className="h-4 w-4" />
+                  Pending
+                </span>
+              </div>
+            </div>
+
+            {/* Student Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <User className="h-4 w-4 text-gray-400" />
+                <span className="truncate">{skills || 'Career Development'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Calendar className="h-4 w-4 text-gray-400" />
+                <span className="truncate">{duration || 'Long-term (3-6 months)'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="h-4 w-4 text-gray-400" />
+                <span className="truncate">Requested {requestedAt}</span>
+              </div>
+            </div>
+
+            {/* Learning Goals */}
+            <div className="mb-4">
+              <div className="flex items-start gap-2">
+                <Target className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 mb-1">Student Goals:</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{goals}</p>
+                </div>
+              </div>
+            </div>
+
+
+
+            {/* Footer with Last Updated and Actions */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div className="text-sm text-gray-500">
+                Last updated: <span className="font-medium">{lastUpdatedAt}</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* View Details Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={<Eye className="h-4 w-4" />}
+                  onClick={onViewDetails}
+                >
+                  View Details
+                </Button>
+
+                {/* Accept Button */}
+                <Button
+                  variant="success"
+                  size="sm"
+                  leftIcon={<CheckCircle className="h-4 w-4" />}
+                  onClick={onAccept}
+                >
+                  Accept
+                </Button>
+
+                {/* Decline Button */}
+                <Button
+                  variant="destructive-outline"
+                  size="sm"
+                  leftIcon={<XCircle className="h-4 w-4" />}
+                  onClick={onDecline}
+                >
+                  Decline
+                </Button>
               </div>
             </div>
           </div>
@@ -711,6 +976,29 @@ const RecentProjectCard = ({
   return null;
 };
 
+const RecentReviewCard = ({ name, rating, time, position }) => (
+  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+    <div className="flex items-center gap-3">
+      <img
+        alt="Sarah Johnson"
+        className="w-10 h-10 rounded-full object-cover"
+        src="/placeholder.svg?height=40&width=40"
+      />
+      <div>
+        <h4 className="font-medium">{name}</h4>
+        <p className="text-sm text-gray-600">{position}</p>
+      </div>
+    </div>
+    <div className="text-right">
+      <div className="flex items-center gap-1">
+        <Star className="h-4 w-4 text-yellow-400 fill-current" fill="currentColor" />
+        <span className="text-sm font-medium">{rating}</span>
+      </div>
+      <div className="text-xs text-gray-500">{time}</div>
+    </div>
+  </div>
+);
+
 const FloatingNotificationCard = ({
   icon: Icon,
   title,
@@ -735,4 +1023,4 @@ const FloatingNotificationCard = ({
 };
 
 
-export { AvailabilityCard, CategoryCard, CertificateCard, DashboardCard, ExpertiseAreasCard, FeaturesCard, FloatingCard, FloatingNotificationCard, MentorCard, MentorInfoCard, MentorReviewCard, MentorShipRequestCard, ProjectCard, ProjectsCard, RecentProjectCard, SkillCard };
+export { AvailabilityCard, CategoryCard, CertificateCard, DashboardCard, ExpertiseAreasCard, FeaturesCard, FloatingCard, FloatingNotificationCard, MentorCard, MentorInfoCard, MentorReviewCard, MentorShipRequestStudentCard, ProjectCard, ProjectsCard, RecentProjectCard, SkillCard, MentorShipRequestMentorCard, RecentReviewCard };

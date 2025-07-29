@@ -2,7 +2,7 @@ import { Search } from "lucide-react"
 import { useEffect, useState } from "react"
 import Button from '../components/ui/Button'
 import { CategoryCard, SkillCard } from '../components/ui/Card'
-import { CreateNewSkill } from './formPage/CreateNewSkill';
+import CreateNewSkill from './formPage/CreateNewSkill';
 
 export default function Skill() {
   const [scrollY, setScrollY] = useState(0);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Upload, Video, Plus } from 'lucide-react';
 
-export const CreateNewSkill = ({ onClose }) => {
+ const CreateNewSkill = ({ onClose }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [highlights, setHighlights] = useState(['', '', '', '', '']);
   const [requirements, setRequirements] = useState(['', '', '', '', '']);
@@ -317,3 +317,5 @@ export const CreateNewSkill = ({ onClose }) => {
     </div>
   );
 };
+
+export default CreateNewSkill;

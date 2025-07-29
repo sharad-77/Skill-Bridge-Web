@@ -4,7 +4,7 @@ import DashboardSection from "../../components/mini-sections/OverView";
 import { RecentProjectCard } from '../../components/ui/Card';
 import SettingsPage from '../../components/mini-sections/SettingsPage';
 
-export default function ProfilePage() {
+export default function StudentProfilePage() {
   const [activeTab, setActiveTab] = useState("OverView");
 
   const tags = ["OverView", "Projects & Skills", "Account Settings"];

@@ -8,9 +8,12 @@ import {
   Github,
   Linkedin,
   Twitter,
+  Users ,
   Globe,
+  Star,
+  MessageSquare
 } from "lucide-react";
-import { RecentProjectCard } from '../ui/Card';
+import { RecentProjectCard, RecentReviewCard } from '../ui/Card';
 
 // Optional: map keys to Lucide icons and colors
 const iconMap = {
@@ -26,6 +29,18 @@ const iconMap = {
     icon: <Trophy className="h-5 w-5 text-purple-600" />,
     bg: "bg-purple-100",
   },
+  StudentsGuided: {
+    icon: <Users  className="h-7 w-7 text-blue-600" />,
+    bg: "bg-blue-100",
+  },
+  avrageRating: {
+    icon: <Star className="h-7 w-7 text-yellow-600" />,
+    bg: "bg-yellow-100",
+  },
+  sessionCompleted: {
+    icon: <MessageSquare className="h-7 w-7 text-green-600" />,
+    bg: "bg-green-100",
+  },
 };
 
 const socialIconMap = {
@@ -38,6 +53,7 @@ const socialIconMap = {
 export default function DashboardSection({
   stats,
   projects,
+  reviews,
   contactInfo,
   socialLinks,
   skills,
@@ -57,7 +73,7 @@ export default function DashboardSection({
                   className="bg-white rounded-xl p-6 shadow-sm text-center"
                 >
                   <div
-                    className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center mx-auto mb-3`}
+                    className={`w-12 h-12 ${bg} rounded-lg flex items-center justify-center mx-auto mb-3`}
                   >
                     {icon}
                   </div>
@@ -71,7 +87,7 @@ export default function DashboardSection({
           </div>
 
           {/* Recent Projects */}
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+          {projects && <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold mb-4">Recent Projects</h3>
             <div className="space-y-4">
               {projects.map((project) => (
@@ -86,9 +102,24 @@ export default function DashboardSection({
                   variant="compact"
                 />
               ))}
-
             </div>
-          </div>
+          </div>}
+
+          { reviews && <div className="bg-white rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold mb-4">Recent Reviews</h3>
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <RecentReviewCard
+                  key={review.name}
+                  name={review.name}
+                  rating={review.rating}
+                  review={review.review}
+                  date={review.date}
+                />
+              ))}
+            </div>
+          </div> }
+
         </div>
 
         {/* Right Section */}
