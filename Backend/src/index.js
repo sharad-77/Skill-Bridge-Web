@@ -1,3 +1,4 @@
+import cors from 'cors';
 import dotenv from "dotenv";
 import express from "express";
 
@@ -7,6 +8,7 @@ dotenv.config();
 // Create an Express application
 const app = express();
 const PORT = process.env.PORT;
+const ORIGIN = process.env.ORIGIN;
 
 // Import database connection and middleware
 import DBconnection from "./config/db.js";
@@ -17,6 +19,10 @@ DBconnection();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use(cors({
+    origin: ORIGIN,
+    credentials: true,
+}));
 
 // Import all routes
 import authRoute from "./routes/authRoute.js";
