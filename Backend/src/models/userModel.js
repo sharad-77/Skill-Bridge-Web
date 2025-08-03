@@ -19,8 +19,8 @@ const studentSchema = new mongoose.Schema({
     certificates: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Certificate' }], default: [] },
     interestedSkills: { type: [String], required: true },
     socialMedia: [{
-        Name: { type: String, required: true },
-        URL: { type: String, required: true }
+        name: { type: String, required: true },
+        url: { type: String, required: true }
     }]
 
 })

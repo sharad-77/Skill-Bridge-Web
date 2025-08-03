@@ -89,11 +89,25 @@ export const login = async (req, res) => {
             });
         }
 
+        let onboarded = false;
+        if (userExist.role === 'student') {
+            const student = await Student.findOne({ userId: userExist._id });
+            if (student) {
+                onboarded = true;
+            }
+        } else if (userExist.role === 'mentor') {
+            const mentor = await Mentor.findOne({ userId: userExist._id });
+            if (mentor) {
+                onboarded = true;
+            }
+        }
+
         const token = jwt.sign(
             {
                 id: userExist._id,
                 name: userExist.name,
-                role: userExist.role
+                role: userExist.role,
+                onboarded: onboarded
             },
             jwtsecret,
         );
@@ -127,8 +141,8 @@ export const studentSignup = async (req, res) => {
             gradYear: z.number(),
             interestedSkills: z.array(z.string()),
             socialMedia: z.array(z.object({
-                Name: z.string(),
-                URL: z.string().url(),
+                name: z.string(),
+                url: z.string().url(),
             })),
         });
 
