@@ -105,7 +105,7 @@ export default function DashboardSection({
             </div>
           </div>}
 
-          { reviews && <div className="bg-white rounded-xl p-6 shadow-sm">
+          {reviews && <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold mb-4">Recent Reviews</h3>
             <div className="space-y-4">
               {reviews.map((review) => (
@@ -113,8 +113,9 @@ export default function DashboardSection({
                   key={review.name}
                   name={review.name}
                   rating={review.rating}
-                  review={review.review}
-                  date={review.date}
+                  position={review.position}
+                  time={review.time}
+                  variant="review"
                 />
               ))}
             </div>

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
 import { Calendar, MapPin } from "lucide-react";
+import { useState } from "react";
 import DashboardSection from "../../components/mini-sections/OverView";
 import SettingsPage from '../../components/mini-sections/SettingsPage';
+import { RecentReviewCard, MentorshipState } from '../../components/ui/Card';
 
 export default function MentorProfilePage() {
   const [activeTab, setActiveTab] = useState("OverView");
@@ -34,6 +35,30 @@ export default function MentorProfilePage() {
       time: "2 days ago",
     },
   ];
+
+  const MentorReviews = [
+    {
+      name: "Sarah Johnson",
+      position: "Advanced to Senior Developer",
+      rating: 4.5,
+      time: "2 days ago",
+    },
+  ]
+
+  const States = [
+    {
+      title: "Response Rate",
+      value: "98%"
+    },
+    {
+      title: "Active Mentees",
+      value: 8
+    },
+    {
+      title: "Total Reviews",
+      value: 38
+    },
+  ]
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col justify-center w-full">
@@ -115,7 +140,7 @@ export default function MentorProfilePage() {
               { type: "sessionCompleted", count: 3, label: "Sessions Completed" },
             ]}
 
-            reviews = {Reviews}
+            reviews={Reviews}
 
             contactInfo={{
               email: "john.doe@email.com",
@@ -144,7 +169,33 @@ export default function MentorProfilePage() {
           />
         )}
 
+        {activeTab === "Mentees & Reviews" && (
+          <div className='flex flex-col gap-10 justify-center w-full h-full p-10 text-left rounded-2xl border border-gray-200 mt-5'>
+            <h1 className='text-[30px] font-semibold'>Mentorship Impact</h1>
+            <div className='flex justify-center gap-5 h-full w-full text-left'>
+              <div className='flex flex-col justify-center gap-2 w-full h-full'>
+                <h3 className="text-[27px] font-medium mb-4">Success Stories</h3>
+                {MentorReviews.map((Review, index) => (
+                  <RecentReviewCard
+                    key={index}
+                    variant="Success-Stories"
+                    {...Review}
+                  />
+                ))}
+              </div>
+              <div className='flex flex-col justify-center gap-2 w-full h-full'>
+                <h3 className="text-[27px] font-medium mb-4">Mentorship Stats</h3>
+                {States.map((state, index) => (
+                  <MentorshipState
+                    key={index}
+                  {...state}
+                  />
+                ))}
+              </div>
+            </div>
 
+          </div>
+        )}
 
         {activeTab === "Account Settings" && (
           <div className="bg-white rounded-xl p-6 shadow-md w-full text-center">

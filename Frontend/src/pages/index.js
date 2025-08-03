@@ -8,7 +8,7 @@ export { default as SkillPage } from './SkillPage';
 export { ChatPage, MentorshipRequestsMentor, MentorshipRequestsStudent, ProjectPage, SkillDetailedPage, MentorProfilePage, StudentProfilePage } from './subpages';
 
 // Auth Pages
-export { ForgotPasswordPage , MentorOnboardingPage, StudentOnboardingPage , SigninPage, SignupPage} from './authPage';
+export { ForgotPasswordPage , MentorOnboardingPage, StudentOnboardingPage , SigninPage, SignupPage, ProtectedRoute} from './authPage';
 
 export { default as MentorRequestPage } from './formPage/MentorRequestPage';
 export { default as NewProject } from './formPage/NewProject';

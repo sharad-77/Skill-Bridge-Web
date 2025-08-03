@@ -2,7 +2,9 @@ import { AlertCircle, Bookmark, BookOpen, Briefcase, Calendar, Check, CheckCircl
 import { useState } from 'react';
 import { useNavigate } from "react-router";
 import { twMerge } from "tailwind-merge";
+import useAuthRedirect from '../../hooks/useAuthRedirect';
 import { cn } from "../../lib/utils";
+import useAuthStore from '../../store/useAuthStore';
 import Button from "../ui/Button";
 
 const FeaturesCard = ({ children, svg, title, description, className }) => {
@@ -36,7 +38,16 @@ const ProjectsCard = ({
   tags,
 }) => {
   const navigate = useNavigate();
+  const { redirectToProfile } = useAuthRedirect();
+  const { isAuthenticated, isOnBoarded } = useAuthStore();
 
+  const handleClick = () => {
+    if (!isAuthenticated || !isOnBoarded) {
+      redirectToProfile();
+    } else {
+      navigate("/Collaboration/Project");
+    }
+  };
   return (
     <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 relative w-full max-w-sm mx-auto overflow-hidden">
       {/* Content */}
@@ -100,7 +111,7 @@ const ProjectsCard = ({
         {/* CTA Button */}
         <Button
           className="w-full h-10 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-          onClick={() => navigate("/Collaboration/Project")}
+          onClick={handleClick}
         >
           View Project
           <MoveRight className="h-4 w-4" />
@@ -976,28 +987,69 @@ const RecentProjectCard = ({
   return null;
 };
 
-const RecentReviewCard = ({ name, rating, time, position }) => (
-  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-    <div className="flex items-center gap-3">
-      <img
-        alt="Sarah Johnson"
-        className="w-10 h-10 rounded-full object-cover"
-        src="/placeholder.svg?height=40&width=40"
-      />
-      <div>
-        <h4 className="font-medium">{name}</h4>
-        <p className="text-sm text-gray-600">{position}</p>
+const RecentReviewCard = ({ name, rating, time, position, variant }) => {
+
+  if (variant === "review") {
+    return (
+      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-3">
+          <img
+            alt="Sarah Johnson"
+            className="w-10 h-10 rounded-full object-cover"
+            src="/placeholder.svg?height=40&width=40"
+          />
+          <div>
+            <h4 className="font-medium">{name}</h4>
+            <p className="text-sm text-gray-600">{position}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="flex items-center justify-end gap-1">
+            <Star className="h-4 w-4 text-yellow-400 fill-current" fill="currentColor" />
+            <span className="text-sm font-medium">{rating}</span>
+          </div>
+          <div className="text-xs text-gray-500">{time}</div>
+        </div>
       </div>
-    </div>
-    <div className="text-right">
-      <div className="flex items-center gap-1">
-        <Star className="h-4 w-4 text-yellow-400 fill-current" fill="currentColor" />
-        <span className="text-sm font-medium">{rating}</span>
+    )
+  }
+
+  if (variant === "Success-Stories") {
+    return (
+      <div className="flex flex-col gap-2 p-4 rounded-lg border border-gray-300">
+        <div className="flex items-center gap-3">
+          <img
+            alt="Sarah Johnson"
+            className="w-10 h-10 rounded-full object-cover"
+            src="/placeholder.svg?height=40&width=40"
+          />
+          <div>
+            <h4 className="font-medium">{name}</h4>
+            <p className="text-sm text-gray-600">{position}</p>
+          </div>
+        </div>
+        <div className="gap-5 items-center flex flex-row">
+          <div className="flex gap-1">
+            <Star className="h-4 w-4 text-yellow-400 fill-current" fill="currentColor" />
+            <span className="text-sm font-medium">{rating}</span>
+          </div>
+          <div className="text-sm text-gray-500">Duration : {time}</div>
+        </div>
       </div>
-      <div className="text-xs text-gray-500">{time}</div>
+    )
+  }
+
+  return null;
+};
+
+const MentorshipState = ({ title, value }) => {
+  return (
+    <div className='flex justify-between items-center py-4 px-5 rounded-lg border-1 border-gray-300'>
+      <div className='text-md text-gray-600'>{title}</div>
+      <div className='text-sm'>{value}</div>
     </div>
-  </div>
-);
+  )
+}
 
 const FloatingNotificationCard = ({
   icon: Icon,
@@ -1023,4 +1075,4 @@ const FloatingNotificationCard = ({
 };
 
 
-export { AvailabilityCard, CategoryCard, CertificateCard, DashboardCard, ExpertiseAreasCard, FeaturesCard, FloatingCard, FloatingNotificationCard, MentorCard, MentorInfoCard, MentorReviewCard, MentorShipRequestStudentCard, ProjectCard, ProjectsCard, RecentProjectCard, SkillCard, MentorShipRequestMentorCard, RecentReviewCard };
+export { AvailabilityCard, CategoryCard, CertificateCard, DashboardCard, ExpertiseAreasCard, FeaturesCard, FloatingCard, FloatingNotificationCard, MentorCard, MentorInfoCard, MentorReviewCard, MentorShipRequestMentorCard, MentorShipRequestStudentCard, MentorshipState, ProjectCard, ProjectsCard, RecentProjectCard, RecentReviewCard, SkillCard };

@@ -99,7 +99,12 @@ export const login = async (req, res) => {
         );
 
         return res.json({
-            token: token,
+            token,
+            user: {
+                id: userExist._id,
+                name: userExist.name,
+                role: userExist.role,
+            }
         });
     } catch (err) {
         return res.status(500).json({

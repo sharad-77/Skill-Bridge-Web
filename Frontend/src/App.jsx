@@ -1,6 +1,8 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Route, Routes } from "react-router-dom";
 import { ErrorBoundary, Footer, Header } from "./components";
+import { Toaster } from 'sonner';
 import "./index.css";
 import {
   HomePage,
@@ -20,18 +22,34 @@ import {
   MentorOnboardingPage,
   StudentOnboardingPage,
   MentorProfilePage,
-  StudentProfilePage,
- } from "./pages";
+  StudentProfilePage
+} from "./pages";
+import useAuthStore from './store/useAuthStore';
 
+const queryClient = new QueryClient();
 
 function App() {
+
+  useEffect(() => {
+    useAuthStore.getState().initAuth();
+  }, []);
+
   return (
-    <div className="max-w-screen-[1352px] ">
+    <QueryClientProvider client={queryClient}>
+      <div className="max-w-screen-[1352px] ">
+        <Toaster richColors toastOptions={{
+          className: 'text-base px-5 py-4',
+        }} />
       <Header />
       <ErrorBoundary>
         <Suspense fallback={<div>Loading...</div>}>
-          <Routes>
+            <Routes>
+            <Route path="/Signup" element={<SignupPage />} />
+            <Route path="/Signin" element={<SigninPage />} />
+            <Route path="/ForgetPassword" element={<ForgotPasswordPage />} />
             <Route path="/" element={<HomePage />} />
+            <Route path="/onboarding/student" element={<StudentOnboardingPage />} />
+            <Route path="/onboarding/mentor" element={<MentorOnboardingPage />} />
             <Route path="/Collaboration" element={<CollaborationPage />} />
             <Route path="/Collaboration/Project" element={<ProjectPage  />} />
             <Route path="/LearnSkill" element={<SkillPage />} />
@@ -44,16 +62,15 @@ function App() {
             <Route path="/Certificate" element={<CertificatePage />} />
             <Route path="/ProfileStudent" element={<StudentProfilePage />} />
             <Route path="/ProfileMentor" element={<MentorProfilePage />} />
-            <Route path="/Signup" element={<SignupPage />} />
-            <Route path="/Signin" element={<SigninPage />} />
-            <Route path="/ForgetPassword" element={<ForgotPasswordPage />} />
-            <Route path="/onboarding/student" element={<StudentOnboardingPage />} />
-            <Route path="/onboarding/mentor" element={<MentorOnboardingPage />} />
+
+
+
           </Routes>
         </Suspense>
       </ErrorBoundary>
       <Footer />
-    </div>
+      </div>
+    </QueryClientProvider>
   );
 }
 
