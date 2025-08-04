@@ -1,24 +1,30 @@
+import z from "zod";
 import Project from "../models/projectModel.js";
 import { Student, User } from "../models/userModel.js";
-import z from "zod";
 
 export const AllProject = async (req, res) => {
     try {
         const featureProjects = await Project.find();
-        res.json(featureProjects.map(project => ({
-            Category: project.category,
-            Title: project.title,
-            Description: project.description,
-            JoinedMembers: project.members,
-            Skills: project.requiredSkill
-        })));
+        res.json(
+            featureProjects.map(project => ({
+                _id: project._id,
+                category: project.category,
+                title: project.title,
+                description: project.description,
+                members: project.members,
+                requiredSkills: project.requiredSkill,
+                progress: project.progress,
+                tags: project.tags
+            }))
+        );
     } catch (e) {
         console.error(e.message);
         res.status(500).json({
             message: "Internal Server error"
-        })
+        });
     }
-}
+};
+
 
 export const NewProject = async (req, res) => {
     try {
@@ -73,19 +79,24 @@ export const ProjectbyId = async (req, res) => {
     try {
         const oneProject = await Project.findById(req.params.id);
         if (!oneProject) {
-            res.json({
-                message: "Invalid Project ID"
-            })
+            return res.status(404).json({
+                success: false,
+                message: "Project not found"
+            });
         }
-        res.json({
-            Project: oneProject
-        })
+
+        res.status(200).json({
+            success: true,
+            project: oneProject 
+        });
     } catch (error) {
-        res.json({
+        res.status(500).json({
+            success: false,
             message: error.message
-        })
+        });
     }
-}
+};
+
 
 export const joinProject = async (req, res) => {
     const userId = req.user.id;
@@ -137,4 +148,3 @@ export const joinProject = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
-

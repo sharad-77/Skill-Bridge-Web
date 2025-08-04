@@ -3,10 +3,12 @@ import { useEffect, useState } from "react"
 import Button from '../components/ui/Button'
 import { CategoryCard, SkillCard } from '../components/ui/Card'
 import CreateNewSkill from './formPage/CreateNewSkill';
+import { useGetSkills } from "../api/mutation/SkillMutation";
 
 export default function Skill() {
   const [scrollY, setScrollY] = useState(0);
   const [showForm, setShowForm] = useState(false);
+  const { data: skills, isLoading, isError } = useGetSkills();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -118,37 +120,23 @@ export default function Skill() {
             </div>
           </div>
 
+          {isLoading && <div>Loading...</div>}
+          {isError && <div>Error fetching skills</div>}
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <SkillCard
-              title="Advanced React Development"
-              instructor="John Doe"
-              rating={4.8}
-              students={1234}
-              duration="8 weeks"
-              level="Intermediate"
-              price="Free"
-              image="/placeholder.svg?height=200&width=400"
-            />
-            <SkillCard
-              title="UI/UX Design Fundamentals"
-              instructor="Sarah Smith"
-              rating={4.9}
-              students={856}
-              duration="6 weeks"
-              level="Beginner"
-              price="Free"
-              image="/placeholder.svg?height=200&width=400"
-            />
-            <SkillCard
-              title="Data Analysis with Python"
-              instructor="Mike Johnson"
-              rating={4.7}
-              students={2156}
-              duration="10 weeks"
-              level="Advanced"
-              price="Free"
-              image="/placeholder.svg?height=200&width=400"
-            />
+            {skills && skills.map((skill) => (
+              <SkillCard
+                key={skill._id}
+                title={skill.title}
+                instructor={skill.user.name}
+                rating={skill.rating}
+                students={skill.students}
+                duration={skill.duration}
+                level={skill.level}
+                price={skill.price}
+                image={skill.image}
+              />
+            ))}
           </div>
         </div>
       </section>

@@ -3,12 +3,14 @@ import { useEffect, useState } from "react"
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import { MentorCard } from '../components/ui/Card'
+import { useGetMentors } from "../api/mutation/MentorMutation";
 
 export default function CareerMentorMatch() {
   const [activeCategory, setActiveCategory] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [scrollY, setScrollY] = useState(0)
   const [showFilters, setShowFilters] = useState(false)
+  const { data: mentors, isLoading, isError } = useGetMentors();
 
   const navigate = useNavigate();
 
@@ -25,79 +27,6 @@ export default function CareerMentorMatch() {
     { id: "design", name: "Design" },
     { id: "marketing", name: "Marketing" },
     { id: "finance", name: "Finance" },
-  ]
-
-  const mentors = [
-    {
-      id: 1,
-      name: "Diana Chen",
-      rating: 4.9,
-      reviews: 112,
-      price: "Free",
-      title: "Product Manager",
-      company: "InnovateTech",
-      location: "Seattle, WA",
-      experience: "9 years of experience",
-      availability: "Available: Weekday mornings",
-      expertise: ["Product Strategy", "Agile Methodologies", "Go-to-Market Planning"],
-      categories: ["business"],
-    },
-    {
-      id: 2,
-      name: "Alex Rodriguez",
-      rating: 4.8,
-      reviews: 89,
-      price: "$50/hour",
-      title: "Senior Software Engineer",
-      company: "TechCorp",
-      location: "San Francisco, CA",
-      experience: "7 years of experience",
-      availability: "Available: Weekday evenings",
-      expertise: ["React", "Node.js", "System Design"],
-      categories: ["tech"],
-    },
-    {
-      id: 3,
-      name: "Sarah Kim",
-      rating: 4.9,
-      reviews: 156,
-      price: "$75/hour",
-      title: "UX Design Lead",
-      company: "DesignStudio",
-      location: "New York, NY",
-      experience: "8 years of experience",
-      availability: "Available: Flexible hours",
-      expertise: ["User Research", "Prototyping", "Design Systems"],
-      categories: ["design"],
-    },
-    {
-      id: 4,
-      name: "Marcus Thompson",
-      rating: 4.7,
-      reviews: 93,
-      price: "$60/hour",
-      title: "Digital Marketing Manager",
-      company: "MarketPro",
-      location: "Austin, TX",
-      experience: "6 years of experience",
-      availability: "Available: Weekends",
-      expertise: ["SEO", "Content Strategy", "PPC Advertising"],
-      categories: ["marketing"],
-    },
-    {
-      id: 5,
-      name: "Jennifer Wu",
-      rating: 4.8,
-      reviews: 124,
-      price: "$80/hour",
-      title: "Investment Advisor",
-      company: "WealthBuilder",
-      location: "Chicago, IL",
-      experience: "12 years of experience",
-      availability: "Available: Weekday afternoons",
-      expertise: ["Portfolio Management", "Risk Analysis", "Financial Planning"],
-      categories: ["finance"],
-    },
   ]
 
   const filteredMentors =
@@ -203,24 +132,26 @@ export default function CareerMentorMatch() {
       {/* Mentors Grid */}
       <section className="py-12 flex justify-center items-center h-full w-full">
         <div className="container mx-auto px-4 flex justify-center items-center max-w-5xl">
-          {searchedMentors.length === 0 ? (
+          {isLoading && <div>Loading...</div>}
+          {isError && <div>Error fetching mentors</div>}
+          {searchedMentors && searchedMentors.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">No mentors found matching your criteria.</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {searchedMentors.map((mentor) => (
+              {searchedMentors && searchedMentors.map((mentor) => (
                 <MentorCard
-                  key={mentor.id}
+                  key={mentor._id}
                   image="https://picjumbo.com/pic/1/2379.jpg"
-                  rating={mentor.rating}
+                  rating={mentor.averageRating}
                   reviews={mentor.reviews}
                   price={mentor.price}
-                  name={mentor.name}
-                  title={mentor.title}
+                  name={mentor.user.name}
+                  title={mentor.currentPosition}
                   company={mentor.company}
                   location={mentor.location}
-                  experience={mentor.experience}
+                  experience={mentor.yearsOfExperience}
                   availability={mentor.availability}
                   expertise={mentor.expertise}
                   onRequest={() => {
@@ -235,3 +166,4 @@ export default function CareerMentorMatch() {
     </div>
   )
 }
+

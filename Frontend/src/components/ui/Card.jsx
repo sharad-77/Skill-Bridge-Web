@@ -30,12 +30,13 @@ const FeaturesCard = ({ children, svg, title, description, className }) => {
 };
 
 const ProjectsCard = ({
-  title,
-  category,
-  description,
-  members,
-  progress,
-  tags,
+  id,
+  title = '',
+  category = '',
+  description = '',
+  members = 0,
+  progress = 0,
+  tags = [],
 }) => {
   const navigate = useNavigate();
   const { redirectToProfile } = useAuthRedirect();
@@ -45,7 +46,7 @@ const ProjectsCard = ({
     if (!isAuthenticated || !isOnBoarded) {
       redirectToProfile();
     } else {
-      navigate("/Collaboration/Project");
+      navigate(`/collaboration/project/${id}`);
     }
   };
   return (
@@ -120,7 +121,6 @@ const ProjectsCard = ({
     </div>
   );
 };
-
 
 const CertificateCard = ({ title, issuer, dateObtained, expirationDate, certificateLink }) => {
 

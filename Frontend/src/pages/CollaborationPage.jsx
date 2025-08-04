@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useGetProjects } from "../api/mutation/ProjectMutation";
 import { ProjectsCard } from "../components/ui/Card";
 import AddProjectModal from "../pages/formPage/NewProject";
 
 function Collaboration() {
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
+  const { data: projects, isLoading, isError } = useGetProjects();
+
   return (
     <div>
       {/* Header Section */}
@@ -35,7 +38,7 @@ function Collaboration() {
 
       <div className='flex flex-col justify-center items-center h-full w-full'>
 
-        <div className="bg-white h-full w-full gap-3 mx-3 px-3 py-2 rounded-lg font-semibold flex items-center justify-center  max-w-5xl mx-auto">
+        <div className="bg-white h-full w-full gap-3 mx-3 px-3 py-2 rounded-lg font-semibold flex items-center justify-center  max-w-5xl ">
           <div className="max-w-7xl h-full w-full flex justify-between items-center gap-6">
             <input
               type="text3"
@@ -58,41 +61,25 @@ function Collaboration() {
           <div className="max-w-7xl mx-auto">
             <h1 className="font-bold text-2xl pt-8 px-5">Featured Projects</h1>
 
+            {isLoading && <div>Loading...</div>}
+            {isError && <div>Error fetching projects</div>}
+
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 py-10">
-              <ProjectsCard
-                category={"Artificial intelligence"}
-                title={"AI-Powered Study Assistant"}
-                progress={90}
-                tags={["AI", "Machine Learning", "Python", "React"]}
-                description={
-                  "Help students study more effectively using AI and machine learning"
-                }
-                skills={["AI", "Machine Learning", "Python", "React"]}
-                members={3}
-              ></ProjectsCard>
-              <ProjectsCard
-                category={"Artificial intelligence"}
-                title={"AI-Powered Study Assistant"}
-                progress={90}
-                tags={["AI", "Machine Learning", "Python", "React"]}
-                description={
-                  "Help students study more effectively using AI and machine learning"
-                }
-                skills={["AI", "Machine Learning", "Python", "React"]}
-                members={3}
-              ></ProjectsCard>
-              <ProjectsCard
-                category={"Artificial intelligence"}
-                title={"AI-Powered Study Assistant"}
-                progress={90}
-                tags={["AI", "Machine Learning", "Python", "React"]}
-                description={
-                  "Help students study more effectively using AI and machine learning"
-                }
-                skills={["AI", "Machine Learning", "Python", "React"]}
-                members={3}
-              ></ProjectsCard>
+              {projects && projects.map((project) => (
+                <ProjectsCard
+                  key={project._id}
+                  id={project._id}
+                  category={project.category}
+                  title={project.title}
+                  progress={project.progress}
+                  tags={project.tags}
+                  description={project.description}
+                  skills={project.requiredSkills}
+                  members={project.members?.length || 0}
+                />
+              ))}
             </div>
+
           </div>
         </div>
       </div>
@@ -104,7 +91,5 @@ function Collaboration() {
     </div>
   );
 }
-
-
 
 export default Collaboration;
