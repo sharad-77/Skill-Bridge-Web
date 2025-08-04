@@ -122,6 +122,113 @@ const ProjectsCard = ({
   );
 };
 
+const SkillCard = ({ id, title, instructor, rating, students, duration, level, price, image }) => {
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const navigate = useNavigate();
+  const { redirectToProfile } = useAuthRedirect();
+  const { isAuthenticated, isOnBoarded } = useAuthStore();
+
+
+  const handleClick = () => {
+    // Add validation before navigation
+    if (!id || id === 'undefined' || id === 'null' || id === undefined || id === null) {
+      return;
+    }
+
+    if (!isAuthenticated || !isOnBoarded) {
+      redirectToProfile();
+    } else {
+      const navigationUrl = `/LearnSkill/DetailedSkill/${id}`;
+      navigate(navigationUrl);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group w-full max-w-sm mx-auto">
+      {/* Image Section */}
+      <div className="relative h-48">
+        <img
+          src={image || "/placeholder.svg"}
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Action Buttons */}
+        <div className="absolute top-3 right-3 flex gap-2">
+          <button
+            className={`w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition-all duration-200 flex items-center justify-center ${isBookmarked ? "text-purple-600" : "text-gray-600"
+              }`}
+            onClick={() => setIsBookmarked(!isBookmarked)}
+          >
+            <Bookmark className="h-4 w-4" fill={isBookmarked ? "currentColor" : "none"} />
+          </button>
+
+          <button
+            className={`w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition-all duration-200 flex items-center justify-center ${isLiked ? "text-rose-500" : "text-gray-600"
+              }`}
+            onClick={() => setIsLiked(!isLiked)}
+          >
+            <Heart className="h-4 w-4" fill={isLiked ? "currentColor" : "none"} />
+          </button>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div className="p-5">
+        {/* Level and Rating */}
+        <div className="flex items-center justify-between mb-3">
+          <span className="px-2.5 py-1 bg-purple-50 text-pink-600 rounded-full text-xs font-semibold">
+            {level}
+          </span>
+          <div className="flex items-center gap-1">
+            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
+            <span className="text-sm font-semibold text-gray-900">{rating}</span>
+          </div>
+        </div>
+
+        {/* Title and Instructor */}
+        <div className="mb-4">
+          <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-pink-500 transition-colors duration-200 line-clamp-2">
+            {title}
+          </h3>
+          <p className="text-gray-600 text-sm">
+            by <span className="font-medium">{instructor}</span>
+          </p>
+        </div>
+
+        {/* Duration and Students */}
+        <div className="flex items-center gap-4 text-sm text-gray-600 mb-5">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-4 w-4 flex-shrink-0" />
+            <span>{duration}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Users className="h-4 w-4 flex-shrink-0" />
+            <span>{students} students</span>
+          </div>
+        </div>
+
+        {/* Price and CTA */}
+        <div className="flex items-center justify-between">
+          <span className="font-bold text-xl text-gray-900">{price}</span>
+          <Button
+            variant="gradient"
+            size="sm"
+            className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5 font-medium"
+            onClick={handleClick}
+          >
+            Learn More
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 const CertificateCard = ({ title, issuer, dateObtained, expirationDate, certificateLink }) => {
 
   return (
@@ -266,94 +373,6 @@ const MentorCard = ({
 };
 
 
-const SkillCard = ({ title, instructor, rating, students, duration, level, price, image }) => {
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const navigate = useNavigate();
-
-  return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group w-full max-w-sm mx-auto">
-      {/* Image Section */}
-      <div className="relative h-48">
-        <img
-          src={image || "/placeholder.svg"}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Action Buttons */}
-        <div className="absolute top-3 right-3 flex gap-2">
-          <button
-            className={`w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition-all duration-200 flex items-center justify-center ${isBookmarked ? "text-purple-600" : "text-gray-600"
-              }`}
-            onClick={() => setIsBookmarked(!isBookmarked)}
-          >
-            <Bookmark className="h-4 w-4" fill={isBookmarked ? "currentColor" : "none"} />
-          </button>
-
-          <button
-            className={`w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition-all duration-200 flex items-center justify-center ${isLiked ? "text-rose-500" : "text-gray-600"
-              }`}
-            onClick={() => setIsLiked(!isLiked)}
-          >
-            <Heart className="h-4 w-4" fill={isLiked ? "currentColor" : "none"} />
-          </button>
-        </div>
-      </div>
-
-      {/* Content Section */}
-      <div className="p-5">
-        {/* Level and Rating */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="px-2.5 py-1 bg-purple-50 text-pink-600 rounded-full text-xs font-semibold">
-            {level}
-          </span>
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-            <span className="text-sm font-semibold text-gray-900">{rating}</span>
-          </div>
-        </div>
-
-        {/* Title and Instructor */}
-        <div className="mb-4">
-          <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-pink-500 transition-colors duration-200 line-clamp-2">
-            {title}
-          </h3>
-          <p className="text-gray-600 text-sm">
-            by <span className="font-medium">{instructor}</span>
-          </p>
-        </div>
-
-        {/* Duration and Students */}
-        <div className="flex items-center gap-4 text-sm text-gray-600 mb-5">
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4 flex-shrink-0" />
-            <span>{duration}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Users className="h-4 w-4 flex-shrink-0" />
-            <span>{students} students</span>
-          </div>
-        </div>
-
-        {/* Price and CTA */}
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-xl text-gray-900">{price}</span>
-          <Button
-            variant="gradient"
-            size="sm"
-            className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5 font-medium"
-            onClick={() => navigate("/LearnSkill/DetailedSkill")}
-          >
-            Learn More
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 
 const FloatingCard = ({ icon: Icon, title, subtitle, bgColorClass, iconColorClass, animationClass, onClick }) => {

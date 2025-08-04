@@ -1,9 +1,61 @@
-import React,{useState} from 'react';
-import { X, Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useCreateProject } from '../../api/mutation/ProjectMutation';
 
 function AddProjectModal({ isOpen, onClose }) {
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const { mutate: createProject, isPending } = useCreateProject();
+  const [requiredSkills, setRequiredSkills] = useState(['']);
+  const [projectGoals, setProjectGoals] = useState(['']);
 
-  // const [index, setIndex] = useState(1);
+  const addSkill = () => setRequiredSkills([...requiredSkills, '']);
+  const removeSkill = (index) => {
+    const newSkills = [...requiredSkills];
+    newSkills.splice(index, 1);
+    setRequiredSkills(newSkills);
+  };
+
+  const addGoal = () => setProjectGoals([...projectGoals, '']);
+  const removeGoal = (index) => {
+    const newGoals = [...projectGoals];
+    newGoals.splice(index, 1);
+    setProjectGoals(newGoals);
+  };
+
+  const handleSkillChange = (index, value) => {
+    const newSkills = [...requiredSkills];
+    newSkills[index] = value;
+    setRequiredSkills(newSkills);
+  };
+
+  const handleGoalChange = (index, value) => {
+    const newGoals = [...projectGoals];
+    newGoals[index] = value;
+    setProjectGoals(newGoals);
+  };
+
+  const onSubmit = (data) => {
+    // Filter out empty skills and goals
+    const skills = requiredSkills.filter(skill => skill.trim() !== '');
+    const goals = projectGoals.filter(goal => goal.trim() !== '');
+
+    const projectData = {
+      ...data,
+      requiredSkill: skills,
+      projectGoal: goals,
+      teamSize: parseInt(data.teamSize, 10)
+    };
+
+    createProject(projectData, {
+      onSuccess: () => {
+        reset();
+        setRequiredSkills(['']);
+        setProjectGoals(['']);
+        onClose();
+      }
+    });
+  };
 
   if (!isOpen) return null;
 
@@ -20,255 +72,222 @@ function AddProjectModal({ isOpen, onClose }) {
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             aria-label="Close modal"
+            disabled={isPending}
           >
             <X className="h-5 w-5 text-gray-500" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-          <form className="p-6 space-y-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Project Title */}
-            <div className="space-y-2">
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                Project Title *
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                Project Title <span className="text-red-500">*</span>
               </label>
               <input
-                id="title"
-                name="title"
                 type="text"
-                placeholder="Enter a descriptive title for your project"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none hover:border-gray-400"
-                maxLength={100}
+                id="title"
+                {...register('title', { required: 'Project title is required' })}
+                className={`w-full px-3 py-2 border rounded-md ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+                placeholder="Enter project title"
+                disabled={isPending}
               />
-              <p className="text-xs text-gray-500">0/100 characters</p>
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+              )}
             </div>
 
             {/* Category */}
-            <div className="space-y-2">
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                Category *
+            <div>
+              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                Category <span className="text-red-500">*</span>
               </label>
               <select
                 id="category"
-                name="category"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white hover:border-gray-400"
+                {...register('category', { required: 'Category is required' })}
+                className={`w-full px-3 py-2 border rounded-md ${errors.category ? 'border-red-500' : 'border-gray-300'}`}
+                disabled={isPending}
               >
                 <option value="">Select a category</option>
-                <option value="web-development">Web Development</option>
-                <option value="mobile-development">Mobile Development</option>
-                <option value="ai-ml">Artificial Intelligence & ML</option>
-                <option value="data-science">Data Science & Analytics</option>
-                <option value="blockchain">Blockchain & Web3</option>
-                <option value="game-development">Game Development</option>
-                <option value="devops-cloud">DevOps & Cloud</option>
-                <option value="cybersecurity">Cybersecurity</option>
-                <option value="iot">Internet of Things</option>
-                <option value="ar-vr">AR/VR & Metaverse</option>
-                <option value="fintech">Financial Technology</option>
-                <option value="healthtech">Healthcare Technology</option>
-                <option value="edtech">Educational Technology</option>
-                <option value="greentech">Environmental Technology</option>
-                <option value="other">Other</option>
+                <option value="Web Development">Web Development</option>
+                <option value="Mobile Development">Mobile Development</option>
+                <option value="Data Science">Data Science</option>
+                <option value="AI/ML">AI/ML</option>
+                <option value="UI/UX Design">UI/UX Design</option>
+                <option value="Other">Other</option>
               </select>
-            </div>
-
-            {/*Brife Introduction*/}
-            <div className="space-y-2">
-              <label htmlFor="introduction" className="block text-sm font-medium text-gray-700">
-                Brief Introduction *
-              </label>
-              <textarea
-                id="introduction"
-                name="introduction"
-                placeholder="Provide a brief overview of your project in 2-3 sentences"
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none hover:border-gray-400"
-                maxLength={300}
-              />
-              <p className="text-xs text-gray-500">0/300 characters</p>
+              {errors.category && (
+                <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+              )}
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                Description *
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 id="description"
-                name="description"
-                placeholder="Describe your project, its goals, target audience, and what you're looking to achieve. Be specific about the problem you're solving."
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none hover:border-gray-400"
-                maxLength={1000}
+                {...register('description', { required: 'Description is required' })}
+                rows={3}
+                className={`w-full px-3 py-2 border rounded-md ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
+                placeholder="Describe your project in detail..."
+                disabled={isPending}
               />
-              <p className="text-xs text-gray-500">0/1000 characters</p>
+              {errors.description && (
+                <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+              )}
+            </div>
+
+            {/* Introduction */}
+            <div>
+              <label htmlFor="introduction" className="block text-sm font-medium text-gray-700 mb-1">
+                Introduction <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="introduction"
+                {...register('introduction', { required: 'Introduction is required' })}
+                rows={2}
+                className={`w-full px-3 py-2 border rounded-md ${errors.introduction ? 'border-red-500' : 'border-gray-300'}`}
+                placeholder="A brief introduction to your project..."
+                disabled={isPending}
+              />
+              {errors.introduction && (
+                <p className="mt-1 text-sm text-red-600">{errors.introduction.message}</p>
+              )}
             </div>
 
             {/* Project Goals */}
-            <div className="space-y-2">
-
-              <label htmlFor="goals" className="block text-sm font-medium text-gray-700">
-                Project Goals (At least 5)
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Project Goals <span className="text-red-500">*</span>
               </label>
+              {projectGoals.map((goal, index) => (
+                <div key={index} className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={goal}
+                    onChange={(e) => handleGoalChange(index, e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder={`Goal ${index + 1}`}
+                    disabled={isPending}
+                  />
+                  {projectGoals.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeGoal(index)}
+                      className="p-2 text-red-500 hover:text-red-700"
+                      disabled={isPending}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addGoal}
+                className="mt-2 flex items-center text-sm text-blue-600 hover:text-blue-800"
+                disabled={isPending}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Add Goal
+              </button>
+            </div>
 
-              <input type="text" id="goals" name="goals" placeholder={`Goal  : What do you want to achieve?`} className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none hover:border-gray-400" />
+            {/* Required Skills */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Required Skills <span className="text-red-500">*</span>
+              </label>
+              {requiredSkills.map((skill, index) => (
+                <div key={index} className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={skill}
+                    onChange={(e) => handleSkillChange(index, e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder={`Skill ${index + 1}`}
+                    disabled={isPending}
+                  />
+                  {requiredSkills.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeSkill(index)}
+                      className="p-2 text-red-500 hover:text-red-700"
+                      disabled={isPending}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addSkill}
+                className="mt-2 flex items-center text-sm text-blue-600 hover:text-blue-800"
+                disabled={isPending}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Add Skill
+              </button>
+            </div>
+
+            {/* Team Size */}
+            <div>
+              <label htmlFor="teamSize" className="block text-sm font-medium text-gray-700 mb-1">
+                Team Size <span className="text-red-500">*</span>
+              </label>
               <input
-                type="text"
-                id="goals"
-                name="goals"
-                placeholder={`Goal : What do you want to achieve?`}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none hover:border-gray-400"
+                type="number"
+                id="teamSize"
+                min="1"
+                {...register('teamSize', {
+                  required: 'Team size is required',
+                  min: { value: 1, message: 'Team size must be at least 1' }
+                })}
+                className={`w-full px-3 py-2 border rounded-md ${errors.teamSize ? 'border-red-500' : 'border-gray-300'}`}
+                placeholder="Enter team size"
+                disabled={isPending}
               />
-
+              {errors.teamSize && (
+                <p className="mt-1 text-sm text-red-600">{errors.teamSize.message}</p>
+              )}
             </div>
 
-            {/* Skills */}
-            <div className="space-y-2">
-              <label htmlFor="skills" className="block text-sm font-medium text-gray-700">
-                Required Skills *
+            {/* Project Deadline */}
+            <div>
+              <label htmlFor="projectdeadline" className="block text-sm font-medium text-gray-700 mb-1">
+                Project Deadline <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-2">
-                <input
-                  id="skills"
-                  name="skills"
-                  type="text"
-                  placeholder="e.g., React, Python, UI Design"
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none hover:border-gray-400"
-                />
-                <button
-                  type="button"
-                  className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add
-                </button>
-              </div>
-
-              {/* Skills Tags - Example */}
-              <div className="flex flex-wrap gap-2 mt-3">
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  React
-                  <button
-                    type="button"
-                    className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  Node.js
-                  <button
-                    type="button"
-                    className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              </div>
-
-              <p className="text-xs text-gray-500">
-                Press Enter or comma to add skills. Add 3-8 relevant skills.
-              </p>
+              <input
+                type="date"
+                id="projectdeadline"
+                {...register('projectdeadline', { required: 'Project deadline is required' })}
+                className={`w-full px-3 py-2 border rounded-md ${errors.projectdeadline ? 'border-red-500' : 'border-gray-300'}`}
+                disabled={isPending}
+              />
+              {errors.projectdeadline && (
+                <p className="mt-1 text-sm text-red-600">{errors.projectdeadline.message}</p>
+              )}
             </div>
 
-            {/* Team Size and Duration Grid */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Team Size */}
-              <div className="space-y-2">
-                <label htmlFor="teamSize" className="block text-sm font-medium text-gray-700">
-                  Team Size *
-                </label>
-                <select
-                  id="teamSize"
-                  name="teamSize"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white hover:border-gray-400"
-                >
-                  <option value="">Select team size</option>
-                  <option value="1-2">1-2 members (Solo/Pair)</option>
-                  <option value="3-5">3-5 members (Small team)</option>
-                  <option value="6-10">6-10 members (Medium team)</option>
-                  <option value="10+">10+ members (Large team)</option>
-                </select>
-              </div>
-
-              {/* Duration */}
-              <div className="space-y-2">
-                <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
-                  Project Duration *
-                </label>
-                <select
-                  id="duration"
-                  name="duration"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white hover:border-gray-400"
-                >
-                  <option value="">Select duration</option>
-                  <option value="less-than-1-month">Less than 1 month</option>
-                  <option value="1-3-months">1-3 months</option>
-                  <option value="3-6-months">3-6 months</option>
-                  <option value="6-months-plus">6+ months</option>
-                  <option value="ongoing">Ongoing</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Priority */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Project Priority
-              </label>
-              <div className="flex gap-3">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="priority"
-                    value="low"
-                    className="sr-only"
-                  />
-                  <span className="px-4 py-2 rounded-lg border text-sm font-medium transition-all bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100">
-                    Low
-                  </span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="priority"
-                    value="medium"
-                    className="sr-only"
-                    defaultChecked
-                  />
-                  <span className="px-4 py-2 rounded-lg border text-sm font-medium transition-all bg-yellow-100 text-yellow-800 border-yellow-200">
-                    Medium
-                  </span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="priority"
-                    value="high"
-                    className="sr-only"
-                  />
-                  <span className="px-4 py-2 rounded-lg border text-sm font-medium transition-all bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100">
-                    High
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="pt-6 border-t border-gray-200 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={isPending}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all font-medium flex items-center justify-center gap-2 min-w-[140px]"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isPending}
               >
-                Create Project
+                {isPending ? 'Creating...' : 'Create Project'}
               </button>
             </div>
           </form>

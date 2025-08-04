@@ -44,24 +44,24 @@ function App() {
         <ErrorBoundary>
           <Suspense fallback={<div>Loading...</div>}>
             <Routes>
-              <Route path="/Signup" element={<SignupPage />} />
-              <Route path="/Signin" element={<SigninPage />} />
-              <Route path="/ForgetPassword" element={<ForgotPasswordPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/signin" element={<SigninPage />} />
+              <Route path="/forget-password" element={<ForgotPasswordPage />} />
               <Route path="/" element={<HomePage />} />
               <Route path="/onboarding/student" element={<StudentOnboardingPage />} />
               <Route path="/onboarding/mentor" element={<MentorOnboardingPage />} />
-              <Route path="/Collaboration" element={<CollaborationPage />} />
+              <Route path="/collaboration" element={<CollaborationPage />} />
               <Route path="/collaboration/project/:projectId" element={<ProjectPage />} />
-              <Route path="/LearnSkill" element={<SkillPage />} />
-              <Route path="/LearnSkill/DetailedSkill" element={<SkillDetailedPage />} />
-              <Route path="/Mentor" element={<MentorPage />} />
-              <Route path="/Mentorship-requests" element={<MentorshipRequestsStudent />} />
-              <Route path="/Mentorship-requests/Mentor" element={<MentorshipRequestsMentor />} />
-              <Route path="/Chat" element={<ChatPage />} />
-              <Route path="/Mentor-request" element={<MentorRequestPage />} />
-              <Route path="/Certificate" element={<CertificatePage />} />
-              <Route path="/ProfileStudent" element={<StudentProfilePage />} />
-              <Route path="/ProfileMentor" element={<MentorProfilePage />} />
+              <Route path="/learnSkill" element={<SkillPage />} />
+              <Route path="/learnSkill/detailedSkill/:id" element={<SkillDetailedPage />} />
+              <Route path="/mentor" element={<MentorPage />} />
+              <Route path="/mentorship-requests" element={<MentorshipRequestsStudent />} />
+              <Route path="/mentorship-requests/mentor" element={<MentorshipRequestsMentor />} />
+              <Route path="/chat" element={<ChatPage />} />
+              <Route path="/mentor-request" element={<MentorRequestPage />} />
+              <Route path="/certificate" element={<CertificatePage />} />
+              <Route path="/profile/student" element={<StudentProfilePage />} />
+              <Route path="/profile/mentor" element={<MentorProfilePage />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>

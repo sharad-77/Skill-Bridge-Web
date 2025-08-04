@@ -1,11 +1,24 @@
-import SkillModel from "../models/skillModel.js";
-import { Student, User, Mentor } from "../models/userModel.js";
 import z from "zod";
+import SkillModel from "../models/skillModel.js";
+import { Student, User } from "../models/userModel.js";
 
 export const allSkill = async (req, res) => {
     try {
         const featureSkill = await SkillModel.find();
-        res.json(featureSkill);
+        res.json(featureSkill.map(skill => ({
+            _id: skill._id,
+            title: skill.title,
+            category: skill.category,
+            level: skill.level,
+            description: skill.description,
+            duration: skill.duration,
+            auther: skill.auther,
+            image: skill.image,
+            video: skill.video,
+            introduction: skill.introduction,
+            highlights: skill.highlights,
+            createdBy: skill.createdBy
+        })));
     } catch (error) {
         console.error(error.message);
         res.status(500).json({

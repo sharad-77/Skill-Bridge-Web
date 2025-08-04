@@ -1,60 +1,62 @@
-import React, { useState } from 'react';
 import {
-  ChevronLeft,
-  Star,
-  Clock,
-  User,
   CheckCircle,
+  ChevronLeft,
   ChevronRight,
-  BookOpen,
-  Download,
-  Award,
-  MessageSquare,
+  Clock,
   Facebook,
+  Linkedin,
+  Star,
   Twitter,
-  Linkedin
+  User
 } from 'lucide-react';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useGetSkillById } from '../../api/mutation/SkillMutation';
+import Button from '../../components/ui/Button';
 
-const CoursePage = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+const SkillDetailedPage = () => {
+  const { id } = useParams();
+  const { data: skillData, isLoading, isError, error } = useGetSkillById(id);
 
-  const learningPoints = [
-    "Advanced component patterns and architecture",
-    "State management with Redux, Context API, and Recoil",
-    "Performance optimization techniques",
-    "Server-side rendering and Next.js",
-    "Testing React applications",
-    "Handling authentication and authorization",
-    "Implementing complex UI interactions",
-    "Deploying React applications to production"
-  ];
-
-  const requirements = [
-    "Basic knowledge of React and hooks",
-    "Familiarity with JavaScript ES6+ features",
-    "Understanding of HTML, CSS, and web development concepts",
-    "Node.js and npm installed on your computer"
-  ];
-
-  const courseIncludes = [
-    { icon: BookOpen, text: "15 lessons (8 weeks)" },
-    { icon: Download, text: "Downloadable resources" },
-    { icon: Award, text: "Certificate of completion" },
-    { icon: MessageSquare, text: "Direct access to instructor" }
-  ];
-
-  const socialIcons = [
+  if (!id || id === 'undefined' || id === 'null') {
+    return <div>Invalid skill ID</div>;
+  }
+  // Default social icons
+  const defaultSocialIcons = [
     { icon: Facebook, color: "text-blue-600" },
     { icon: Twitter, color: "text-blue-400" },
     { icon: Linkedin, color: "text-blue-700" }
   ];
 
-  const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'curriculum', label: 'Curriculum' },
-    { id: 'instructor', label: 'Instructor' },
-    { id: 'reviews', label: 'Reviews' }
-  ];
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading skill details...</div>;
+
+  if (isError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg max-w-md">
+          <h2 className="text-xl font-bold mb-2">Error Loading Skill</h2>
+          <p>{error?.message || 'Failed to load skill details. Please try again later.'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Extract skill from the response data
+  const skill = skillData?.Skill || skillData;
+  if (!skill) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Skill Not Found</h2>
+          <p>The requested skill could not be found.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Use skill.socialIcons if available, otherwise use defaultSocialIcons
+  const socialIcons = skill.socialIcons || defaultSocialIcons;
+
 
   return (
     <main className="min-h-screen">
@@ -64,76 +66,58 @@ const CoursePage = () => {
           <div className="container mx-auto px-4 py-8 max-w-5xl">
             {/* Back Button */}
             <div className="mb-6">
-              <a
-                href="/marketplace"
-                className="inline-flex items-center text-rose-100 hover:text-white transition-colors"
+              <Button
+                variant="outline"
+                className="text-rose-100 hover:text-white transition-colors"
+                startIcon={<ChevronLeft className="h-4 w-4 mr-1" />}
+                onClick={() => window.history.back()}
               >
-                <ChevronLeft className="h-4 w-4 mr-1" />
                 Back to Skills
-              </a>
+              </Button>
             </div>
 
             {/* Course Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-3">
-                  Intermediate
+                  {skill.level}
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                  Advanced React Development
+                  {skill.title}
                 </h1>
                 <p className="text-rose-100 max-w-3xl">
-                  Master advanced React concepts and build complex, production-ready
-                  applications with modern best practices.
+                  {skill.description}
                 </p>
 
                 {/* Course Stats */}
                 <div className="flex items-center gap-4 mt-4">
                   <div className="flex items-center">
                     <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                    <span className="ml-1 font-medium">4.8</span>
-                    <span className="ml-1 text-rose-100">(1234 students)</span>
+                    <span className="ml-1 font-medium">{skill.rating || 'N/A'}</span>
+                    <span className="ml-1 text-rose-100">({skill.students || 0} students)</span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-5 w-5 text-rose-100" />
-                    <span className="ml-1 text-rose-100">8 weeks</span>
+                    <span className="ml-1 text-rose-100">{skill.duration || 'N/A'} hours</span>
                   </div>
                   <div className="flex items-center">
                     <User className="h-5 w-5 text-rose-100" />
-                    <span className="ml-1 text-rose-100">By John Doe</span>
+                    <span className="ml-1 text-rose-100">By {skill.user?.name || 'Unknown Instructor'}</span>
                   </div>
                 </div>
               </div>
 
               {/* Enroll Button */}
-              <div>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 bg-white text-rose-500 hover:bg-white/90 transform hover:scale-105 ">
-                  Enroll Now - Free
-                </button>
-              </div>
+              <Button
+                className="bg-white text-rose-500 hover:bg-white/90 transform hover:scale-105 h-10 px-4 py-2"
+                onClick={() => window.alert('Enroll now!')}
+              >
+                Enroll Now - Free
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* Video Section */}
-        <div className="container mx-auto px-4 mt-8 flex items-center justify-center w-full">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex w-full justify-between max-w-5xl ">
-            <div className="flex overflow-x-auto ">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-6 py-4 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
-                      ? 'text-rose-500 border-b-2 border-rose-500'
-                      : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8 flex justify-center">
@@ -145,15 +129,7 @@ const CoursePage = () => {
                 <h2 className="text-xl font-semibold mb-4">About This Course</h2>
                 <div className="prose max-w-none">
                   <p className="mb-4 text-gray-700">
-                    This comprehensive course will take your React skills to the next level.
-                    You'll learn advanced patterns, state management techniques, performance
-                    optimization, and how to build scalable applications that can handle
-                    real-world requirements.
-                  </p>
-                  <p className="mb-4 text-gray-700">
-                    By the end of this course, you'll be able to architect and implement
-                    complex React applications using the latest tools and best practices
-                    in the ecosystem.
+                    {skill.description}
                   </p>
                 </div>
               </div>
@@ -162,7 +138,7 @@ const CoursePage = () => {
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                 <h2 className="text-xl font-semibold mb-4">What You'll Learn</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {learningPoints.map((point, index) => (
+                  {skill.learningPoints?.map((point, index) => (
                     <div key={index} className="flex items-start gap-2">
                       <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{point}</span>
@@ -175,7 +151,7 @@ const CoursePage = () => {
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                 <h2 className="text-xl font-semibold mb-4">Requirements</h2>
                 <ul className="space-y-2">
-                  {requirements.map((requirement, index) => (
+                  {skill.requirements?.map((requirement, index) => (
                     <li key={index} className="flex items-start gap-2">
                       <ChevronRight className="h-5 w-5 text-rose-500 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{requirement}</span>
@@ -191,7 +167,7 @@ const CoursePage = () => {
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                 <h2 className="text-lg font-semibold mb-4">This course includes:</h2>
                 <ul className="space-y-3">
-                  {courseIncludes.map((item, index) => {
+                  {skill.courseIncludes?.map((item, index) => {
                     const IconComponent = item.icon;
                     return (
                       <li key={index} className="flex items-center gap-3">
@@ -204,9 +180,12 @@ const CoursePage = () => {
 
                 {/* Enroll Section */}
                 <div className="mt-6">
-                  <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 h-10 px-4 py-2 w-full text-white transform hover:scale-105 transition-transform">
+                  <Button
+                    className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 h-10 px-4 py-2 w-full text-white transform hover:scale-105"
+                    onClick={() => window.alert('Enroll now!')}
+                  >
                     Enroll Now - Free
-                  </button>
+                  </Button>
                   <p className="text-center text-sm text-gray-500 mt-2">
                     30-day money-back guarantee
                   </p>
@@ -220,17 +199,17 @@ const CoursePage = () => {
                   {socialIcons.map((social, index) => {
                     const IconComponent = social.icon;
                     return (
-                      <button
+                      <Button
                         key={index}
                         className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-10"
                       >
-                        <IconComponent className={`h-5 w-5 ${social.color}`} />
-                      </button>
+                        <IconComponent className={`h-5 w-5 ${social.color || 'text-gray-600'}`} />
+                      </Button>
                     );
                   })}
-                  <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 flex-1">
+                  <Button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 flex-1">
                     Copy Link
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -241,4 +220,4 @@ const CoursePage = () => {
   );
 };
 
-export default CoursePage;
+export default SkillDetailedPage;

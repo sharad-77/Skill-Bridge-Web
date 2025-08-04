@@ -1,14 +1,26 @@
-import { Search } from "lucide-react"
-import { useEffect, useState } from "react"
-import Button from '../components/ui/Button'
-import { CategoryCard, SkillCard } from '../components/ui/Card'
-import CreateNewSkill from './formPage/CreateNewSkill';
+import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useGetSkills } from "../api/mutation/SkillMutation";
+import Button from '../components/ui/Button';
+import { CategoryCard, SkillCard } from '../components/ui/Card';
+import useAuthRedirect from '../hooks/useAuthRedirect';
+import useAuthStore from '../store/useAuthStore';
+import CreateNewSkill from './formPage/CreateNewSkill';
 
 export default function Skill() {
   const [scrollY, setScrollY] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const { data: skills, isLoading, isError } = useGetSkills();
+  const { redirectToProfile } = useAuthRedirect();
+  const { isAuthenticated, isOnBoarded } = useAuthStore();
+
+  const handleClick = () => {
+    if (!isAuthenticated || !isOnBoarded) {
+      redirectToProfile();
+    } else {
+      setShowForm(true)
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,7 +70,7 @@ export default function Skill() {
                 <Button
                   variant="outline"
                   className="px-4 py-2 rounded-xl font-medium ml-2 bg-white"
-                  onClick={() => setShowForm(true)}
+                  onClick={handleClick}
                 >
                   Create New Skill
                 </Button>
@@ -127,8 +139,9 @@ export default function Skill() {
             {skills && skills.map((skill) => (
               <SkillCard
                 key={skill._id}
+                id={skill._id}
                 title={skill.title}
-                instructor={skill.user.name}
+                instructor={skill.user?.name || 'Unknown Instructor'}
                 rating={skill.rating}
                 students={skill.students}
                 duration={skill.duration}

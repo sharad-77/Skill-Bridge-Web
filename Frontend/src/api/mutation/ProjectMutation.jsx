@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from 'sonner';
 import axiosInstance from "../axiosInstance";
 
 export const useGetProjects = () => {
@@ -22,3 +23,21 @@ export const useGetProjectById = (projectId) => {
   });
 };
 
+export const useCreateProject = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (projectData) => {
+      const { data } = await axiosInstance.post('/Collaboration/', projectData);
+      return data;
+    },
+    onSuccess: () => {
+      // Invalidate and refetch projects list
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      toast.success('Project created successfully!');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to create project');
+    }
+  });
+};

@@ -1,6 +1,5 @@
 import {
   Bookmark,
-  Calendar,
   CheckCircle,
   ChevronLeft,
   Clock,
@@ -64,13 +63,8 @@ const ProjectPage = () => {
     teamSize: projectData.teamSize || 0,
     projectDeadline: projectData.projectdeadline || 'No deadline set',
     members: projectData.members && projectData.members.length > 0 ? projectData.members : [],
-    createdBy: projectData.createdBy,
-    createdAt: projectData.createdAt,
-    updatedAt: projectData.updatedAt,
+    createdBy: projectData.createdBy
   };
-
-  const timestamp = project.createdAt;
-  const date = new Date(timestamp * 1000); // if timestamp is in seconds
 
   console.log(project.createdAt);
 
@@ -128,13 +122,6 @@ const ProjectPage = () => {
                 <div>
                   <div className="text-sm text-gray-500">Team Size</div>
                   <div className="font-medium">{project.teamSize} Members</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-gray-500" />
-                <div>
-                  <div className="text-sm text-gray-500">Created</div>
-                  <div className="font-medium">{date.toLocaleDateString()}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
