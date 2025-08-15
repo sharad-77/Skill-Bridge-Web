@@ -17,7 +17,7 @@ const loginSchema = z.object({
 
 const Signin = () => {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false); // Added password visibility state
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors, isValid } } = useForm({
     resolver: zodResolver(loginSchema),
@@ -34,15 +34,18 @@ const Signin = () => {
   const onSubmit = async (data) => {
     signin.mutate(data, {
       onSuccess: async (res) => {
-        const { token, user } = res;
+        const { token, user, role, userId } = res;
 
+        // Store in Zustand first
         useAuthStore.setState({
-          user,
-          token,
+          user: user || null,
+          token: token || null,
           isAuthenticated: true,
-          role: user.role,
+          role: role || user?.role || null,
+          userId: userId || user?.id || user?.userId || null,
         });
 
+        // This ensures axiosInstance interceptor has the token now
         toast.success("SignIn Successfull");
 
         try {
@@ -50,12 +53,13 @@ const Signin = () => {
           const { onboarded } = onboardStatusRes.data;
 
           useAuthStore.setState({ isOnBoarded: onboarded });
+          const userRole = role || user?.role;
 
           if (onboarded) {
             navigate('/');
-          } else if (user.role === "student") {
+          } else if (userRole === "student") {
             navigate("/onboarding/student");
-          } else if (user.role === "mentor") {
+          } else if (userRole === "mentor") {
             navigate("/onboarding/mentor");
           } else {
             navigate('/');
@@ -67,8 +71,8 @@ const Signin = () => {
         }
       },
       onError: (err) => {
+        console.error('Login Error:', err.response?.data || err.message);
         toast.error(err.response?.data?.message || "Signin Failed");
-        console.error(err)
       }
     })
   }

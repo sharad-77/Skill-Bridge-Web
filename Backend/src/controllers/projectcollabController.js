@@ -5,8 +5,10 @@ import { Student, User } from "../models/userModel.js";
 export const AllProject = async (req, res) => {
     try {
         const featureProjects = await Project.find();
-        res.json(
-            featureProjects.map(project => ({
+        res.json({
+            success: true,
+            message: "Projects retrieved successfully.",
+            data: featureProjects.map(project => ({
                 _id: project._id,
                 category: project.category,
                 title: project.title,
@@ -16,11 +18,12 @@ export const AllProject = async (req, res) => {
                 progress: project.progress,
                 tags: project.tags
             }))
-        );
+        });
     } catch (e) {
         console.error(e.message);
         res.status(500).json({
-            message: "Internal Server error"
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later."
         });
     }
 };
@@ -46,7 +49,11 @@ export const NewProject = async (req, res) => {
 
         const validation = projectSchema.safeParse(req.body);
         if (!validation.success) {
-            return res.status(400).json({ message: "Invalid project data", errors: validation.error.errors });
+            return res.status(400).json({
+                success: false,
+                message: "Invalid project data. Please check your input and try again.",
+                errors: validation.error.errors
+            });
         }
 
         const { title, category, description, introduction, projectGoal, requiredSkill, teamSize, members, projectdeadline } = validation.data;
@@ -65,12 +72,16 @@ export const NewProject = async (req, res) => {
             createdBy: student._id
         });
         res.json({
-            message: "Project created successfully"
+            success: true,
+            message: "Project created successfully!",
+            data: newProject
         });
     } catch (error) {
         console.error(error.message);
         res.status(404).json({
-            message: error.message
+            success: false,
+            message: "An unexpected error occurred while creating the project. Please try again later.",
+            error: error.message
         });
     }
 }
@@ -81,18 +92,20 @@ export const ProjectbyId = async (req, res) => {
         if (!oneProject) {
             return res.status(404).json({
                 success: false,
-                message: "Project not found"
+                message: "The requested project could not be found. Please check the ID and try again."
             });
         }
 
         res.status(200).json({
             success: true,
-            project: oneProject 
+            message: "Project details retrieved successfully.",
+            data: { project: oneProject }
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error.message
+            message: "An unexpected error occurred on the server. Please try again later.",
+            error: error.message
         });
     }
 };
@@ -110,12 +123,19 @@ export const joinProject = async (req, res) => {
 
         const validation = joinProjectSchema.safeParse({ projectId });
         if (!validation.success) {
-            return res.status(400).json({ message: "Invalid request data", errors: validation.error.errors });
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request data. Please check your input and try again.",
+                errors: validation.error.errors
+            });
         }
 
         const project = await Project.findById(projectId);
         if (!project) {
-            return res.status(404).json({ message: "Project not found" });
+            return res.status(404).json({
+                success: false,
+                message: "The project you are trying to join could not be found."
+            });
         }
 
         const currentUserId = userId.toString();
@@ -124,11 +144,17 @@ export const joinProject = async (req, res) => {
         );
 
         if (alreadyJoined) {
-            return res.status(400).json({ message: "You already joined this project" });
+            return res.status(400).json({
+                success: false,
+                message: "You have already joined this project."
+            });
         }
 
         if (project.members.length >= project.teamSize) {
-            return res.status(400).json({ message: "No more space left in project" });
+            return res.status(400).json({
+                success: false,
+                message: "This project has reached its maximum number of members."
+            });
         }
 
         project.members.push({ userId, name });
@@ -142,9 +168,16 @@ export const joinProject = async (req, res) => {
             );
         }
 
-        return res.status(200).json({ message: "Joined project successfully" });
+        return res.status(200).json({
+            success: true,
+            message: "You have successfully joined the project!"
+        });
 
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return res.status(500).json({
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later.",
+            error: error.message
+        });
     }
 };

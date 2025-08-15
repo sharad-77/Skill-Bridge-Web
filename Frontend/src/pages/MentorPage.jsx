@@ -10,7 +10,9 @@ export default function CareerMentorMatch() {
   const [searchQuery, setSearchQuery] = useState("")
   const [scrollY, setScrollY] = useState(0)
   const [showFilters, setShowFilters] = useState(false)
-  const { data: mentors, isLoading, isError } = useGetMentors();
+  const { data, isLoading, isError } = useGetMentors();
+
+  const mentors = Array.isArray(data) ? data : data?.mentors ?? [];
 
   const navigate = useNavigate();
 
@@ -166,4 +168,3 @@ export default function CareerMentorMatch() {
     </div>
   )
 }
-

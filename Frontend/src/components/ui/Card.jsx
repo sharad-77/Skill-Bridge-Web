@@ -2,9 +2,7 @@ import { AlertCircle, Bookmark, BookOpen, Briefcase, Calendar, Check, CheckCircl
 import { useState } from 'react';
 import { useNavigate } from "react-router";
 import { twMerge } from "tailwind-merge";
-import useAuthRedirect from '../../hooks/useAuthRedirect';
 import { cn } from "../../lib/utils";
-import useAuthStore from '../../store/useAuthStore';
 import Button from "../ui/Button";
 
 const FeaturesCard = ({ children, svg, title, description, className }) => {
@@ -39,16 +37,7 @@ const ProjectsCard = ({
   tags = [],
 }) => {
   const navigate = useNavigate();
-  const { redirectToProfile } = useAuthRedirect();
-  const { isAuthenticated, isOnBoarded } = useAuthStore();
 
-  const handleClick = () => {
-    if (!isAuthenticated || !isOnBoarded) {
-      redirectToProfile();
-    } else {
-      navigate(`/collaboration/project/${id}`);
-    }
-  };
   return (
     <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 relative w-full max-w-sm mx-auto overflow-hidden">
       {/* Content */}
@@ -112,7 +101,7 @@ const ProjectsCard = ({
         {/* CTA Button */}
         <Button
           className="w-full h-10 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-          onClick={handleClick}
+          onClick={() => navigate(`/collaboration/project/${id}`)}
         >
           View Project
           <MoveRight className="h-4 w-4" />
@@ -126,23 +115,7 @@ const SkillCard = ({ id, title, instructor, rating, students, duration, level, p
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const navigate = useNavigate();
-  const { redirectToProfile } = useAuthRedirect();
-  const { isAuthenticated, isOnBoarded } = useAuthStore();
 
-
-  const handleClick = () => {
-    // Add validation before navigation
-    if (!id || id === 'undefined' || id === 'null' || id === undefined || id === null) {
-      return;
-    }
-
-    if (!isAuthenticated || !isOnBoarded) {
-      redirectToProfile();
-    } else {
-      const navigationUrl = `/LearnSkill/DetailedSkill/${id}`;
-      navigate(navigationUrl);
-    }
-  };
 
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group w-full max-w-sm mx-auto">
@@ -217,7 +190,9 @@ const SkillCard = ({ id, title, instructor, rating, students, duration, level, p
             variant="gradient"
             size="sm"
             className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5 font-medium"
-            onClick={handleClick}
+            onClick={
+              () => navigate(`/LearnSkill/DetailedSkill/${id}`)
+            }
           >
             Learn More
             <ChevronRight className="h-4 w-4" />

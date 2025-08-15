@@ -7,7 +7,10 @@ export const getUserProfile = async (req, res) => {
 
     const user = await User.findById(userId).select('-password');
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found. Please log in and try again."
+      });
     }
 
     const userData = user.toObject({ getters: true });
@@ -16,7 +19,10 @@ export const getUserProfile = async (req, res) => {
     if (user.role === "student") {
       const student = await Student.findOne({ userId });
       if (!student) {
-        return res.status(404).json({ message: "Student profile not found" });
+        return res.status(404).json({
+          success: false,
+          message: "Student profile not found. Please complete your student onboarding."
+        });
       }
 
       profileData = {
@@ -34,7 +40,10 @@ export const getUserProfile = async (req, res) => {
     } else if (user.role === "mentor") {
       const mentor = await Mentor.findOne({ userId });
       if (!mentor) {
-        return res.status(404).json({ message: "Mentor profile not found" });
+        return res.status(404).json({
+          success: false,
+          message: "Mentor profile not found. Please complete your mentor onboarding."
+        });
       }
 
       profileData = {
@@ -52,11 +61,18 @@ export const getUserProfile = async (req, res) => {
       };
     }
 
-    return res.json({ profile: profileData });
+    return res.json({
+      success: true,
+      message: "User profile retrieved successfully.",
+      data: { profile: profileData }
+    });
 
   } catch (error) {
     console.error("Error fetching user profile:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred on the server. Please try again later."
+    });
   }
 };
 
@@ -72,14 +88,21 @@ export const updateUserProfile = async (req, res) => {
 
     const validation = profileUpdateSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ message: "Invalid profile data", errors: validation.error.errors });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid profile data. Please check your input and try again.",
+        errors: validation.error.errors
+      });
     }
 
     const { name, introduction, location } = validation.data;
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found. Please log in and try again."
+      });
     }
 
     if (name) {
@@ -96,7 +119,10 @@ export const updateUserProfile = async (req, res) => {
         { new: true }
       );
       if (!updatedProfile) {
-        return res.status(404).json({ message: "Student profile not found" });
+        return res.status(404).json({
+          success: false,
+          message: "Student profile not found. Please complete your student onboarding before updating."
+        });
       }
     } else if (user.role === "mentor") {
       updatedProfile = await Mentor.findOneAndUpdate(
@@ -105,19 +131,29 @@ export const updateUserProfile = async (req, res) => {
         { new: true }
       );
       if (!updatedProfile) {
-        return res.status(404).json({ message: "Mentor profile not found" });
+        return res.status(404).json({
+          success: false,
+          message: "Mentor profile not found. Please complete your mentor onboarding before updating."
+        });
       }
     } else {
-      return res.status(400).json({ message: "Invalid user role" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user role. Profile update not applicable."
+      });
     }
 
     return res.json({
-      message: "Profile updated successfully",
-      profile: updatedProfile,
+      success: true,
+      message: "Profile updated successfully!",
+      data: { profile: updatedProfile },
     });
   } catch (error) {
     console.error("Error updating profile:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred on the server. Please try again later."
+    });
   }
 };
 
@@ -138,14 +174,21 @@ export const updateAccountSettings = async (req, res) => {
 
     const validation = accountSettingsSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ message: "Invalid account settings data", errors: validation.error.errors });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid account settings data. Please check your input and try again.",
+        errors: validation.error.errors
+      });
     }
 
     const { name, email, location, introduction, socialMedia } = validation.data;
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found. Please log in and try again."
+      });
     }
 
     if (name) user.name = name;
@@ -166,7 +209,10 @@ export const updateAccountSettings = async (req, res) => {
     }
 
     if (!updatedProfile) {
-      return res.status(404).json({ message: "Profile not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User profile not found. Please ensure your profile is complete."
+      });
     }
 
     const userObject = user.toObject();
@@ -175,13 +221,17 @@ export const updateAccountSettings = async (req, res) => {
     const fullProfile = { ...userObject, ...updatedProfile.toObject() };
 
     res.json({
-      message: "Account settings updated successfully",
-      profile: fullProfile,
+      success: true,
+      message: "Account settings updated successfully!",
+      data: { profile: fullProfile },
     });
 
   } catch (error) {
     console.error("Error updating account settings:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred on the server. Please try again later."
+    });
   }
 };
 

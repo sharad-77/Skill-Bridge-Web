@@ -10,9 +10,12 @@ import CreateNewSkill from './formPage/CreateNewSkill';
 export default function Skill() {
   const [scrollY, setScrollY] = useState(0);
   const [showForm, setShowForm] = useState(false);
-  const { data: skills, isLoading, isError } = useGetSkills();
-  const { redirectToProfile } = useAuthRedirect();
+  const { data, isLoading, isError } = useGetSkills();
+  const redirectToProfile  = useAuthRedirect();
   const { isAuthenticated, isOnBoarded } = useAuthStore();
+
+  // Ensure we always have an array to map over
+  const skills = Array.isArray(data) ? data : data?.skills ?? [];
 
   const handleClick = () => {
     if (!isAuthenticated || !isOnBoarded) {

@@ -22,7 +22,8 @@ export const signup = async (req, res) => {
 
         if (!userValidation.success) {
             return res.status(400).json({
-                message: "Please Enter Valid Information"
+                success: false,
+                message: "Invalid user input. Please check your information and try again."
             });
         }
 
@@ -32,7 +33,8 @@ export const signup = async (req, res) => {
 
         if (userExist) {
             return res.status(400).json({
-                message: "User already exists"
+                success: false,
+                message: "This email is already registered. Please sign in or use a different email."
             });
         }
 
@@ -44,14 +46,16 @@ export const signup = async (req, res) => {
         });
 
         res.status(200).json({
-            message: "User Created Succesfully",
-            userData
+            success: true,
+            message: "User created successfully! Please proceed to login.",
+            data: userData
         })
 
     } catch (error) {
         console.error(error.message);
         return res.status(500).json({
-            message: "Internal Server Error Occured"
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later."
         })
     }
 };
@@ -69,7 +73,8 @@ export const login = async (req, res) => {
 
         if (!loginValidation.success) {
             return res.status(400).json({
-                message: "Please Enter Valid Information"
+                success: false,
+                message: "Invalid login credentials. Please check your email and password."
             });
         }
 
@@ -77,7 +82,8 @@ export const login = async (req, res) => {
 
         if (!userExist) {
             return res.status(400).send({
-                message: "User does not exist Pleas Signup"
+                success: false,
+                message: "This email is not registered. Please sign up to create an account."
             });
         }
 
@@ -85,7 +91,8 @@ export const login = async (req, res) => {
 
         if (!passCheck) {
             return res.status(400).send({
-                message: "Your Credentials are Wrong"
+                success: false,
+                message: "Invalid password. Please double-check your password and try again."
             });
         }
 
@@ -113,15 +120,21 @@ export const login = async (req, res) => {
         );
 
         return res.json({
-            token,
-            user: {
-                id: userExist._id,
-                name: userExist.name,
-                role: userExist.role,
+            success: true,
+            message: "Login successful! Welcome back.",
+            data: {
+                token,
+                user: {
+                    id: userExist._id,
+                    name: userExist.name,
+                    role: userExist.role,
+                }
             }
         });
     } catch (err) {
         return res.status(500).json({
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later.",
             error: err.message
         })
     }
@@ -150,7 +163,8 @@ export const studentSignup = async (req, res) => {
 
         if (!studentValidation.success) {
             return res.status(400).json({
-                message: "Please Enter Valid Information"
+                success: false,
+                message: "Invalid student information. Please fill out all required fields correctly."
             });
         }
 
@@ -158,7 +172,8 @@ export const studentSignup = async (req, res) => {
 
         if (allReadyExist) {
             return res.status(400).json({
-                message: "You are allReady Exist"
+                success: false,
+                message: "You have already completed the student onboarding process."
             })
         }
 
@@ -173,15 +188,17 @@ export const studentSignup = async (req, res) => {
         })
 
         res.status(200).json({
-            message: "Student Created Succesfully",
-            newStudent
+            success: true,
+            message: "Student profile created successfully!",
+            data: newStudent
         })
 
     }
     catch (error) {
         console.error(error.message);
         res.status(500).json({
-            message: "Internal Server Error occured"
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later."
         })
     }
 }
@@ -209,7 +226,8 @@ export const mentorSignup = async (req, res) => {
 
         if (!mentorValidation.success) {
             return res.status(400).json({
-                message: "Please Enter Valid Information"
+                success: false,
+                message: "Invalid mentor information. Please fill out all required fields correctly."
             });
         }
 
@@ -217,7 +235,8 @@ export const mentorSignup = async (req, res) => {
 
         if (allReadyExist) {
             return res.status(400).json({
-                message: "You are allReady Existce"
+                success: false,
+                message: "You have already completed the mentor onboarding process."
             })
         }
 
@@ -233,14 +252,16 @@ export const mentorSignup = async (req, res) => {
         });
 
         res.status(200).json({
-            message: "Mentor Created Succesfully",
-            newMentor
+            success: true,
+            message: "Mentor profile created successfully!",
+            data: newMentor
         })
 
     } catch (error) {
         console.error(error.message);
         res.status(500).json({
-            message: "Internal Server Error Occured"
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later."
         })
     }
 }
@@ -253,7 +274,8 @@ export const changePassword = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                message: "User not found"
+                success: false,
+                message: "User not found. Please log in and try again."
             })
         }
 
@@ -261,7 +283,8 @@ export const changePassword = async (req, res) => {
 
         if (!isMatch) {
             return res.status(400).json({
-                message: "Old password is incorrect"
+                success: false,
+                message: "The old password you entered is incorrect. Please try again."
             })
         }
 
@@ -272,13 +295,15 @@ export const changePassword = async (req, res) => {
         await user.save();
 
         res.status(200).json({
-            message: "Password changed successfully"
+            success: true,
+            message: "Password changed successfully."
         })
 
     } catch (error) {
         console.error(error.message);
         res.status(500).json({
-            message: "Internal Server Error Occured"
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later."
         })
     }
 }

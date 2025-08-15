@@ -5,24 +5,29 @@ import { Student, User } from "../models/userModel.js";
 export const allSkill = async (req, res) => {
     try {
         const featureSkill = await SkillModel.find();
-        res.json(featureSkill.map(skill => ({
-            _id: skill._id,
-            title: skill.title,
-            category: skill.category,
-            level: skill.level,
-            description: skill.description,
-            duration: skill.duration,
-            auther: skill.auther,
-            image: skill.image,
-            video: skill.video,
-            introduction: skill.introduction,
-            highlights: skill.highlights,
-            createdBy: skill.createdBy
-        })));
+        res.json({
+            success: true,
+            message: "Skills retrieved successfully.",
+            data: featureSkill.map(skill => ({
+                _id: skill._id,
+                title: skill.title,
+                category: skill.category,
+                level: skill.level,
+                description: skill.description,
+                duration: skill.duration,
+                auther: skill.auther,
+                image: skill.image,
+                video: skill.video,
+                introduction: skill.introduction,
+                highlights: skill.highlights,
+                createdBy: skill.createdBy
+            }))
+        });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({
-            message: "Internal Server error"
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later."
         });
     }
 };
@@ -45,7 +50,11 @@ export const newSkill = async (req, res) => {
 
         const validation = newSkillSchema.safeParse(req.body);
         if (!validation.success) {
-            return res.status(400).json({ message: "Invalid skill data", errors: validation.error.errors });
+            return res.status(400).json({
+                success: false,
+                message: "Invalid skill data. Please check your input and try again.",
+                errors: validation.error.errors
+            });
         }
 
         const { title, category, level, description, duration, image, video, introduction, highlights, knowledgeRequirement } = validation.data;
@@ -66,12 +75,15 @@ export const newSkill = async (req, res) => {
         });
 
         res.status(200).json({
-            newSkill,
-            message: "New Skill Created"
+            success: true,
+            message: "New skill created successfully!",
+            data: newSkill
         });
     } catch (error) {
         res.status(400).json({
-            message: error.message
+            success: false,
+            message: "An unexpected error occurred while creating the skill. Please try again later.",
+            error: error.message
         });
     }
 };
@@ -80,17 +92,21 @@ export const detailSkill = async (req, res) => {
         const skillDetails = await SkillModel.findById(req.params.id);
         if (!skillDetails) {
             return res.status(404).json({
-                message: "Invalid Skill Id"
+                success: false,
+                message: "The requested skill could not be found. Please check the ID and try again."
             });
         }
 
         res.json({
-            Skill: skillDetails
+            success: true,
+            message: "Skill details retrieved successfully.",
+            data: { Skill: skillDetails }
         });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({
-            message: "Internal Server Error"
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later."
         });
     }
 };
@@ -104,13 +120,18 @@ export const joinSkill = async (req, res) => {
 
         const validation = joinSkillSchema.safeParse({ skillId });
         if (!validation.success) {
-            return res.status(400).json({ message: "Invalid request data", errors: validation.error.errors });
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request data. Please check your input and try again.",
+                errors: validation.error.errors
+            });
         }
 
         const skillDetail = await SkillModel.findById(skillId);
         if (!skillDetail) {
             return res.status(404).json({
-                message: "Skill Id is Invalid"
+                success: false,
+                message: "The skill you are trying to join could not be found."
             });
         }
         const student = await Student.findOne({ userId });
@@ -119,7 +140,8 @@ export const joinSkill = async (req, res) => {
         );
         if (alreadyJoined) {
             return res.status(400).json({
-                message: "You already joined this skill"
+                success: false,
+                message: "You have already enrolled in this skill."
             });
         }
         skillDetail.enrollStudents += 1;
@@ -134,12 +156,14 @@ export const joinSkill = async (req, res) => {
         );
 
         res.status(200).json({
-            message: "You Joined Skill Successfully"
+            success: true,
+            message: "You have successfully enrolled in the skill!"
         });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({
-            message: "Internal server error"
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later."
         });
     }
 };
@@ -152,7 +176,11 @@ export const makeReview = async (req, res) => {
 
         const validation = reviewSchema.safeParse(req.body);
         if (!validation.success) {
-            return res.status(400).json({ message: "Invalid review data", errors: validation.error.errors });
+            return res.status(400).json({
+                success: false,
+                message: "Invalid review data. Please check your input and try again.",
+                errors: validation.error.errors
+            });
         }
 
         const { star, comment } = validation.data;
@@ -161,7 +189,8 @@ export const makeReview = async (req, res) => {
         const skillDetail = await SkillModel.findById(skillId);
         if (!skillDetail) {
             return res.status(404).json({
-                message: "Skill Id is Invalid"
+                success: false,
+                message: "The skill you are trying to review could not be found."
             });
         }
         const user = await User.findById(userId);
@@ -171,7 +200,8 @@ export const makeReview = async (req, res) => {
         );
         if (alreadyReviewed) {
             return res.status(400).json({
-                message: "You already reviewed this skill"
+                success: false,
+                message: "You have already submitted a review for this skill."
             });
         }
         skillDetail.allReviews.push({
@@ -182,13 +212,15 @@ export const makeReview = async (req, res) => {
         await skillDetail.save();
 
         res.status(200).json({
-            message: "You Reviewed Skill Successfully"
+            success: true,
+            message: "Your review has been submitted successfully!"
         });
 
     } catch (error) {
         console.error(error.message);
         res.status(500).json({
-            message: "Internal Server Error"
+            success: false,
+            message: "An unexpected error occurred on the server. Please try again later."
         });
     }
 }

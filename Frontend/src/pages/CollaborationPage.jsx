@@ -5,17 +5,20 @@ import AddProjectModal from "../pages/formPage/NewProject";
 
 function Collaboration() {
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
-  const { data: projects, isLoading, isError } = useGetProjects();
+  const { data, isLoading, isError } = useGetProjects();
+
+  // Ensure we always have an array to map over
+  const projects = Array.isArray(data) ? data : data?.projects ?? [];
 
   return (
     <div>
       {/* Header Section */}
-      <div className="text-left shadow-lg  bg-gradient-to-r from-purple-500 to-blue-500 ">
+      <div className="text-left shadow-lg bg-gradient-to-r from-purple-500 to-blue-500">
         <header className="text-[#ffffff] font-semibold p-6 lg:p-10 flex flex-col items-left justify-center max-w-5xl mx-auto">
           <div className="inline-block bg-black opacity-80 text-white text-sm px-3 p-3 rounded-full mb-3 h-full w-fit">
             Collaboration Hub
           </div>
-          <div className=" text-4xl md:text-5xl lg:text-6xl text-[ffffff] font-bold mb-2">
+          <div className="text-4xl md:text-5xl lg:text-6xl text-[ffffff] font-bold mb-2">
             Project Collaboration Hub
           </div>
           <div className="text-sm md:text-md lg:text-lg max-w-2xl mb-6">
@@ -36,12 +39,11 @@ function Collaboration() {
         </header>
       </div>
 
-      <div className='flex flex-col justify-center items-center h-full w-full'>
-
-        <div className="bg-white h-full w-full gap-3 mx-3 px-3 py-2 rounded-lg font-semibold flex items-center justify-center  max-w-5xl ">
+      <div className="flex flex-col justify-center items-center h-full w-full">
+        <div className="bg-white h-full w-full gap-3 mx-3 px-3 py-2 rounded-lg font-semibold flex items-center justify-center max-w-5xl">
           <div className="max-w-7xl h-full w-full flex justify-between items-center gap-6">
             <input
-              type="text3"
+              type="text"
               placeholder="Search projects by name, skills, or keywords"
               className="w-full p-2 lg:p-4 rounded-2xl focus:outline-none border border-gray-300"
             />
@@ -49,15 +51,15 @@ function Collaboration() {
               Filters
             </button>
 
-            <select className="border border-gray-300 px-2 py-1 lg:px-4 lg:py-2 rounded-lg ">
+            <select className="border border-gray-300 px-2 py-1 lg:px-4 lg:py-2 rounded-lg">
               <option>Sort: Newest</option>
-              <option>Sort: Populer</option>
-              <option>Sort: Closign Soon</option>
+              <option>Sort: Popular</option>
+              <option>Sort: Closing Soon</option>
             </select>
           </div>
         </div>
 
-        <div className="h-full w-full px-5  max-w-5xl mx-auto">
+        <div className="h-full w-full px-5 max-w-5xl mx-auto">
           <div className="max-w-7xl mx-auto">
             <h1 className="font-bold text-2xl pt-8 px-5">Featured Projects</h1>
 
@@ -65,21 +67,24 @@ function Collaboration() {
             {isError && <div>Error fetching projects</div>}
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 py-10">
-              {projects && projects.map((project) => (
-                <ProjectsCard
-                  key={project._id}
-                  id={project._id}
-                  category={project.category}
-                  title={project.title}
-                  progress={project.progress}
-                  tags={project.tags}
-                  description={project.description}
-                  skills={project.requiredSkills}
-                  members={project.members?.length || 0}
-                />
-              ))}
+              {projects.length > 0 ? (
+                projects.map((project) => (
+                  <ProjectsCard
+                    key={project._id}
+                    id={project._id}
+                    category={project.category}
+                    title={project.title}
+                    progress={project.progress}
+                    tags={project.tags}
+                    description={project.description}
+                    skills={project.requiredSkills}
+                    members={project.members?.length || 0}
+                  />
+                ))
+              ) : (
+                <div>No projects found.</div>
+              )}
             </div>
-
           </div>
         </div>
       </div>
