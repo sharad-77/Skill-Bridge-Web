@@ -17,6 +17,12 @@ import authMiddleware from "./middleware/authMiddleware.js";
 // Establish database connection
 DBconnection();
 
+if (process.env.NODE_ENV === "production") {
+    console.log = () => { };
+    console.error = () => { };
+    console.warn = () => { };
+}
+
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(cors({

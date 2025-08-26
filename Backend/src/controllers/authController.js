@@ -76,16 +76,16 @@ export const login = async (req, res) => {
         const userExist = await User.findOne({ email });
 
         if (!userExist) {
-            return res.status(400).send({
-                message: "User does not exist Pleas Signup"
+            return res.status(404).json({ // 404 for not found
+                message: "User does not exist. Please signup"
             });
         }
 
         const passCheck = await bcrypt.compare(password, userExist.password);
 
         if (!passCheck) {
-            return res.status(400).send({
-                message: "Your Credentials are Wrong"
+            return res.status(401).json({ // 401 for unauthorized
+                message: "Invalid credentials"
             });
         }
 
@@ -121,9 +121,10 @@ export const login = async (req, res) => {
             }
         });
     } catch (err) {
+        console.error(err);
         return res.status(500).json({
-            error: err.message
-        })
+            message: "Internal Server Error Occurred"
+        });
     }
 };
 

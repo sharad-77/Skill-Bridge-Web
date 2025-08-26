@@ -36,21 +36,20 @@ const Signin = () => {
       onSuccess: async (res) => {
         const { token, user } = res;
 
-        useAuthStore.setState({
-          user,
-          token,
-          isAuthenticated: true,
-          role: user.role,
-        });
+        // Use the store's login method - this handles token storage and state
+        useAuthStore.getState().login({ token, user });
 
-        toast.success("SignIn Successfull");
+        toast.success("SignIn Successful");
 
         try {
+          // Fetch onboarding status
           const onboardStatusRes = await axiosInstance.get("/Authentication/onboarding-status");
           const { onboarded } = onboardStatusRes.data;
 
-          useAuthStore.setState({ isOnBoarded: onboarded });
+          // Set onboarding status
+          useAuthStore.getState().setOnBoardingStatus(onboarded);
 
+          // Navigation logic
           if (onboarded) {
             navigate('/');
           } else if (user.role === "student") {
@@ -68,10 +67,9 @@ const Signin = () => {
       },
       onError: (err) => {
         toast.error(err.response?.data?.message || "Signin Failed");
-        console.error(err)
       }
     })
-  }
+  };
 
   return (
     <main className="min-h-screen">

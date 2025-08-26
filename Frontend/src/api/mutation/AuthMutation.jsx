@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import axiosInstance from "../axiosInstance";
 
-
 const setAuthToken = (token) => {
   if (token) {
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -21,17 +20,21 @@ export const UseSignup = () => {
   })
 }
 
-
 export const UseSignin = () => {
   return useMutation({
     mutationFn: async (userData) => {
-      const res = await axiosInstance.post("/Authentication/login", userData);
-      const token = res.data.token;
-      setAuthToken(token);
-      return res.data;
+      try {
+        const res = await axiosInstance.post("/Authentication/login", userData);
+
+        const token = res.data.token;
+        setAuthToken(token);
+        return res.data;
+      } catch (error) {
+        throw new Error(error.response?.data?.message || "Login failed");
+      }
     }
-  })
-}
+  });
+};
 
 export const UseStudentOnboard = () => {
   return useMutation({

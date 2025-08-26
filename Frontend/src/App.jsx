@@ -29,11 +29,16 @@ import useAuthStore from './store/useAuthStore';
 const queryClient = new QueryClient();
 
 function App() {
+  const initAuth = useAuthStore(state => state.initAuth);
+  const loading = useAuthStore(state => state.loading);
 
   useEffect(() => {
-    useAuthStore.getState().initAuth();
-  }, []);
+    initAuth();
+  }, [initAuth]);
 
+  if (loading) {
+    return <div>Loading...</div>; // Your loading component
+  }
   return (
     <QueryClientProvider client={queryClient}>
       <div className="max-w-screen-[1352px] ">
