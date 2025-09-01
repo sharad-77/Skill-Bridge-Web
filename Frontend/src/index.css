@@ -1,0 +1,114 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+body {
+   font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+:root {
+  --primary-color: #7c3aed;
+  --secondary-color: #4b5563;
+}
+
+@layer utilities {
+  .gradient-text-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600;
+  }
+
+  .gradient-text-secondary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-rose-500;
+  }
+
+  .gradient-text-blue {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-400;
+  }
+
+  .gradient-text-green {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-500;
+  }
+
+  .gradient-primary {
+    @apply bg-gradient-to-r from-purple-600 to-indigo-600;
+  }
+
+  .gradient-secondary {
+    @apply bg-gradient-to-r from-pink-500 to-rose-500;
+  }
+
+  .text-secondary {
+    @apply text-[#4b5563] hover:text-[#7c3aed] cursor-pointer;
+  }
+
+  .mini-Heading {
+    @apply text-[#9333ea] text-[15px] font-semibold bg-[#f3e8ff] rounded-full p-1 px-4;
+  }
+}
+
+.glass-dark {
+  background-color: rgb(19, 20, 43);
+  opacity: 95%;
+}
+
+.sparkle-effect {
+  background-image: radial-gradient(circle, white, rgba(255, 255, 255, 0) 70%);
+  background-size: 15px 15px;
+  background-repeat: no-repeat;
+  background-position: right center;
+  animation: sparkle 1s infinite linear;
+}
+
+@keyframes sparkle {
+  0% {
+    background-position: -15px center;
+  }
+  100% {
+    background-position: right center;
+  }
+}
+
+.gradient-container {
+  background: linear-gradient(135deg, #7c3aed 0%, #fff 50%, #196fe7 100%);
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+    background-color: #7c3aed;
+  }
+  25% {
+    background-color: #fff;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-color: #fff;
+  }
+  100% {
+    background-position: 0% 50%;
+    background-color: #7c3aed;
+  }
+}
+
+.card-animation {
+  background: linear-gradient(135deg, #196fe7 0%, #fff 50%, #7c3aed 100%);
+  background-size: 200% 200%;
+  animation: cardGlow 3s ease infinite;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+@keyframes cardGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
