@@ -33,10 +33,10 @@ const iconMap = {
     icon: <Users  className="h-7 w-7 text-blue-600" />,
     bg: "bg-blue-100",
   },
-  avrageRating: {
-    icon: <Star className="h-7 w-7 text-yellow-600" />,
-    bg: "bg-yellow-100",
-  },
+   averageRating: {
+     icon: <Star className="h-7 w-7 text-yellow-600" />,
+     bg: "bg-yellow-100",
+   },
   sessionCompleted: {
     icon: <MessageSquare className="h-7 w-7 text-green-600" />,
     bg: "bg-green-100",

@@ -3,12 +3,15 @@ import mongoose from "mongoose";
 
 dotenv.config();
 
+
+const DatabaseURL = process.env.DBURL;
+
 const DBconnection = async () => {
   try {
-    if (!process.env.DBURL) {
+    if (!DatabaseURL) {
       throw new Error("Database URL is not defined in environment variables");
     }
-    await mongoose.connect(process.env.DBURL);
+    await mongoose.connect(DatabaseURL);
     console.log("DB Connected");
   } catch (error) {
     console.error("Error occurred:", error.message);

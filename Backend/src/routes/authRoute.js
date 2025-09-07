@@ -1,6 +1,7 @@
 import express from "express";
 import { changePassword, login, mentorSignup, signup, studentSignup } from '../controllers/authController.js';
 import authMiddleware from "../middleware/authMiddleware.js";
+import uploadImage from "../middleware/uploadImage.js";
 import { Mentor, Student } from '../models/userModel.js';
 
 // Create a new router object
@@ -10,8 +11,8 @@ const authRoute = express.Router();
 authRoute.post('/signup', signup);
 
 // Routes for student and mentor specific signup steps, protected by auth middleware
-authRoute.post('/signup/Student', authMiddleware, studentSignup);
-authRoute.post('/signup/Mentor', authMiddleware, mentorSignup);
+authRoute.post('/signup/Mentor', uploadImage, authMiddleware, mentorSignup);
+authRoute.post('/signup/Student', uploadImage, authMiddleware, studentSignup);
 
 authRoute.get("/onboarding-status", authMiddleware, async (req, res) => {
   try {

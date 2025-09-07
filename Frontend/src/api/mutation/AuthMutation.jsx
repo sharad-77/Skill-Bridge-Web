@@ -41,23 +41,41 @@ export const UseSignin = () => {
   });
 };
 
+
 export const UseStudentOnboard = () => {
   return useMutation({
-    mutationFn: async (userData) => {
-      const response = await axiosInstance.post("/Authentication/signup/Student", userData);
+    mutationFn: async (formData) => {
+      const response = await axiosInstance.post(
+        "/Authentication/signup/Student",
+        formData,
+        {
+          headers: {
+            "Content-Type": undefined,
+          },
+        }
+      );
       return response.data;
-    }
-  })
-}
+    },
+  });
+};
+
 
 export const UseMentorOnboard = () => {
   return useMutation({
-    mutationFn: async (userData) => {
-      const response = await axiosInstance.post("/Authentication/signup/Mentor", userData);
+    mutationFn: async (formData) => {
+      const response = await axiosInstance.post(
+        "/Authentication/signup/Mentor",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       return response.data;
-    }
-  })
-}
+    },
+  });
+};
 
 export const UseForgetPassword = () => {
   return useMutation({

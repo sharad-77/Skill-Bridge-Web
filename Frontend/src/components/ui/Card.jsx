@@ -246,16 +246,16 @@ const MentorCard = ({
       {/* Image Section */}
       <div className="relative h-48">
         <img
-          src={image}
-          alt={name}
+          src={image || "https://ui-avatars.com/api/?name=Mentor&background=0D8ABC&color=fff&size=300"}
+          alt={`${name} profile photo`}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        {/* Removed disabledClassName to avoid leaking unknown prop to DOM */}
         <Button
           variant="outline"
           size="small"
           className="absolute top-3 right-3 w-9 h-9 p-0 bg-white/90 backdrop-blur-sm border-white/20 hover:bg-white"
-          disabledClassName="opacity-50"
         >
           <Heart className="h-4 w-4 text-gray-600" />
         </Button>
@@ -263,55 +263,59 @@ const MentorCard = ({
 
       {/* Content Section */}
       <div className="p-5">
-        {/* Rating and Price Row */}
+        {/* Rating and Reviews */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1">
             <Star className="h-4 w-4 text-yellow-400 fill-current" />
-            <span className="font-semibold text-sm text-gray-900">{rating}</span>
-            <span className="text-gray-500 text-sm">({reviews})</span>
+            <span className="font-semibold text-sm text-gray-900">{Number(rating ?? 0).toFixed(1)}</span>
+            <span className="text-gray-500 text-sm">({reviews ?? 0})</span>
           </div>
         </div>
 
         {/* Name and Title */}
         <div className="mb-4">
-          <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">
-            {name}
-          </h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{name}</h3>
           <p className="text-gray-600 text-sm line-clamp-1">
-            {title} at <span className="font-medium">{company}</span>
+            {title}{company ? <> at <span className="font-medium">{company}</span></> : null}
           </p>
         </div>
 
         {/* Location */}
-        <div className="flex items-center text-gray-500 text-sm mb-4">
-          <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-          <span className="line-clamp-1">{location}</span>
-        </div>
+        {location && (
+          <div className="flex items-center text-gray-500 text-sm mb-4">
+            <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+            <span className="line-clamp-1">{location}</span>
+          </div>
+        )}
 
         {/* Experience and Availability */}
         <div className="space-y-2.5 mb-4">
-          <div className="flex items-start gap-2.5">
-            <Briefcase className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-            <span className="text-sm text-gray-700 line-clamp-2">{experience}</span>
-          </div>
-          <div className="flex items-start gap-2.5">
-            <Calendar className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-            <span className="text-sm text-gray-700">
-              Available: <span className="font-medium">{availability}</span>
-            </span>
-          </div>
+          {experience != null && (
+            <div className="flex items-start gap-2.5">
+              <Briefcase className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-gray-700 line-clamp-2">
+                {typeof experience === "number" ? `${experience} years experience` : experience}
+              </span>
+            </div>
+          )}
+          {availability && (
+            <div className="flex items-start gap-2.5">
+              <Calendar className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-gray-700">
+                Available: <span className="font-medium">{availability}</span>
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Expertise Tags */}
-        {expertise.length > 0 && (
+        {Array.isArray(expertise) && expertise.length > 0 && (
           <div className="mb-5">
-            <div className="text-sm font-semibold text-gray-900 mb-2.5">
-              Expertise
-            </div>
+            <div className="text-sm font-semibold text-gray-900 mb-2.5">Expertise</div>
             <div className="flex flex-wrap gap-1.5">
               {expertise.slice(0, 6).map((tag, idx) => (
                 <span
-                  key={idx}
+                  key={`${tag}-${idx}`}
                   className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-100 transition-colors duration-150 cursor-pointer line-clamp-1"
                 >
                   {tag}
@@ -339,6 +343,7 @@ const MentorCard = ({
             onClick={onMessage}
             variant="outline"
             className="w-10 h-10 p-0 border-gray-300 hover:border-gray-400 hover:bg-gray-50 rounded-lg transition-all duration-150"
+            aria-label="Message mentor"
           >
             <MessageSquare className="h-4 w-4 text-gray-600" />
           </Button>
@@ -347,9 +352,6 @@ const MentorCard = ({
     </div>
   );
 };
-
-
-
 
 const FloatingCard = ({ icon: Icon, title, subtitle, bgColorClass, iconColorClass, animationClass, onClick }) => {
   return (
@@ -839,31 +841,26 @@ const CategoryCard = ({ name, count, icon, onClick }) => {
 }
 
 
-const MentorInfoCard = ({ name, title, company, location, experience, responseTime }) => {
+const MentorInfoCard = ({ name, title, image, location, experience }) => {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       <div className="text-center mb-4">
         <img
-          src="/placeholder.svg"
+          src={image}
           alt={name}
           className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
         />
         <h3 className="text-lg font-semibold">{name}</h3>
         <p className="text-gray-600">{title}</p>
-        <p className="text-sm text-gray-500">{company}</p>
       </div>
       <div className="space-y-3 text-sm">
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-gray-500" />
-          <span>{location}</span>
+          <span>Location : {location}</span>
         </div>
         <div className="flex items-center gap-2">
           <Briefcase className="h-4 w-4 text-gray-500" />
-          <span>{experience}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-gray-500" />
-          <span>{responseTime}</span>
+          <span>Years of Experience : {experience}</span>
         </div>
       </div>
     </div>
@@ -890,20 +887,7 @@ const AvailabilityCard = ({ availability }) => {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       <h3 className="text-lg font-semibold mb-4">Availability</h3>
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-600">Weekdays:</span>
-          <span>{availability.weekdays}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Weekends:</span>
-          <span>{availability.weekends}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Timezone:</span>
-          <span>{availability.timezone}</span>
-        </div>
-      </div>
+      <h3>{availability}</h3>
     </div>
   );
 };

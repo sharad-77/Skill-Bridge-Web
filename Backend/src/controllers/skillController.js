@@ -14,7 +14,7 @@ export const allSkill = async (req, res) => {
             level: skill.level,
             description: skill.description,
             duration: skill.duration,
-            auther: skill.auther,
+            author: skill.author,
             image: skill.image,
             video: skill.video,
             introduction: skill.introduction,
@@ -25,7 +25,7 @@ export const allSkill = async (req, res) => {
             students: skill.enrolledStudents,
             price: skill.price || "Free",
             user: {
-                name: skill.auther || skill.createdBy?.name || 'Unknown Instructor'
+                name: skill.author || skill.createdBy?.name || 'Unknown Instructor'
             },
             enrolledStudents: skill.enrolledStudents || [],
             allReviews: skill.allReviews || []
@@ -40,6 +40,9 @@ export const allSkill = async (req, res) => {
 
 // Create a new skill
 export const newSkill = async (req, res) => {
+    if (!req.user || !req.user.name) {
+        return res.status(400).json({ message: "User not authenticated or name missing" });
+    }
     const userName = req.user.name;
     try {
         const newSkillSchema = z.object({
@@ -81,15 +84,16 @@ export const newSkill = async (req, res) => {
             level,
             description,
             duration,
-            auther: userName,
+            author: userName || 'Unknown Author',
             image: image || '',
             video: video || '',
             introduction,
             highlights,
             knowledgeRequirement,
             createdBy: creatorDoc._id,
-            creatorModel,
-            enrolledStudents: [], // empty array initially
+            enrolledStudents: [],
+            enrollCount: 0,
+            rating: 0,
             allReviews: []
         });
 
@@ -112,20 +116,20 @@ export const detailSkill = async (req, res) => {
             level: skillDetails.level,
             description: skillDetails.description,
             duration: skillDetails.duration,
-            auther: skillDetails.auther,
+            author: skillDetails.author,
             image: skillDetails.image,
             video: skillDetails.video,
             introduction: skillDetails.introduction,
             highlights: skillDetails.highlights,
             knowledgeRequirement: skillDetails.knowledgeRequirement,
             createdBy: skillDetails.createdBy,
-            enrollCount: skillDetails.enrolledStudents.length,
+            enrollCount: skillDetails.enrollCount,
             enrolledStudents: skillDetails.enrolledStudents,
             allReviews: skillDetails.allReviews || [],
             rating: skillDetails.rating || 4.5,
             students: skillDetails.enrolledStudents,
             price: skillDetails.price || "Free",
-            user: { name: skillDetails.auther || skillDetails.createdBy?.name || 'Unknown Instructor' },
+            user: { name: skillDetails.author || skillDetails.createdBy?.name || 'Unknown Instructor' },
             learningPoints: skillDetails.highlights || [],
             requirements: skillDetails.knowledgeRequirement || [],
             courseIncludes: [
@@ -152,14 +156,14 @@ export const joinSkill = async (req, res) => {
         if (!skillDetail) return res.status(404).json({ message: "Skill not found" });
 
         // Check if student already joined
-        const alreadyJoined = skillDetail.enrolledStudentsIds.includes(userId);
+        const alreadyJoined = skillDetail.enrolledStudents.some(id => id.toString() === userId);
         if (alreadyJoined) {
             return res.status(400).json({ message: "You already joined this skill" });
         }
 
         // Add student to skill
-        skillDetail.enrollStudents = (skillDetail.enrollStudents || 0) + 1;
-        skillDetail.enrolledStudentsIds.push(userId);
+        skillDetail.enrollCount = (skillDetail.enrollCount || 0) + 1;
+        skillDetail.enrolledStudents.push(userId);
         await skillDetail.save();
 
         // Add skill to student's joinedSkills
@@ -200,7 +204,6 @@ export const makeReview = async (req, res) => {
 
         skillDetail.allReviews.push({ name: user.name, star, comment });
         skillDetail.rating = skillDetail.allReviews.reduce((sum, r) => sum + r.star, 0) / skillDetail.allReviews.length;
-
         await skillDetail.save();
         res.status(200).json({ message: "You Reviewed Skill Successfully" });
     } catch (error) {

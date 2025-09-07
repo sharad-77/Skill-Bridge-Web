@@ -1,6 +1,7 @@
 import { Mentor, Student, User } from "../models/userModel.js";
 import z from "zod";
 
+
 export const getUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -14,7 +15,16 @@ export const getUserProfile = async (req, res) => {
     let profileData = { ...userData };
 
     if (user.role === "student") {
-      const student = await Student.findOne({ userId });
+      const student = await Student.findOne({ userId })
+        .populate({
+          path: 'joinedProjects',
+          select: 'title category description introduction projectGoal requiredSkill teamSize projectdeadline members createdBy status progress',
+          populate: { path: 'members.userId createdBy', select: 'name email' }
+        })
+        .populate({
+          path: 'joinedSkills',
+          select: 'title category level description duration enrollCount author image video introduction highlights knowledgeRequirement rating'
+        });
       if (!student) {
         return res.status(404).json({ message: "Student profile not found" });
       }
@@ -25,14 +35,19 @@ export const getUserProfile = async (req, res) => {
         location: student.location,
         instituteName: student.instituteName,
         gradYear: student.gradYear,
-        joinedProjects: student.joinedProjects,
-        joinedSkills: student.joinedSkills,
-        interestedSkills: student.interestedSkills,
-        socialMedia: student.socialMedia,
+        joinedProjects: student.joinedProjects || [],
+        joinedSkills: student.joinedSkills || [],
+        interestedSkills: student.interestedSkills || [],
+        socialMedia: student.socialMedia || [],
+        certificates: student.certificates || [],
+        profileImage: student.profileImage?.url,
       };
-
     } else if (user.role === "mentor") {
-      const mentor = await Mentor.findOne({ userId });
+      const mentor = await Mentor.findOne({ userId })
+        .populate({
+          path: 'expertise',
+          select: 'title category level description duration enrollCount author image video introduction highlights knowledgeRequirement rating'
+        });
       if (!mentor) {
         return res.status(404).json({ message: "Mentor profile not found" });
       }
@@ -46,14 +61,15 @@ export const getUserProfile = async (req, res) => {
         studentsGuided: mentor.studentsGuided,
         averageRating: mentor.averageRating,
         completedSessions: mentor.completedSessions,
-        expertise: mentor.expertise,
-        socialMedia: mentor.socialMedia,
+        expertise: mentor.expertise || [],
+        socialMedia: mentor.socialMedia || [],
         availability: mentor.availability,
+        allReviews: mentor.allReviews || [],
+        profileImage: mentor.profileImage?.url,
       };
     }
 
     return res.json({ profile: profileData });
-
   } catch (error) {
     console.error("Error fetching user profile:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -184,4 +200,3 @@ export const updateAccountSettings = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-

@@ -99,7 +99,7 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              <Route path="/mentor-request" element={
+              <Route path="/mentor-request/:mentorId" element={
                 <ProtectedRoute>
                   <MentorRequestPage />
                 </ProtectedRoute>

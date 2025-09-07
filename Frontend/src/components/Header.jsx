@@ -81,7 +81,6 @@ export default function Header() {
         { name: "Find Mentors", to: "/mentor", icon: Users, description: "Connect with industry experts" },
         { name: "My Requests", to: "/mentorship-requests", icon: MessageSquare, description: "Track mentorship requests" },
         { name: "Chat", to: "/chat", icon: MessageSquare, description: "Message your mentors" },
-        { name: "Request Mentor", to: "/mentor-request", icon: UserPlus, description: "Send mentorship request" },
       ],
     },
     {

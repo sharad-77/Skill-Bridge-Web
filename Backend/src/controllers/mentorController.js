@@ -1,20 +1,24 @@
 import MentorshipRequestSchema from "../models/mentorshipModel.js";
 import { Mentor, Student } from "../models/userModel.js";
+import z from "zod";
+
 
 export const allMentorsController = async (req, res) => {
   try {
     const allDetialsOfMentor = await Mentor.find().populate('userId', 'name');
     const mentors = allDetialsOfMentor.map(mentor => ({
       id: mentor.userId._id,
+      mentorId: mentor._id,
       rating: mentor.averageRating,
       name: mentor.userId.name,
       position: mentor.currentPosition,
       location: mentor.location,
       experience: mentor.yearsOfExperience,
       availability: mentor.availability,
-      expertise: mentor.expertise
+      expertise: mentor.expertise,
+      profileImage: mentor.profileImage?.url || null
     }));
-    res.json({ mentors });
+    res.json(mentors);
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Internal Server error" });
@@ -24,11 +28,13 @@ export const allMentorsController = async (req, res) => {
 export const mentorDetails = async (req, res) => {
   try {
     const mentorId = req.params.id;
+    if (!mentorId) return res.status(400).json({ message: 'Missing id param' });
     const mentor = await Mentor.findById(mentorId).populate('userId', 'name');
     if (!mentor) {
       return res.status(400).json({ message: "Invalid Mentor ID" });
     }
     const mentorDetails = {
+      image: mentor.profileImage.url,
       name: mentor.userId.name,
       position: mentor.currentPosition,
       location: mentor.location,
@@ -44,8 +50,6 @@ export const mentorDetails = async (req, res) => {
     res.status(500).json({ message: "Internal Server error" });
   }
 }
-
-import z from "zod";
 
 export const requestForMentorship = async (req, res) => {
   try {
@@ -190,4 +194,3 @@ export const updateMentorshipRequest = async (req, res) => {
     res.status(500).json({ message: "Internal Server error" });
   }
 };
-

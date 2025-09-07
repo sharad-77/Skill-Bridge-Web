@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useGetSkills } from "../api/mutation/SkillMutation";
+import { useGetSkills } from "../api/query/SkillQuery";
 import Button from '../components/ui/Button';
 import { CategoryCard, SkillCard } from '../components/ui/Card';
 import CreateNewSkill from './formPage/CreateNewSkill';
@@ -250,20 +250,20 @@ export default function Skill() {
 
           {!isLoading && !isError && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {filteredSkills && filteredSkills.map((skill) => (
-                <SkillCard
-                  key={skill._id}
-                  id={skill._id}
-                  title={skill.title}
-                  instructor={skill.user?.name || 'Unknown Instructor'}
-                  rating={skill.rating}
-                  students={skill.students}
-                  duration={skill.duration}
-                  level={skill.level}
-                  price={skill.price}
-                  image={skill.image}
-                />
-              ))}
+               {filteredSkills && filteredSkills.map((skill) => (
+                 <SkillCard
+                   key={skill._id}
+                   id={skill._id}
+                   title={skill.title}
+                   instructor={skill.user?.name || 'Unknown Instructor'}
+                   rating={skill.rating}
+                   students={skill.enrollCount}
+                   duration={skill.duration}
+                   level={skill.level}
+                   price={skill.price}
+                   image={skill.image}
+                 />
+               ))}
             </div>
           )}
 

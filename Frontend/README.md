@@ -1,202 +1,45 @@
+# React + Vite
 
-# Frontend Improvement Suggestions
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Hello! As requested, here is a summary of suggestions to improve your frontend application, focusing on data fetching with TanStack Query and fixing the flickering issue on protected routes.
+Currently, two official plugins are available:
 
----
-
-## 1. Fixing the Protected Route Flickering Issue
-
-This is a classic anti-pattern in client-side rendered applications. The "flicker" happens because the component renders its initial UI *before* the authentication check is complete. The logic then runs, finds the user is not authenticated, and triggers a redirect, causing the UI to change abruptly.
-
-### The Problem in Your Code
-
-- In `App.jsx`, you import `useRedirecter.js` and alias it as `ProtectedRoute`.
-- Your actual `ProtectedRoute.jsx` file contains the correct logic to handle a loading state, but it is **not being used**.
-- The logic in `useRedirecter.js` does not have a loading state. It renders its `children` (the protected page) for a brief moment before the `useEffect` hook runs and performs the redirect.
-
-### How to Fix It
-
-The solution is to show a loading indicator or a blank screen while you are verifying the user's authentication status. Only when the check is complete should you either render the protected component or redirect.
-
-**Your `ProtectedRoute.jsx` file already does this correctly!** You just need to use it.
-
-**Action Steps:**
-
-1.  **Update the import in `App.jsx`:**
-    Change the import from `useRedirecter.js` to `ProtectedRoute.jsx`.
-
-    ```javascript
-    // In Frontend/src/App.jsx
-    // Change this:
-    import ProtectedRoute from './hooks/useRedirecter';
-
-    // To this:
-    import ProtectedRoute from './pages/authPage/ProtectedRoute'; // Correct path
-    ```
-
-2.  **Refine `ProtectedRoute.jsx`:**
-    Your `ProtectedRoute.jsx` is a great start. You can simplify the return statements. The `isInitializing` state from your `useAuthStore` is perfect for this.
-
-    ```javascript
-    // In Frontend/src/pages/authPage/ProtectedRoute.jsx
-
-    import { useNavigate } from "react-router-dom";
-    import useAuthStore from "../../store/useAuthStore";
-
-    const ProtectedRoute = ({ children }) => {
-      const navigate = useNavigate();
-      const { isAuthenticated, isOnBoarded, isInitializing, role } = useAuthStore();
-
-      if (isInitializing) {
-        // While checking auth, show a loading spinner or nothing at all.
-        // This prevents the flicker.
-        return (
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="text-lg">Loading...</div>
-          </div>
-        );
-      }
-
-      if (!isAuthenticated) {
-        navigate("/signin", { replace: true });
-        return null; // Return null while redirecting
-      }
-
-      if (!isOnBoarded) {
-        const path = role === "student" ? "/onboarding/student" : "/onboarding/mentor";
-        navigate(path, { replace: true });
-        return null; // Return null while redirecting
-      }
-
-      // If all checks pass, render the actual component
-      return children;
-    };
-
-    export default ProtectedRoute;
-    ```
-
-3.  **Clean up:** You can now safely delete `Frontend/src/hooks/useRedirecter.js` to avoid confusion.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
 ---
 
-## 2. Improving Data Fetching with TanStack Query
+## Onboarding Performance Issue Analysis
 
-You are using `useMutation` correctly for sending data to the server (login, signup). To fetch data, you should use `useQuery`. This will give you powerful caching, refetching, and state management capabilities out of the box.
+### The Problem: Long Loading Times During Profile Creation
 
-### Key Concepts to Use
+A significant performance bottleneck has been identified in the student and mentor onboarding process. When a user fills out their profile details and uploads a profile picture, the submission process takes a long time to complete.
 
-#### a. `useQuery` for Fetching Data
+The root cause is the current implementation of the image upload feature. The flow is as follows:
+1.  The frontend sends the entire form, including the image file, to the backend API (`/signup/Student` or `/signup/Mentor`).
+2.  The backend server receives the request.
+3.  A middleware (`uploadImage.js`) intercepts the request and uploads the image file to the Cloudinary service.
+4.  The API route handler (`studentSignup` or `mentorSignup`) is blocked and does not execute until the Cloudinary upload is complete.
+5.  Once the image is uploaded, the controller proceeds to save the user's data to the database.
+6.  Finally, the backend sends a success response to the frontend.
 
-Any time you need to get data from your backend, wrap the API call in a `useQuery` hook.
+This synchronous, server-side upload process means the user has to wait for a third-party network operation to finish, leading to a poor user experience.
 
--   **Query Keys:** These are unique keys TanStack Query uses to cache your data. They should be an array, starting with a unique string and followed by any dependencies (like an ID).
--   **Query Function:** The async function that performs the data fetching.
+### The Solution: Client-Side Uploads to Cloudinary
 
-**Example:** Fetching a user's profile.
+To resolve this, the image upload process should be offloaded from the backend to the client-side. This makes the backend's job much faster, as it only needs to handle text-based data and a URL.
 
-```javascript
-// In a new file: Frontend/src/api/query/UserQuery.jsx
+The recommended implementation is:
 
-import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "../axiosInstance";
+1.  **Backend Modification:**
+    *   Create a new, protected API endpoint (e.g., `/api/cloudinary-signature`).
+    *   This endpoint's role is to generate and send a secure "signed upload signature" from Cloudinary to the authenticated frontend client. This signature temporarily grants the client permission to upload a file to your Cloudinary account without needing your API secret.
 
-const fetchUserProfile = async (userId) => {
-  const { data } = await axiosInstance.get(`/users/${userId}`);
-  return data;
-};
+2.  **Frontend Modification:**
+    *   In the onboarding form, when a user selects an image to upload, the frontend should **not** include it in the main form submission.
+    *   Instead, the frontend should first make a request to the new `/api/cloudinary-signature` endpoint to get the upload signature.
+    *   Using this signature, the frontend then uploads the image file **directly** to the Cloudinary API. This can be done asynchronously, allowing you to implement a progress bar for a better user experience.
+    *   Cloudinary will respond to the frontend with the `url` and `publicId` of the successfully uploaded image.
+    *   Finally, the frontend submits the onboarding form to the original backend endpoint (`/signup/Student` or `/signup/Mentor`). However, instead of sending the image file, it will now send the image `url` and `publicId` received from Cloudinary as string fields in the form data.
 
-export const useUserProfile = (userId) => {
-  return useQuery({
-    queryKey: ['userProfile', userId], // Unique key for this query
-    queryFn: () => fetchUserProfile(userId),
-    enabled: !!userId, // VERY IMPORTANT: Only run the query if the userId exists
-  });
-};
-```
-
-#### b. Caching with `staleTime` and `cacheTime`
-
--   **`staleTime`**: The duration (in ms) until cached data is considered "stale". While data is fresh (not stale), TanStack Query will **not** refetch it from the network. It will be served instantly from the cache. This is great for data that doesn't change often.
-    -   **Use Case:** A user's profile, a list of available skills, or project details might not change every second. Setting a `staleTime` of 5 minutes (`1000 * 60 * 5`) would prevent redundant API calls.
-
--   **`cacheTime`**: The duration (in ms) that unused/inactive query data remains in the cache. If a query has no active `useQuery` hooks, it becomes inactive. After `cacheTime` (default 5 mins), the cached data is garbage collected.
-
-**Example with `staleTime`:**
-
-```javascript
-export const useUserProfile = (userId) => {
-  return useQuery({
-    queryKey: ['userProfile', userId],
-    queryFn: () => fetchUserProfile(userId),
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    // Now, if you navigate away and back to the profile page within 5 minutes,
-    // the data will be instant, with no "Loading..." state.
-  });
-};
-```
-
-### Action Steps:
-
-1.  **Create Query Hooks:** For every `GET` request in your application (fetching skills, projects, user data), create a corresponding `useQuery` hook in a new `Frontend/src/api/query` directory.
-2.  **Use Smart Query Keys:** Use descriptive and specific query keys. For a list of all projects, `['projects']` is good. For a single project, `['projects', projectId]` is better.
-3.  **Set `staleTime`:** Identify data that isn't highly dynamic and give it a `staleTime` to improve UX and reduce network requests.
-4.  **Replace Manual Fetching:** Go through your pages (`ProfilePage`, `ProjectPage`, etc.) and replace any manual `useEffect` + `useState` data fetching logic with your new `useQuery` hooks. TanStack Query provides `isLoading`, `isError`, `error`, and `data` states for you.
-
----
-
-## 3. General Frontend Improvements
-
-#### a. Code Splitting (Lazy Loading)
-
-Your `App.jsx` imports all pages upfront. This means the user downloads the code for every single page, even if they only visit the homepage. Use `React.lazy` to split your code by route.
-
-**Example:**
-
-```javascript
-// In Frontend/src/App.jsx
-import { Suspense, lazy } from 'react';
-
-// Change your static imports
-// import { HomePage, SigninPage } from "./pages";
-
-// To lazy imports
-const HomePage = lazy(() => import('./pages/HomePage'));
-const SigninPage = lazy(() => import('./pages/authPage/SigninPage'));
-// ... and so on for all other pages
-
-function App() {
-  // ...
-  return (
-    // ...
-    <Suspense fallback={<div>Loading Page...</div>}>
-      <Routes>
-        <Route path="/signin" element={<SigninPage />} />
-        <Route path="/" element={<HomePage />} />
-        {/* ... other routes */}
-      </Routes>
-    </Suspense>
-    // ...
-  );
-}
-```
-
-#### b. Centralized API Logic
-
-You have a good structure with `api/mutation` and `api/query` (once you create it). Keep this pattern. It makes your components cleaner and separates your data logic from your view logic.
-
-#### c. Consistent Error Handling
-
-Use the `isError` and `error` properties from `useQuery` and `useMutation` to handle API errors gracefully in your UI. Show a toast notification or an error message.
-
-```javascript
-const { data, isLoading, isError, error } = useUserProfile(userId);
-
-if (isLoading) return <div>Loading profile...</div>;
-if (isError) return <div>Error: {error.message}</div>;
-
-// Render your component with `data`
-```
-
-I hope these suggestions are helpful! Let me know if you have more questions.
+This asynchronous, client-led approach will make the profile creation process feel almost instantaneous to the user, as the final form submission to your backend will be a very quick operation.

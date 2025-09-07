@@ -8,6 +8,7 @@ import {
   Plus,
   Tag,
   User,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -15,29 +16,34 @@ import { toast } from 'sonner';
 import { z } from "zod";
 import { UseMentorOnboard } from "../../api/mutation/AuthMutation";
 import useAuthStore from "../../store/useAuthStore";
-
+import { useState } from "react";
 import Button from '../../components/ui/Button';
 
 const mentorSchema = z.object({
-  introduction: z.string(),
-  location: z.string(),
-  currentPosition: z.string(),
-  yearsOfExperience: z.coerce.number(),
-  expertise: z.string()
+  introduction: z.string().min(1, "Introduction is required"),
+  location: z.string().min(1, "Location is required"),
+  currentPosition: z.string().min(1, "Current position is required"),
+  yearsOfExperience: z.coerce.number().min(1, "Years of experience is required"),
+  expertise: z
+    .string()
     .min(1, "At least one expertise is required")
     .transform((str) => str.split(',').map(expertise => expertise.trim()).filter(expertise => expertise.length > 0))
     .refine((arr) => arr.length > 0, "At least one expertise is required"),
-  socialMedia: z.array(z.object({
-    name: z.string(),
-    url: z.string().url(),
-  })),
-  availability: z.string()
+  socialMedia: z.array(
+    z.object({
+      name: z.string().min(1, "Platform name is required"),
+      url: z.string().url("Invalid URL"),
+    })
+  ).min(1, "At least one social media link is required"),
+  availability: z.string().min(1, "Availability is required"),
 });
 
 const MentorOnBoarding = () => {
   const navigate = useNavigate();
   const mentorOnboard = UseMentorOnboard();
   const { setOnBoardingStatus } = useAuthStore();
+  const [imagePreview, setImagePreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const {
     register,
@@ -46,6 +52,7 @@ const MentorOnBoarding = () => {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(mentorSchema),
+    mode: "onChange",
     defaultValues: {
       introduction: "",
       location: "",
@@ -62,8 +69,46 @@ const MentorOnBoarding = () => {
     name: "socialMedia",
   });
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast.error("Please select an image file");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size must be less than 5MB");
+        return;
+      }
+
+      setSelectedFile(file); // Store raw file
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result); // For preview only
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setSelectedFile(null);
+      setImagePreview(null);
+    }
+  };
+
   const onSubmit = async (data) => {
-    mentorOnboard.mutate(data, {
+    const formData = new FormData();
+    formData.append('introduction', data.introduction);
+    formData.append('location', data.location);
+    formData.append('currentPosition', data.currentPosition);
+    formData.append('yearsOfExperience', data.yearsOfExperience.toString());
+    formData.append('expertise', JSON.stringify(data.expertise));
+    formData.append('socialMedia', JSON.stringify(data.socialMedia));
+    formData.append('availability', data.availability);
+    if (selectedFile) {
+      formData.append('profileImage', selectedFile);
+    } else {
+      console.log('No file selected');
+    }
+
+    mentorOnboard.mutate(formData, {
       onSuccess: (response) => {
         toast.success("Mentor profile created successfully!");
         setOnBoardingStatus(true);
@@ -71,7 +116,7 @@ const MentorOnBoarding = () => {
       },
       onError: (error) => {
         toast.error(error.response?.data?.message || "Mentor profile creation failed");
-        console.error(error);
+        console.error('Mutation Error:', error);
       },
     });
   };
@@ -92,7 +137,33 @@ const MentorOnBoarding = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+            {/* Profile Image */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Profile Image
+              </label>
+              <div className="relative">
+                <ImageIcon className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  name="profileImage" // Added name attribute
+                  className="pl-10 w-full border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 border-gray-300 focus:border-purple-500 focus:ring-purple-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                />
+              </div>
+              {imagePreview && (
+                <div className="mt-4">
+                  <img
+                    src={imagePreview}
+                    alt="Profile preview"
+                    className="w-32 h-32 object-cover rounded-full border border-gray-200"
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Introduction */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-700">
@@ -114,7 +185,6 @@ const MentorOnBoarding = () => {
 
             {/* Location & Current Position */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Location */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">Location</label>
                 <div className="relative">
@@ -130,7 +200,6 @@ const MentorOnBoarding = () => {
                 )}
               </div>
 
-              {/* Position */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
                   Current Position
@@ -254,7 +323,6 @@ const MentorOnBoarding = () => {
               ))}
             </div>
 
-            {/* Submit Button */}
             <Button
               type="submit"
               isLoading={mentorOnboard.isPending}

@@ -6,14 +6,15 @@ const skillSchema = new mongoose.Schema({
     level: { type: String, required: true },
     description: { type: String, required: true },
     duration: { type: String, required: true },
-    enrollStudents: { type: Number, default: 0 },
-    enrolledStudentsIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }], // <-- NEW
-    auther: { type: String, required: true },
-    image: { type: String},
+    enrollCount: { type: Number, default: 0 },
+    enrolledStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    author: { type: String, required: false, default: 'Unknown Author' },
+    image: { type: String },
     video: { type: String },
     introduction: { type: String, required: true },
     highlights: { type: [String], required: true },
     knowledgeRequirement: { type: [String], required: true },
+    rating: { type: Number, default: 0 },
     allReviews: {
         type: [{
             name: { type: String },
@@ -24,5 +25,5 @@ const skillSchema = new mongoose.Schema({
     createdBy: { type: mongoose.Schema.Types.ObjectId }
 }, { timestamps: true });
 
-const SkillModel = mongoose.model('Skill', skillSchema);
-export default SkillModel;
+const Skill = mongoose.model('Skill', skillSchema);
+export default Skill;

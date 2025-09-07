@@ -30,12 +30,10 @@ const Signup = () => {
   };
 
   const onSubmit = (data) => {
-    console.log(data);
     signup.mutate(data, {
       onSuccess: (res) => {
         toast.success('Signup successful!');
         navigate("/signin")
-        console.log(res)
       },
       onError: (err) => {
         toast.error(err.response?.data?.message || "Signup Failed");

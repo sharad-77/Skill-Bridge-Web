@@ -24,6 +24,6 @@ export const useGetSkillById = (skillId) => {
     queryKey: ["skill", skillId],
     queryFn: () => fetchSkillById(skillId),
     enabled: !!skillId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 };

@@ -10,23 +10,12 @@ export const skillSchema = z.object({
   level: z.string().min(2, "Level must be at least 2 characters"),
   description: z.string().min(2, "Description must be at least 2 characters"),
   duration: z.string().min(2, "Duration must be at least 2 characters"),
-  auther: z.string().min(2, "Author must be at least 2 characters"),
   introduction: z.string().min(2, "Introduction must be at least 2 characters"),
   highlights: z.array(z.string()).min(1, "At least 1 highlight is required"),
   knowledgeRequirement: z.array(z.string()).min(1, "At least 1 knowledge requirement is required"),
   image: z.string().url().optional().or(z.literal('')),
   video: z.string().url().optional().or(z.literal('')),
 });
-
-export const useGetSkills = () => {
-  return useQuery({
-    queryKey: ["skills"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/Skill-Exchange/");
-      return response.data;
-    },
-  });
-};
 
 // ✅ Fetch single skill by ID
 export const useGetSkillById = (id) => {
@@ -61,7 +50,7 @@ export const useCreateSkill = () => {
 };
 
 // ✅ Join/Enroll in a skill
-export const useJoinSkill = (id) => {
+export const useJoinSkill = (id, setIsJoined) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
@@ -70,6 +59,7 @@ export const useJoinSkill = (id) => {
     },
     onSuccess: () => {
       toast.success("You have joined this skill!");
+      if (setIsJoined) setIsJoined(true);
       queryClient.invalidateQueries(["skill", id]); // refresh details
     },
     onError: (error) => {

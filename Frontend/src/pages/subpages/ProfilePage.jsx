@@ -1,16 +1,19 @@
-import useUserStore from '../../store/useUserStore';
+import useAuthStore from '../../store/useAuthStore';
 import MentorProfilePage from './MentorProfilePage';
 import StudentProfilePage from './StudentProfilePage';
 
 function ProfilePage() {
-  const role = useUserStore(state => state.role);
-  const loading = useUserStore(state => state.loading);
+  const { user, isAuthenticated } = useAuthStore();
+  const role = user?.role;
 
-  // Enhanced loading with better UX
-  if (loading) {
+  // Check if user is authenticated
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Please Login</h2>
+          <p>You need to be logged in to view your profile.</p>
+        </div>
       </div>
     );
   }

@@ -8,8 +8,9 @@ import { useGetMentors } from "../api/mutation/MentorMutation";
 export default function CareerMentorMatch() {
   const [scrollY, setScrollY] = useState(0)
   const [showFilters, setShowFilters] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("") // Keep state but no logic
+  const [searchQuery, setSearchQuery] = useState("")
   const { data: mentors, isLoading, isError } = useGetMentors();
+
 
   const navigate = useNavigate();
 
@@ -29,6 +30,7 @@ export default function CareerMentorMatch() {
   ]
 
   const displayMentors = mentors && Array.isArray(mentors) ? mentors : [];
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -56,7 +58,11 @@ export default function CareerMentorMatch() {
                 <div className="flex gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    {/* Added id, name, and aria-label */}
                     <input
+                      id="mentor-search"
+                      name="mentorSearch"
+                      aria-label="Search mentors"
                       type="text"
                       placeholder="Search mentors by name, title, or expertise"
                       value={searchQuery}
@@ -88,7 +94,7 @@ export default function CareerMentorMatch() {
           <div className="flex overflow-x-auto pb-2 gap-2">
             <button
               className="px-4 py-2 rounded-full whitespace-nowrap transition-all bg-blue-100 text-blue-600 font-medium"
-              onClick={() => {/* Add your logic here */ }}
+              onClick={() => { /* Add your logic here */ }}
             >
               All
             </button>
@@ -96,7 +102,7 @@ export default function CareerMentorMatch() {
               <button
                 key={category.id}
                 className="px-4 py-2 rounded-full whitespace-nowrap transition-all text-gray-600 hover:bg-gray-100"
-                onClick={() => {/* Add your filtering logic here */ }}
+                onClick={() => { /* Add your filtering logic here */ }}
               >
                 {category.name}
               </button>
@@ -129,25 +135,22 @@ export default function CareerMentorMatch() {
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {displayMentors.map((mentor) => (
-                    <MentorCard
-                      key={mentor._id}
-                      image="https://ui-avatars.com/api/?name=Mentor&background=0D8ABC&color=fff&size=300"
-                      rating={mentor.averageRating || 0}
-                      reviews={mentor.reviews || 0}
-                      price={mentor.price || 0}
-                      name={mentor.user?.name || 'Unknown'}
-                      title={mentor.currentPosition || 'Professional'}
-                      company={mentor.company || 'Company'}
-                      location={mentor.location || 'Location'}
-                      experience={mentor.yearsOfExperience || 0}
-                      availability={mentor.availability || 'Available'}
-                      expertise={mentor.expertise || []}
-                      onRequest={() => {
-                        navigate("/Mentor-request")
-                      }}
-                    />
-                  ))}
+                    {displayMentors.map((m) => (
+                      <MentorCard
+                        key={m.id}
+                        image={m.profileImage}
+                        rating={m.rating ?? 0}
+                        reviews={Array.isArray(m.allReviews) ? m.allReviews.length : m.reviews ?? 0}
+                        name={m.name || "Unknown"}
+                        title={m.position || "Professional"}
+                        company={m.company}
+                        location={m.location}
+                        experience={m.experience}
+                        availability={m.availability}
+                        expertise={m.expertise || []}
+                        onRequest={() => navigate(`/Mentor-request/${m.mentorId}`)}
+                      />
+                    ))}
                 </div>
               )}
             </>

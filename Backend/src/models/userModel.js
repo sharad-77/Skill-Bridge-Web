@@ -7,26 +7,26 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ["student", "mentor"], required: true }
 }, { timestamps: true });
 
-const studentSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    introduction: { type: String, required: true },
-    location: { type: String, required: true },
-    instituteName: { type: String, required: true },
-    gradYear: { type: Number, required: true },
-    joinedProjects: { type: [String], default: [] },
-    joinedSkills: { type: [String], default: [] },
-    mentorShipRequests: { type: [{}], default: {} },
-    certificates: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Certificate' }], default: [] },
-    interestedSkills: { type: [String], required: true },
-    socialMedia: [{
-        name: { type: String, required: true },
-        url: { type: String, required: true }
-    }]
 
-})
+const studentSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+    introduction: {type: String, required: true, },
+    location: { type: String, required: true, },
+    instituteName: {type: String, required: true, },
+    gradYear: { type: Number, required: true, min: 1900, max: 2050 },
+    joinedProjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
+    joinedSkills: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
+    mentorShipRequests: { type: [{}], default: [] },
+    certificates: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Certificate' }],
+    interestedSkills: [{ type: String, required: true, }],
+    socialMedia: [{ name: { type: String, required: true, }, url: { type: String, required: true, } }],
+    profileImage: { url: { type: String, default: null }, publicId: { type: String, default: null } },
+}, {
+    timestamps: true,
+});
 
 const mentorSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     introduction: { type: String, required: true },
     location: { type: String, required: true },
     currentPosition: { type: String, required: true },
@@ -34,14 +34,23 @@ const mentorSchema = new mongoose.Schema({
     studentsGuided: { type: Number, default: 0 },
     averageRating: { type: Number, default: 0 },
     completedSessions: { type: Number, default: 0 },
-    mentorShipRequests: { type: [{}], default: {} },
-    expertise: { type: [String], required: true },
+    expertise: [{ type: String, default: [] }],
     socialMedia: [{
         name: { type: String, required: true },
         url: { type: String, required: true }
     }],
-    availability: { type: String, required: true }
-})
+    availability: { type: String },
+    allReviews: [{
+        name: { type: String, required: true },
+        star: { type: Number, default: 0 },
+        comment: { type: String, required: true }
+    }],
+    profileImage: {
+        url: String,
+        publicId: String
+    },
+}, { timestamps: true });
+
 
 const User = mongoose.model('User', userSchema);
 const Student = mongoose.model('Student', studentSchema);

@@ -18,11 +18,11 @@ import { useGetSkillById } from '../../api/query/SkillQuery';
 import Button from '../../components/ui/Button';
 import { useJoinSkill } from '../../api/mutation/SkillMutation';
 import useAuthStore from '../../store/useAuthStore';
+import { useState, useEffect } from 'react';
 
 const SkillDetailedPage = () => {
   const { id } = useParams();
   const { data: skillData, isLoading, isError, error } = useGetSkillById(id);
-  const joinSkill = useJoinSkill(id);
 
   const { user } = useAuthStore();
   const userId = user?._id;
@@ -34,7 +34,16 @@ const SkillDetailedPage = () => {
   }
 
   // Check if user already joined
-  const alreadyJoined = skill?.enrolledStudentsIds?.includes(userId);
+  const alreadyJoined = skill?.enrolledStudents?.includes(userId);
+  const [isJoined, setIsJoined] = useState(false);
+
+  const joinSkill = useJoinSkill(id, setIsJoined);
+
+  useEffect(() => {
+    if (alreadyJoined !== undefined) {
+      setIsJoined(alreadyJoined);
+    }
+  }, [alreadyJoined]);
 
   const defaultSocialIcons = [
     { icon: Facebook, color: "text-blue-600" },
@@ -105,8 +114,8 @@ const SkillDetailedPage = () => {
                 <div className="flex items-center gap-4 mt-4">
                   <div className="flex items-center">
                     <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                    <span className="ml-1 font-medium">{skill.rating || 'N/A'}</span>
-                    <span className="ml-1 text-rose-100">({skill.enrollStudents || 0} students)</span>
+                     <span className="ml-1 font-medium">{skill.rating || 'N/A'}</span>
+                     <span className="ml-1 text-rose-100">({skill.enrollCount || 0} students)</span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-5 w-5 text-rose-100" />
@@ -119,19 +128,19 @@ const SkillDetailedPage = () => {
                 </div>
               </div>
 
-              {/* Enroll Button */}
-              <Button
-                className={`h-10 px-4 py-2 transform hover:scale-105 ${alreadyJoined
-                  ? "bg-green-500 text-white cursor-default"
-                  : "bg-white text-rose-500 hover:bg-white/90"
-                  }`}
-                disabled={alreadyJoined || joinSkill.isLoading}
-                onClick={() => {
-                  if (!alreadyJoined) joinSkill.mutate();
-                }}
-              >
-                {alreadyJoined ? "Joined" : joinSkill.isLoading ? "Joining..." : "Enroll Now - Free"}
-              </Button>
+               {/* Enroll Button */}
+               <Button
+                 className={`h-10 px-4 py-2 transform hover:scale-105 ${isJoined
+                   ? "bg-green-500 text-white cursor-default"
+                   : "bg-white text-rose-500 hover:bg-white/90"
+                 }`}
+                 disabled={isJoined || joinSkill.isLoading}
+                 onClick={() => {
+                   if (!isJoined) joinSkill.mutate();
+                 }}
+               >
+                 {isJoined ? "Joined" : joinSkill.isLoading ? "Joining..." : "Enroll Now - Free"}
+               </Button>
             </div>
           </div>
         </div>
@@ -155,7 +164,7 @@ const SkillDetailedPage = () => {
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                 <h2 className="text-xl font-semibold mb-4">What You'll Learn</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {skill.learningPoints?.map((point, index) => (
+                  {skill.highlights?.map((point, index) => (
                     <div key={index} className="flex items-start gap-2">
                       <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{point}</span>
@@ -196,19 +205,19 @@ const SkillDetailedPage = () => {
                 </ul>
 
                 {/* Enroll Section */}
-                <div className="mt-6">
-                  <Button
-                    className={`h-10 px-4 py-2 transform hover:scale-105 ${alreadyJoined
-                      ? "bg-green-500 text-white cursor-default"
-                      : "bg-white text-rose-500 hover:bg-white/90"
-                      }`}
-                    disabled={alreadyJoined || joinSkill.isLoading}
-                    onClick={() => {
-                      if (!alreadyJoined) joinSkill.mutate();
-                    }}
-                  >
-                    {alreadyJoined ? "Joined" : joinSkill.isLoading ? "Joining..." : "Enroll Now - Free"}
-                  </Button>
+                 <div className="mt-6">
+                   <Button
+                     className={`h-10 px-4 py-2 transform hover:scale-105 ${isJoined
+                       ? "bg-green-500 text-white cursor-default"
+                       : "bg-white text-rose-500 hover:bg-white/90"
+                     }`}
+                     disabled={isJoined || joinSkill.isLoading}
+                     onClick={() => {
+                       if (!isJoined) joinSkill.mutate();
+                     }}
+                   >
+                     {isJoined ? "Joined" : joinSkill.isLoading ? "Joining..." : "Enroll Now - Free"}
+                   </Button>
                   <p className="text-center text-sm text-gray-500 mt-2">
                     30-day money-back guarantee
                   </p>

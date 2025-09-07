@@ -1,134 +1,112 @@
 import { Calendar, MapPin, Star, Users } from "lucide-react";
 import { useState } from "react";
 import DashboardSection from "../../components/mini-sections/OverView";
-import SettingsPage from '../../components/mini-sections/SettingsPage';
-import { RecentReviewCard, MentorshipState } from '../../components/ui/Card';
+import SettingsPage from "../../components/mini-sections/SettingsPage";
+import { RecentReviewCard } from "../../components/ui/Card";
+import { useGetUserProfile } from "../../api/query/UserQuery";
+import useAuthStore from "../../store/useAuthStore";
 
 export default function MentorProfilePage() {
   const [activeTab, setActiveTab] = useState("OverView");
+  const { userId } = useAuthStore();
+  const { data: profile, isLoading, isError } = useGetUserProfile(userId);
 
   const tabs = ["OverView", "Mentees & Reviews", "Account Settings"];
 
-  const reviews = [
-    {
-      name: "Sarah Johnson",
-      position: "Advanced to Senior Developer",
-      rating: 4.5,
-      time: "2 days ago",
-    },
-    {
-      name: "John Doe",
-      position: "Advanced to Senior Developer",
-      rating: 4.5,
-      time: "2 days ago",
-    },
-    {
-      name: "Emily Smith",
-      position: "Advanced to Senior Developer",
-      rating: 4.5,
-      time: "2 days ago",
-    },
-    {
-      name: "Michael Brown",
-      position: "Advanced to Senior Developer",
-      rating: 4.5,
-      time: "2 days ago",
-    },
-  ];
+  const userName = profile?.name || "Unknown Mentor";
+  const introduction = profile?.introduction || "No introduction provided";
+  const location = profile?.location || "Location not specified";
+  const currentPosition = profile?.currentPosition || "Position not specified";
+  const yearsOfExperience = profile?.yearsOfExperience || 0;
+  const studentsGuided = profile?.studentsGuided || 0;
+  const averageRating = profile?.averageRating || 0;
+  const completedSessions = profile?.completedSessions || 0;
+  const expertise = profile?.expertise || [];
+  const socialMedia = profile?.socialMedia || [];
+  const reviews =
+    profile?.allReviews?.map((review) => ({
+      name: review.name || "Anonymous",
+      position: "Student",
+      rating: review.star || 0,
+      comment: review.comment || "No comment provided",
+    })) || [];
 
-  const successStories = [
-    {
-      name: "Sarah Johnson",
-      position: "Advanced to Senior Developer",
-      rating: 4.5,
-      time: "2 days ago",
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
+      </div>
+    );
+  }
 
-  const mentorshipStats = [
-    {
-      title: "Response Rate",
-      value: "98%"
-    },
-    {
-      title: "Active Mentees",
-      value: 8
-    },
-    {
-      title: "Total Reviews",
-      value: 38
-    },
-  ];
+  if (isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Error Loading Profile
+          </h2>
+          <p className="text-gray-600">
+            Failed to load profile data. Please try again.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Enhanced Cover with Professional Gradient */}
-      <section className="relative h-80 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-700 overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30"></div>
+    <main className="min-h-screen bg-gray-100">
+      {/* Cover Header */}
+      <section className="relative h-60 bg-gray-700">
         <img
           alt="Cover"
-          src="/placeholder.svg?height=400&width=1200"
-          className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay"
+          src={profile?.coverImage || "/default-cover.png"}
+          className="absolute inset-0 w-full h-full object-cover opacity-50"
         />
-        {/* Professional decorative elements */}
-        <div className="absolute top-16 right-16 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-        <div className="absolute bottom-12 left-12 w-28 h-28 bg-indigo-300/20 rounded-full blur-lg"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Enhanced Profile Card for Mentor */}
-        <section className="relative -mt-24 mb-8">
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-200/50 backdrop-blur-sm">
-            <div className="flex flex-col lg:flex-row gap-8 p-8">
-              {/* Enhanced Profile Image */}
-              <div className="relative flex-shrink-0">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-3xl blur opacity-75"></div>
+      {/* Profile Card */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="relative -mt-20 mb-8">
+          <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-8">
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="flex-shrink-0 relative">
                 <img
-                  alt="John Doe"
-                  src="https://randomuser.me/api/portraits/men/32.jpg"
-                  className="relative w-40 h-40 rounded-3xl object-cover border-4 border-white shadow-2xl"
+                  alt={userName}
+                  src={
+                    profile?.profileImage ||
+                    "https://randomuser.me/api/portraits/men/32.jpg"
+                  }
+                  className="w-36 h-36 rounded-xl object-cover border-4 border-white shadow-md"
                 />
-                {/* Mentor Badge */}
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-400 w-12 h-12 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-                  <Star className="w-6 h-6 text-white fill-white" />
+                <div className="absolute bottom-0 right-0 bg-yellow-400 w-10 h-10 rounded-full border-4 border-white shadow-md flex items-center justify-center">
+                  <Star className="w-5 h-5 text-white fill-white" />
                 </div>
               </div>
-
-              {/* Enhanced Profile Info */}
-              <div className="flex-1 space-y-6">
-                <div>
-                  <div className="flex items-center gap-4 mb-2">
-                    <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                      John Doe
-                    </h1>
-                    <div className="bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-full">
-                      <span className="text-purple-700 font-semibold text-sm">MENTOR</span>
-                    </div>
-                  </div>
-                  <p className="text-xl text-gray-600 font-medium mb-4">
-                    Senior Software Engineer at Tech Corp
-                  </p>
-                  <p className="text-gray-700 leading-relaxed max-w-3xl text-lg">
-                    Passionate software developer with a love for mentoring and building
-                    innovative solutions. Dedicated to helping others grow and achieve their
-                    career goals through personalized guidance and support.
-                  </p>
+              <div className="flex-1 space-y-4">
+                <div className="flex items-center gap-4 mb-2">
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {userName}
+                  </h1>
+                  <span className="px-3 py-1 text-sm font-medium text-indigo-700 bg-indigo-100 rounded-full">
+                    MENTOR
+                  </span>
                 </div>
-
-                {/* Enhanced Info with Experience Focus */}
-                <div className="flex flex-wrap items-center gap-6 text-gray-600">
-                  <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full">
-                    <MapPin className="h-5 w-5 text-indigo-600" />
-                    <span className="font-medium">San Francisco, CA</span>
+                <p className="text-lg text-gray-600">{currentPosition}</p>
+                <p className="text-gray-700 max-w-2xl">{introduction}</p>
+                <div className="flex flex-wrap items-center gap-4 text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-gray-500" />
+                    <span>{location}</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full">
-                    <Calendar className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium">8 years experience</span>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-gray-500" />
+                    <span>{yearsOfExperience} years experience</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-gradient-to-r from-green-50 to-green-100 px-4 py-2 rounded-full">
-                    <Users className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-green-700">38 students mentored</span>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-gray-500" />
+                    <span>{studentsGuided} students mentored</span>
                   </div>
                 </div>
               </div>
@@ -136,102 +114,102 @@ export default function MentorProfilePage() {
           </div>
         </section>
 
-        {/* Enhanced Navigation */}
-        <nav className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200/50 rounded-2xl shadow-lg mb-8">
-          <div className="px-8 py-6">
-            <div className="flex gap-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`relative px-2 py-3 font-semibold text-lg transition-all duration-300 ${activeTab === tab
-                      ? "text-indigo-600"
-                      : "text-gray-500 hover:text-gray-700"
-                    }`}
-                >
-                  {tab}
-                  {activeTab === tab && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full transition-all duration-300"></div>
-                  )}
-                </button>
-              ))}
-            </div>
+        {/* Tabs */}
+        <nav className="sticky top-0 z-20 bg-white border-b border-gray-200 rounded-md shadow-sm mb-8">
+          <div className="px-6 py-4 flex gap-6">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-2 font-medium transition-colors ${activeTab === tab
+                    ? "text-gray-900 border-b-2 border-gray-900"
+                    : "text-gray-500 hover:text-gray-800"
+                  }`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
         </nav>
 
-        {/* Enhanced Content Sections */}
+        {/* Sections */}
         <section className="pb-12">
           {activeTab === "OverView" && (
             <DashboardSection
               stats={[
-                { type: "StudentsGuided", count: 12, label: "Students Guided" },
-                { type: "averageRating", count: 4.8, label: "Average Rating" },
-                { type: "sessionCompleted", count: 156, label: "Sessions Completed" },
+                { type: "StudentsGuided", count: studentsGuided, label: "Students Guided" },
+                { type: "averageRating", count: averageRating, label: "Average Rating" },
+                { type: "sessionCompleted", count: completedSessions, label: "Sessions Completed" },
               ]}
               reviews={reviews}
               contactInfo={{
-                email: "john.doe@email.com",
-                location: "San Francisco, CA",
-                phone: "+1 (555) 123-4567",
+                email: profile?.email || "No email provided",
+                location: location,
+                phone: profile?.phone || "No phone provided",
               }}
-              socialLinks={[
-                { type: "github", label: "GitHub", url: "https://github.com/johndoe" },
-                { type: "linkedin", label: "LinkedIn", url: "https://linkedin.com/in/johndoe" },
-                { type: "twitter", label: "Twitter", url: "https://twitter.com/johndoe" },
-                { type: "portfolio", label: "Portfolio", url: "https://johndoe.dev" },
-              ]}
-              skills={[
-                "React", "JavaScript", "Python", "UI/UX",
-                "Node.js", "SQL", "Docker", "Figma",
-              ]}
+              socialLinks={socialMedia.map((media) => ({
+                type: media.name.toLowerCase(),
+                label: media.name,
+                url: media.url,
+              }))}
+              skills={expertise.map((skill) => skill.title)}
             />
           )}
 
           {activeTab === "Mentees & Reviews" && (
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-200/50 p-8 lg:p-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center lg:text-left">
+            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
                 Mentorship Impact
               </h2>
-
-              <div className="grid lg:grid-cols-2 gap-12">
-                {/* Success Stories */}
-                <div className="space-y-6">
-                  <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                    <div className="w-2 h-8 bg-gradient-to-b from-green-400 to-emerald-600 rounded-full"></div>
+              <div className="grid lg:grid-cols-2 gap-10">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Success Stories
                   </h3>
-                  <div className="space-y-4">
-                    {successStories.map((review, index) => (
+                  {reviews.length > 0 ? (
+                    reviews.map((review, index) => (
                       <RecentReviewCard
-                        key={`success-${index}`}
+                        key={`review-${index}`}
                         variant="Success-Stories"
-                        {...review}
+                        name={review.name}
+                        position={review.position}
+                        rating={review.rating}
+                        comment={review.comment}
                       />
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-600">No success stories yet.</p>
+                  )}
                 </div>
 
-                {/* Mentorship Statistics */}
-                <div className="space-y-6">
-                  <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                    <div className="w-2 h-8 bg-gradient-to-b from-indigo-400 to-purple-600 rounded-full"></div>
-                    Mentorship Statistics
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    Expertise
                   </h3>
-                  <div className="space-y-4">
-                    {mentorshipStats.map((stat, index) => (
-                      <MentorshipState
-                        key={`stat-${index}`}
-                        {...stat}
-                      />
-                    ))}
-                  </div>
+                  {expertise.length > 0 ? (
+                    expertise.map((skill) => (
+                      <div
+                        key={skill._id}
+                        className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      >
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          {skill.title}
+                        </h4>
+                        <p className="text-gray-600">Category: {skill.category}</p>
+                        <p className="text-gray-600">Level: {skill.level}</p>
+                        <p className="text-gray-600">Duration: {skill.duration}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-600">No expertise listed yet.</p>
+                  )}
                 </div>
               </div>
             </div>
           )}
 
           {activeTab === "Account Settings" && (
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-200/50 p-8">
+            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8">
               <SettingsPage />
             </div>
           )}

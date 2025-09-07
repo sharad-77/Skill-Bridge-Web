@@ -129,88 +129,187 @@ export const login = async (req, res) => {
 };
 
 export const studentSignup = async (req, res) => {
-
     try {
-        const userID = req.user.id;
+        const userID = req.user?.id;
 
-        const { introduction, location, instituteName, gradYear, interestedSkills, socialMedia } = req.body;
-
-        const studentSchema = z.object({
-            introduction: z.string(),
-            location: z.string(),
-            instituteName: z.string(),
-            gradYear: z.number(),
-            interestedSkills: z.array(z.string()),
-            socialMedia: z.array(z.object({
-                name: z.string(),
-                url: z.string().url(),
-            })),
-        });
-
-        const studentValidation = studentSchema.safeParse(req.body);
-
-        if (!studentValidation.success) {
-            return res.status(400).json({
-                message: "Please Enter Valid Information"
+        if (!userID) {
+            return res.status(401).json({
+                message: "User not authenticated"
             });
         }
 
-        const allReadyExist = await Student.findOne({ userId: userID });
-
-        if (allReadyExist) {
-            return res.status(400).json({
-                message: "You are allReady Exist"
-            })
-        }
-
-        const newStudent = await Student.create({
-            userId: userID,
+        const {
             introduction,
             location,
             instituteName,
             gradYear,
             interestedSkills,
-            socialMedia
-        })
+            socialMedia = "[]"
+        } = req.body;
 
-        res.status(200).json({
-            message: "Student Created Succesfully",
-            newStudent
-        })
+        const interestedSkillsArray = typeof interestedSkills === 'string'
+            ? interestedSkills.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0)
+            : [];
 
-    }
-    catch (error) {
-        console.error(error.message);
+        let socialMediaArray = [];
+        try {
+            socialMediaArray = typeof socialMedia === 'string' ? JSON.parse(socialMedia) : socialMedia;
+        } catch (parseError) {
+            console.error("Error parsing socialMedia:", parseError);
+            socialMediaArray = [];
+        }
+
+        const studentSchema = z.object({
+            introduction: z.string().min(1, { message: "Introduction is required" }),
+            location: z.string().min(1, { message: "Location is required" }),
+            instituteName: z.string().min(1, { message: "Institute name is required" }),
+            gradYear: z.union([z.number(), z.string()]).transform((val) => {
+                const num = typeof val === 'string' ? parseInt(val, 10) : val;
+                if (isNaN(num) || num === null || num === undefined) {
+                    throw new Error("Invalid graduation year");
+                }
+                return num;
+            }).refine((val) => val >= 2020 && val <= 2050, { message: "Graduation year must be between 2020 and 2050" }),
+            interestedSkills: z.array(z.string().min(1, { message: "Skill cannot be empty" }))
+                .min(1, { message: "At least one skill is required" }),
+            socialMedia: z.array(
+                z.object({
+                    name: z.string().min(1, { message: "Social media name is required" }),
+                    url: z.string().url({ message: "Invalid URL format" }),
+                })
+            ).optional().default([]),
+        });
+
+        const validationData = {
+            introduction: typeof introduction === 'string' ? introduction.trim() : "",
+            location: typeof location === 'string' ? location.trim() : "",
+            instituteName: typeof instituteName === 'string' ? instituteName.trim() : "",
+            gradYear: gradYear,
+            interestedSkills: interestedSkillsArray,
+            socialMedia: socialMediaArray
+        };
+
+
+        const studentValidation = studentSchema.safeParse(validationData);
+
+        if (!studentValidation.success) {
+            console.log("Validation errors:", studentValidation.error.errors);
+            return res.status(400).json({
+                message: "Please Enter Valid Information",
+                errors: studentValidation.error.errors.map(error => ({
+                    field: error.path.join('.'),
+                    message: error.message
+                }))
+            });
+        }
+
+        const validatedData = studentValidation.data;
+
+        const existingStudent = await Student.findOne({ userId: userID });
+        if (existingStudent) {
+            return res.status(400).json({
+                message: "Student profile already exists"
+            });
+        }
+
+        let profileImageData = { url: null, publicId: null };
+
+        if (req.file) {
+            profileImageData = {
+                url: req.file.path,
+                publicId: req.file.filename
+            };
+        }
+
+        const newStudent = new Student({
+            userId: userID,
+            introduction: validatedData.introduction,
+            location: validatedData.location,
+            instituteName: validatedData.instituteName,
+            gradYear: validatedData.gradYear,
+            interestedSkills: validatedData.interestedSkills,
+            socialMedia: validatedData.socialMedia,
+            profileImage: profileImageData
+        });
+
+        const savedStudent = await newStudent.save();
+
+        await User.findByIdAndUpdate(userID, {
+            isOnboarded: true,
+            userType: 'Student'
+        });
+
+        res.status(201).json({
+            message: "Student profile created successfully",
+
+        });
+
+    } catch (error) {
+        console.error("Full error:", error);
+
+        if (error.name === 'ValidationError') {
+            const validationErrors = Object.values(error.errors).map(err => ({
+                field: err.path,
+                message: err.message
+            }));
+            return res.status(400).json({
+                message: "Validation failed",
+                errors: validationErrors
+            });
+        }
+
+        if (error.code === 11000) {
+            return res.status(400).json({
+                message: "Student profile already exists for this user"
+            });
+        }
+
         res.status(500).json({
-            message: "Internal Server Error occured"
-        })
+            message: "Internal server error occurred",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
-}
+};
+
 
 export const mentorSignup = async (req, res) => {
     try {
         const userID = req.user.id;
 
-        const { introduction, location, currentPosition, yearsOfExperience, expertise, socialMedia, availability } = req.body;
+        let { introduction, location, currentPosition, yearsOfExperience, expertise, socialMedia, availability } = req.body;
+
+        expertise = typeof expertise === 'string' ? JSON.parse(expertise) : expertise;
+        socialMedia = typeof socialMedia === 'string' ? JSON.parse(socialMedia) : socialMedia;
 
         const mentorSchema = z.object({
-            introduction: z.string(),
-            location: z.string(),
-            currentPosition: z.string(),
-            yearsOfExperience: z.number(),
-            expertise: z.array(z.string()),
-            socialMedia: z.array(z.object({
-                name: z.string(),
-                url: z.string().url(),
-            })),
-            availability: z.string(),
+            introduction: z.string().min(1, 'Introduction is required'),
+            location: z.string().min(1, 'Location is required'),
+            currentPosition: z.string().min(1, 'Current position is required'),
+            yearsOfExperience: z.number().min(1, 'Years of experience must be at least 1'),
+            expertise: z.array(z.string().min(1)).min(1, 'At least one expertise is required'),
+            socialMedia: z.array(
+                z.object({
+                    name: z.string().min(1, 'Platform name is required'),
+                    url: z.string().url('Invalid URL'),
+                })
+            ).min(1, 'At least one social media link is required'),
+            availability: z.string().min(1, 'Availability is required'),
         });
 
-        const mentorValidation = mentorSchema.safeParse(req.body);
+        const mentorValidation = mentorSchema.safeParse({
+            introduction,
+            location,
+            currentPosition,
+            yearsOfExperience: Number(yearsOfExperience),
+            expertise,
+            socialMedia,
+            availability,
+        });
 
         if (!mentorValidation.success) {
             return res.status(400).json({
-                message: "Please Enter Valid Information"
+                message: 'Please Enter Valid Information',
+                errors: mentorValidation.error.errors,
             });
         }
 
@@ -218,33 +317,43 @@ export const mentorSignup = async (req, res) => {
 
         if (allReadyExist) {
             return res.status(400).json({
-                message: "You are allReady Existce"
-            })
+                message: 'You already exist',
+            });
         }
 
-        const newMentor = await Mentor.create({
+        const mentorData = {
             userId: userID,
             introduction,
             location,
             currentPosition,
-            yearsOfExperience,
+            yearsOfExperience: Number(yearsOfExperience),
             expertise,
             socialMedia,
             availability,
-        });
+        };
+
+        if (req.file) {
+            mentorData.profileImage = {
+                url: req.file.path,
+                publicId: req.file.filename,
+            };
+        } else {
+            console.log('No profile image provided');
+        }
+
+        const newMentor = await Mentor.create(mentorData);
 
         res.status(200).json({
-            message: "Mentor Created Succesfully",
-            newMentor
-        })
-
+            message: 'Mentor Created Successfully',
+        });
     } catch (error) {
-        console.error(error.message);
+        console.error('Backend Error:', error.stack);
         res.status(500).json({
-            message: "Internal Server Error Occured"
-        })
+            message: 'Internal Server Error Occurred',
+            error: error.message,
+        });
     }
-}
+};
 
 export const changePassword = async (req, res) => {
     try {

@@ -1,7 +1,43 @@
 import { ArrowLeft, Star } from 'lucide-react';
 import { AvailabilityCard, ExpertiseAreasCard, MentorInfoCard } from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useDetailsMentor } from '../../api/mutation/MentorMutation';
 
 const MentorRequest = () => {
+  const { mentorId } = useParams();
+  const navigate = useNavigate();
+  const {
+    data,
+    isLoading,
+    isError,
+    error
+  } = useDetailsMentor(mentorId);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading mentor details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Mentor</h2>
+          <p className="text-gray-600 mb-4">{error?.message || 'Something went wrong'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { mentorDetails } = data;
+
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Header */}
@@ -9,38 +45,35 @@ const MentorRequest = () => {
         <div className="container mx-auto px-4 py-8 w-full max-w-5xl">
           {/* Back Link */}
           <div className="mb-6">
-            <a
-              href="/mentor-match"
-              className="inline-flex items-center text-blue-100 hover:text-white transition-colors"
+            <Button
+              onClick={() => navigate("/mentor")}
+            className="bg-indigo-600 hover:bg-white hover:text-black"
             >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back to Mentors
-            </a>
+             <ArrowLeft></ArrowLeft> Back To Mentor Page
+            </Button>
           </div>
 
           {/* Mentor Info Section */}
           <div className="flex flex-col md:flex-row gap-8 items-start">
             <img
-              src="/placeholder.svg"
+              src={mentorDetails.image}
               alt="Alice Johnson"
               className="w-32 h-32 rounded-2xl object-cover border-4 border-white/20"
             />
             <div className="flex-1">
               <h1 className="text-3xl md:text-4xl font-bold mb-2">Request Mentorship</h1>
-              <p className="text-blue-100 text-lg mb-4">
-                Send a mentorship request to Alice Johnson and start your learning journey
+              <p className="text-white text-lg mb-4">
+                Send a mentorship request to {mentorDetails?.name} and start your learning journey
               </p>
 
               <div className="flex items-center gap-4">
                 {/* Rating Section */}
                 <div className="flex items-center">
                   <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="ml-1 font-medium">4.9</span>
-                  <span className="ml-1 text-blue-100">(124 reviews)</span>
+                  <span className="ml-1 font-medium">{mentorDetails.reting}</span>
+                  <span className="ml-1 text-blue-100">{mentorDetails.Student}</span>
                 </div>
 
-                {/* Response Time */}
-                <div className="text-blue-100">Usually responds within 2 hours</div>
               </div>
             </div>
           </div>
@@ -208,31 +241,19 @@ const MentorRequest = () => {
           <div className="space-y-6 sm:w-[30%] w-full">
             {/* Mentor Summary */}
             <MentorInfoCard
-              name="Alice Johnson"
-              title="Senior Software Engineer"
-              company="Tech Corp"
-              location="San Francisco, CA"
-              experience="10+ years experience"
-              responseTime="Usually responds within 2 hours"
+              image={mentorDetails.image}
+              name={mentorDetails.name}
+              title={mentorDetails.position}
+              location={mentorDetails.location}
+              experience={mentorDetails.experience}
             />
 
             <ExpertiseAreasCard
-              areas={[
-                "Career Guidance",
-                "Technical Interview Prep",
-                "Software Architecture",
-                "Team Leadership",
-                "Full-Stack Development",
-                "System Design",
-              ]}
+              areas={mentorDetails.expertise}
             />
 
             <AvailabilityCard
-              availability={{
-                weekdays: "6:00 PM - 9:00 PM",
-                weekends: "10:00 AM - 4:00 PM",
-                timezone: "PST",
-              }}
+              availability={mentorDetails.availability}
             />
 
 
