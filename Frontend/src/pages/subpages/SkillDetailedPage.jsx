@@ -97,51 +97,65 @@ const SkillDetailedPage = () => {
               </Button>
             </div>
 
-            {/* Course Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-3">
-                  {skill.level}
-                </div>
-                <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                  {skill.title}
-                </h1>
-                <p className="text-rose-100 max-w-3xl">
-                  {skill.description}
-                </p>
+             {/* Course Header */}
+             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+               <div className="flex-1">
+                 <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-3">
+                   {skill.level}
+                 </div>
+                 <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                   {skill.title}
+                 </h1>
+                 <p className="text-rose-100 max-w-3xl">
+                   {skill.description}
+                 </p>
 
-                {/* Course Stats */}
-                <div className="flex items-center gap-4 mt-4">
-                  <div className="flex items-center">
-                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                     <span className="ml-1 font-medium">{skill.rating || 'N/A'}</span>
-                     <span className="ml-1 text-rose-100">({skill.enrollCount || 0} students)</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="h-5 w-5 text-rose-100" />
-                    <span className="ml-1 text-rose-100">{skill.duration || 'N/A'} hours</span>
-                  </div>
-                  <div className="flex items-center">
-                    <User className="h-5 w-5 text-rose-100" />
-                    <span className="ml-1 text-rose-100">By {skill.user?.name || 'Unknown Instructor'}</span>
-                  </div>
-                </div>
-              </div>
+                 {/* Course Stats */}
+                 <div className="flex items-center gap-4 mt-4">
+                   <div className="flex items-center">
+                     <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                      <span className="ml-1 font-medium">{skill.rating || 'N/A'}</span>
+                      <span className="ml-1 text-rose-100">({skill.enrollCount || 0} students)</span>
+                   </div>
+                   <div className="flex items-center">
+                     <Clock className="h-5 w-5 text-rose-100" />
+                     <span className="ml-1 text-rose-100">{skill.duration || 'N/A'} hours</span>
+                   </div>
+                   <div className="flex items-center">
+                     <User className="h-5 w-5 text-rose-100" />
+                     <span className="ml-1 text-rose-100">By {skill.user?.name || 'Unknown Instructor'}</span>
+                   </div>
+                 </div>
+               </div>
 
-               {/* Enroll Button */}
-               <Button
-                 className={`h-10 px-4 py-2 transform hover:scale-105 ${isJoined
-                   ? "bg-green-500 text-white cursor-default"
-                   : "bg-white text-rose-500 hover:bg-white/90"
-                 }`}
-                 disabled={isJoined || joinSkill.isLoading}
-                 onClick={() => {
-                   if (!isJoined) joinSkill.mutate();
-                 }}
-               >
-                 {isJoined ? "Joined" : joinSkill.isLoading ? "Joining..." : "Enroll Now - Free"}
-               </Button>
-            </div>
+               {/* Course Image and Enroll Button */}
+               <div className="flex flex-col sm:flex-row lg:flex-col items-center gap-4">
+                 {skill.image && (
+                   <div className="w-full max-w-xs">
+                     <img
+                       src={skill.image}
+                       alt={skill.title}
+                       className="w-full h-48 object-cover rounded-lg shadow-lg"
+                       onError={(e) => {
+                         e.target.src = "https://via.placeholder.com/400x300/6366f1/ffffff?text=No+Image";
+                       }}
+                     />
+                   </div>
+                 )}
+                 <Button
+                   className={`h-10 px-6 py-2 transform hover:scale-105 whitespace-nowrap ${isJoined
+                     ? "bg-green-500 text-white cursor-default"
+                     : "bg-white text-rose-500 hover:bg-white/90"
+                   }`}
+                   disabled={isJoined || joinSkill.isLoading}
+                   onClick={() => {
+                     if (!isJoined) joinSkill.mutate();
+                   }}
+                 >
+                   {isJoined ? "Joined" : joinSkill.isLoading ? "Joining..." : "Enroll Now - Free"}
+                 </Button>
+               </div>
+             </div>
           </div>
         </div>
 

@@ -40,10 +40,17 @@ export const allSkill = async (req, res) => {
 
 // Create a new skill
 export const newSkill = async (req, res) => {
+
     if (!req.user || !req.user.name) {
+        console.log('User not authenticated:', req.user); 
         return res.status(400).json({ message: "User not authenticated or name missing" });
     }
     const userName = req.user.name;
+
+    if (req.fileValidationError) {
+        return res.status(400).json({ message: req.fileValidationError });
+    }
+
     try {
         const newSkillSchema = z.object({
             title: z.string().min(1, "Title is required"),
@@ -51,8 +58,7 @@ export const newSkill = async (req, res) => {
             level: z.string().min(1, "Level is required"),
             description: z.string().min(1, "Description is required"),
             duration: z.string().min(1, "Duration is required"),
-            image: z.string().url().optional().or(z.literal('')),
-            video: z.string().url().optional().or(z.literal('')),
+            image: z.string().optional(),
             introduction: z.string().min(1, "Introduction is required"),
             highlights: z.array(z.string()).min(1, "At least one highlight is required"),
             knowledgeRequirement: z.array(z.string()).min(1, "At least one knowledge requirement is required"),
@@ -63,7 +69,17 @@ export const newSkill = async (req, res) => {
             return res.status(400).json({ message: "Invalid skill data", errors: validation.error.errors });
         }
 
-        const { title, category, level, description, duration, image, video, introduction, highlights, knowledgeRequirement } = validation.data;
+        const { title, category, level, description, duration, image, introduction, highlights, knowledgeRequirement } = validation.data;
+L
+        let skillImage = image || '';
+        if (req.file) {
+            skillImage = req.file.path;
+            console.log('Skill image URL:', skillImage);
+        } else {
+            console.log('No file uploaded, using provided URL:', image);
+        }
+
+        console.log('User info:', req.user);
 
         let creatorDoc, creatorModel;
         if (req.user.role === "student") {
@@ -74,19 +90,19 @@ export const newSkill = async (req, res) => {
             creatorModel = "Mentor";
         }
 
+
         if (!creatorDoc) {
             return res.status(400).json({ message: "User profile not found in the corresponding role collection." });
         }
 
-        const newSkill = await SkillModel.create({
+        const skillData = {
             title,
             category,
             level,
             description,
             duration,
             author: userName || 'Unknown Author',
-            image: image || '',
-            video: video || '',
+            image: skillImage,
             introduction,
             highlights,
             knowledgeRequirement,
@@ -95,7 +111,8 @@ export const newSkill = async (req, res) => {
             enrollCount: 0,
             rating: 0,
             allReviews: []
-        });
+        };
+        const newSkill = await SkillModel.create(skillData);
 
         res.status(201).json({ skill: newSkill, message: "New Skill Created Successfully" });
     } catch (error) {

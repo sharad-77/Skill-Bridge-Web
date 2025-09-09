@@ -3,7 +3,6 @@ import { toast } from "sonner";
 import { z } from "zod";
 import axiosInstance from "../axiosInstance";
 
-// ✅ Correct Zod schema (matches backend validation)
 export const skillSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
   category: z.string().min(2, "Category must be at least 2 characters"),
@@ -14,10 +13,8 @@ export const skillSchema = z.object({
   highlights: z.array(z.string()).min(1, "At least 1 highlight is required"),
   knowledgeRequirement: z.array(z.string()).min(1, "At least 1 knowledge requirement is required"),
   image: z.string().url().optional().or(z.literal('')),
-  video: z.string().url().optional().or(z.literal('')),
 });
 
-// ✅ Fetch single skill by ID
 export const useGetSkillById = (id) => {
   return useQuery({
     queryKey: ["skill", id],
@@ -29,12 +26,24 @@ export const useGetSkillById = (id) => {
   });
 };
 
-// ✅ Create a new skill
 export const useCreateSkill = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (skillData) => {
-      const response = await axiosInstance.post("/Skill-Exchange/", skillData);
+      const isFormData = skillData instanceof FormData;
+      console.log('Sending skill data:', isFormData ? 'FormData' : skillData); // Debug log
+      // if (isFormData) {
+      //   for (let [key, value] of skillData.entries()) {
+      //     console.log(key, value); // Debug log
+      //   }
+      // }
+      const response = await axiosInstance.post("/Skill-Exchange/", skillData, {
+        headers: isFormData ? {
+          'Content-Type': 'multipart/form-data',
+        } : {
+          'Content-Type': 'application/json',
+        },
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -49,7 +58,6 @@ export const useCreateSkill = () => {
   });
 };
 
-// ✅ Join/Enroll in a skill
 export const useJoinSkill = (id, setIsJoined) => {
   const queryClient = useQueryClient();
   return useMutation({

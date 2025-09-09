@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Upload, Video, X } from 'lucide-react';
-import { useState } from 'react';
+import { Plus, Upload, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useCreateSkill } from '../../api/mutation/SkillMutation';
@@ -12,7 +12,6 @@ const skillFormSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   duration: z.string().min(1, 'Duration is required'),
   image: z.string().url('Image must be a valid URL').optional().or(z.literal('')),
-  video: z.string().url('Video must be a valid URL').optional().or(z.literal('')),
   introduction: z.string().min(1, 'Introduction is required'),
   highlights: z.array(z.string()).min(1, 'At least 1 highlight is required'),
   knowledgeRequirement: z.array(z.string()).min(1, 'At least 1 knowledge requirement is required'),
@@ -25,7 +24,6 @@ const defaultSkillValues = {
   description: '',
   duration: '',
   image: '',
-  video: '',
   introduction: '',
   highlights: [''],
   knowledgeRequirement: [''],
@@ -111,32 +109,105 @@ function BasicInfoContent({ register, errors }) {
   );
 }
 
-function ContentStepContent({ register, errors }) {
+function ContentStepContent({
+  register,
+  errors,
+  setValue,
+  selectedImage,
+  setSelectedImage,
+  imagePreview,
+  setImagePreview
+}) {
+  const [fileInputKey, setFileInputKey] = useState(Date.now());
+
+  const handleImageSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file');
+        return;
+      }
+
+      setSelectedImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      setValue('image', '');
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    setFileInputKey(Date.now()); // Reset file input by changing key
+  };
+
+  const handleUrlChange = (event) => {
+    if (event.target.value) {
+      setSelectedImage(null);
+      setImagePreview(null);
+      setFileInputKey(Date.now()); // Reset file input
+    }
+  };
+
+  const triggerFileSelect = () => {
+    document.getElementById('file-upload').click();
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Skill Thumbnail</label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer">
-          <Upload className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-600">
-            Upload thumbnail image, or <span className="text-pink-500 font-medium">browse</span>
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Recommended: 800x600px, PNG or JPG</p>
+        <div className="space-y-4">
+          {!imagePreview ? (
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
+              onClick={triggerFileSelect}
+            >
+              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="mt-2 text-sm text-gray-600">
+                Click to upload thumbnail image
+              </p>
+              <p className="text-xs text-gray-500 mt-1">Recommended: 800x600px, PNG, JPG, or WebP (max 5MB)</p>
+            </div>
+          ) : (
+            <div className="relative">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-48 object-cover rounded-lg border"
+              />
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
+          <input
+            key={fileInputKey}
+            id="file-upload"
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+          <div className="text-center">
+            <span className="text-sm text-gray-500">or</span>
+          </div>
+          <InputField
+            type="url"
+            {...register('image')}
+            placeholder="Paste image URL"
+            onChange={handleUrlChange}
+            error={errors.image}
+          />
+          {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image.message}</p>}
         </div>
-        <InputField type="url" {...register('image')} placeholder="Or paste image URL" error={errors.image} />
-        {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image.message}</p>}
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Skill Videos</label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer">
-          <Video className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-600">
-            Upload video files, or <span className="text-pink-500 font-medium">browse</span>
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Supports MP4, MOV, AVI (max 100MB each)</p>
-        </div>
-        <InputField type="url" {...register('video')} placeholder="Or paste video URL" error={errors.video} />
-        {errors.video && <p className="mt-1 text-sm text-red-600">{errors.video.message}</p>}
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Main Description</label>
@@ -188,6 +259,8 @@ function DetailsStepContent({ fields, append, remove, register, errors, name, la
 
 const CreateNewSkill = ({ onClose = () => { } }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const createSkillMutation = useCreateSkill();
 
   const {
@@ -195,6 +268,8 @@ const CreateNewSkill = ({ onClose = () => { } }) => {
     handleSubmit,
     control,
     trigger,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: defaultSkillValues,
@@ -214,6 +289,15 @@ const CreateNewSkill = ({ onClose = () => { } }) => {
     remove: removeRequirement,
   } = useFieldArray({ control, name: 'knowledgeRequirement' });
 
+  // Cleanup object URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
+
   const steps = [
     { title: 'Basic Info', key: 'basic' },
     { title: 'Content', key: 'content' },
@@ -223,7 +307,7 @@ const CreateNewSkill = ({ onClose = () => { } }) => {
   const nextStep = async () => {
     let valid = false;
     if (currentStep === 1) valid = await trigger(['title', 'category', 'level', 'description', 'duration']);
-    if (currentStep === 2) valid = await trigger(['image', 'video', 'introduction']);
+    if (currentStep === 2) valid = await trigger(['image', 'introduction']);
     if (valid && currentStep < 3) setCurrentStep((prev) => prev + 1);
   };
 
@@ -238,13 +322,38 @@ const CreateNewSkill = ({ onClose = () => { } }) => {
         knowledgeRequirement: data.knowledgeRequirement.filter((r) => r.trim() !== ""),
       };
 
-      await createSkillMutation.mutateAsync(cleanedData);
+      // If we have a selected image file, send FormData
+      if (selectedImage) {
+        console.log('Sending FormData with file:', selectedImage);
+        const formData = new FormData();
+
+        // Add the image file
+        formData.append('skillImage', selectedImage);
+
+        // Add other form data
+        Object.keys(cleanedData).forEach(key => {
+          if (key !== 'image') { // Don't include the image URL field when sending file
+            if (key === 'highlights' || key === 'knowledgeRequirement') {
+              formData.append(key, JSON.stringify(cleanedData[key]));
+            } else {
+              formData.append(key, cleanedData[key]);
+            }
+          }
+        });
+
+        console.log(formData);
+
+        await createSkillMutation.mutateAsync(formData);
+      } else {
+        // Send regular JSON data with image URL
+        console.log('Sending JSON data:', cleanedData);
+        await createSkillMutation.mutateAsync(cleanedData);
+      }
       onClose();
     } catch (error) {
       console.error("Error creating skill:", error);
     }
   };
-
 
   return (
     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -291,7 +400,17 @@ const CreateNewSkill = ({ onClose = () => { } }) => {
 
         <div className="px-6 pb-6 min-h-[400px]">
           {currentStep === 1 && <BasicInfoContent register={register} errors={errors} />}
-          {currentStep === 2 && <ContentStepContent register={register} errors={errors} />}
+          {currentStep === 2 && (
+            <ContentStepContent
+              register={register}
+              errors={errors}
+              setValue={setValue}
+              selectedImage={selectedImage}
+              setSelectedImage={setSelectedImage}
+              imagePreview={imagePreview}
+              setImagePreview={setImagePreview}
+            />
+          )}
           {currentStep === 3 && (
             <>
               <DetailsStepContent
@@ -319,7 +438,6 @@ const CreateNewSkill = ({ onClose = () => { } }) => {
           )}
         </div>
 
-        {/* Footer buttons */}
         <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
           <button
             type="button"
