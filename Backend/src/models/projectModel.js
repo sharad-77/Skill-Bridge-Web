@@ -16,8 +16,8 @@ const projectSchema = new mongoose.Schema({
     _id: false
   }],
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  progress: { type: Number, default: 0, min: 0, max: 100 }, // Added for frontend
-  status: { type: String, default: 'In Progress', enum: ['In Progress', 'Completed', 'On Hold'] } // Added for frontend
+   progress: { type: Number, default: 0, min: 0, max: 100 },
+   status: { type: String, default: 'In Progress', enum: ['In Progress', 'Completed', 'On Hold'] }
 }, { timestamps: true });
 
 const Project = mongoose.model('Project', projectSchema);

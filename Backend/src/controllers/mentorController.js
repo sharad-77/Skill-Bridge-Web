@@ -52,6 +52,7 @@ export const mentorDetails = async (req, res) => {
 }
 
 export const requestForMentorship = async (req, res) => {
+  const mentorId = req.params.id;
   try {
     const mentorshipRequestSchema = z.object({
       typeOfMentorship: z.string(),
@@ -60,11 +61,12 @@ export const requestForMentorship = async (req, res) => {
       currentExperienceLevel: z.string(),
       availability: z.string(),
       preferredMeetingFormat: z.string(),
-      specificQuestionsOrTopics: z.string(),
+      specificQuestionsOrTopics: z.string().optional(),
       additionalInformation: z.string().optional(),
     });
 
     const validation = mentorshipRequestSchema.safeParse(req.body);
+
     if (!validation.success) {
       return res.status(400).json({ message: "Invalid mentorship request data", errors: validation.error.errors });
     }
@@ -75,7 +77,7 @@ export const requestForMentorship = async (req, res) => {
     if (!student) {
       return res.status(404).json({ message: "Student not found, Please try again" });
     }
-    const mentor = await Mentor.findOne({ userId: req.params.id });
+    const mentor = await Mentor.findById(mentorId);
     if (!mentor) return res.status(404).json({ message: "Mentor not found" });
 
     const RequestMentorship = await MentorshipRequestSchema.create({
@@ -106,21 +108,29 @@ export const AllMentorshipRequest = async (req, res) => {
       const requests = await MentorshipRequestSchema.find({ studentId: student._id })
         .populate({
           path: 'mentorId',
-          populate: { path: 'userId', select: 'name' },
-          select: 'currentPosition'
+          populate: { path: 'userId', select: 'name email' },
+          select: 'currentPosition profileImage'
         })
-        .select('currentExperienceLevel availability preferredMeetingFormat specificQuestionsOrTopics additionalInformation createdAt mentorId status');
+        .select('mentorshipType preferredDuration goals currentExperienceLevel availability preferredMeetingFormat specificQuestionsOrTopics additionalInformation createdAt updatedAt mentorId status')
+        .sort({ createdAt: -1 });
 
       const formattedRequests = requests.map(req => ({
-        mentorName: req.mentorId?.userId?.name || '',
-        mentorPosition: req.mentorId?.currentPosition || '',
+        mentorName: req.mentorId?.userId?.name || 'Unknown Mentor',
+        mentorProfilePhoto: req.mentorId?.profileImage?.url || '/default-avatar.png',
+        mentorEmail: req.mentorId?.userId?.email || '',
+        mentorCurrentPosition: req.mentorId?.currentPosition || 'Position not specified',
+        mentorshipType: req.mentorshipType || 'Not specified',
+        preferredMeetingFormat: req.preferredMeetingFormat || 'Not specified',
+        duration: req.preferredDuration || 'Not specified',
+        dateOfReq: req.createdAt ? new Date(req.createdAt).toLocaleDateString() : '',
+        goalOfReq: req.specificQuestionsOrTopics || 'No specific goals mentioned',
+        goals: req.goals || '',
+        lastUpdate: req.updatedAt ? new Date(req.updatedAt).toLocaleDateString() : new Date(req.createdAt).toLocaleDateString(),
         experienceLevel: req.currentExperienceLevel || '',
         availability: req.availability || '',
-        meetingFormat: req.preferredMeetingFormat || '',
-        questionsOrTopics: req.specificQuestionsOrTopics || '',
         additionalInfo: req.additionalInformation || '',
-        requestedAt: req.createdAt,
-        status: req.status
+        status: req.status,
+        _id: req._id
       }));
 
       return res.json({ requests: formattedRequests });
@@ -132,21 +142,36 @@ export const AllMentorshipRequest = async (req, res) => {
       const requests = await MentorshipRequestSchema.find({ mentorId: mentor._id })
         .populate({
           path: 'studentId',
-          populate: { path: 'userId', select: 'name' },
-          select: 'instituteName'
+          populate: {
+            path: 'userId',
+            select: 'name email',
+            model: 'User'
+          },
+          select: 'instituteName profileImage',
+          model: 'Student'
         })
-        .select('currentExperienceLevel availability preferredMeetingFormat specificQuestionsOrTopics additionalInformation createdAt studentId status');
+        .select('mentorshipType preferredDuration goals currentExperienceLevel availability preferredMeetingFormat specificQuestionsOrTopics additionalInformation createdAt updatedAt studentId status')
+        .sort({ createdAt: -1 });
+
+
 
       const formattedRequests = requests.map(req => ({
-        studentName: req.studentId?.userId?.name || '',
-        studentInstitute: req.studentId?.instituteName || '',
+        userName: req.studentId?.userId?.name || 'Unknown Student',
+        studentProfilePhoto: req.studentId?.profileImage?.url || null,
+        instituteName: req.studentId?.instituteName || 'Institute not specified',
+        email: req.studentId?.userId?.email || '',
+        mentorshipType: req.mentorshipType || 'Not specified',
+        preferredMeetingFormat: req.preferredMeetingFormat || 'Not specified',
+        duration: req.preferredDuration || 'Not specified',
+        dateOfReq: req.createdAt ? new Date(req.createdAt).toLocaleDateString() : '',
+        goalOfReq: req.specificQuestionsOrTopics || 'No specific goals mentioned',
+        goals: req.goals || '',
+        lastUpdate: req.updatedAt ? new Date(req.updatedAt).toLocaleDateString() : (req.createdAt ? new Date(req.createdAt).toLocaleDateString() : ''),
         experienceLevel: req.currentExperienceLevel || '',
         availability: req.availability || '',
-        meetingFormat: req.preferredMeetingFormat || '',
-        questionsOrTopics: req.specificQuestionsOrTopics || '',
         additionalInfo: req.additionalInformation || '',
-        requestedAt: req.createdAt,
-        status: req.status
+        status: req.status || 'pending',
+        _id: req._id
       }));
 
       return res.json({ requests: formattedRequests });
@@ -156,19 +181,15 @@ export const AllMentorshipRequest = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in AllMentorshipRequest:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 };
 
 export const updateMentorshipRequest = async (req, res) => {
   try {
-    if (req.user.role === "student") {
-      return res.status(403).json({ message: "Only mentor can access this route" });
-    }
-
     const updateRequestSchema = z.object({
       requestId: z.string(),
-      status: z.enum(["pending", "accepted", "rejected", "reject"]), // Assuming these are the valid statuses
+      status: z.enum(["cancelled", "accepted", "rejected"]),
     });
 
     const validation = updateRequestSchema.safeParse(req.body);
@@ -178,19 +199,67 @@ export const updateMentorshipRequest = async (req, res) => {
 
     const { requestId, status } = validation.data;
 
-    if (status === 'reject') {
-      await MentorshipRequestSchema.findByIdAndDelete(requestId);
-      return res.json({ message: "Request deleted successfully" });
+    // Find the request first to check ownership
+    const existingRequest = await MentorshipRequestSchema.findById(requestId);
+    if (!existingRequest) {
+      return res.status(404).json({ message: "Request not found" });
     }
 
-    const request = await MentorshipRequestSchema.findByIdAndUpdate(requestId, { status }, { new: true })
-      .populate('studentId', 'userId.name')
-      .populate('mentorId', 'userId.name currentPosition')
-      .select('mentorshipType preferredDuration goals created_at studentId mentorId status');
+    // Check permissions based on user role
+    if (req.user.role === "student") {
+      // Students can only cancel their own requests
+      const student = await Student.findOne({ userId: req.user.id });
+      if (!student || existingRequest.studentId.toString() !== student._id.toString()) {
+        return res.status(403).json({ message: "You can only cancel your own requests" });
+      }
+      if (status !== "cancelled") {
+        return res.status(400).json({ message: "Students can only cancel requests" });
+      }
+    } else if (req.user.role === "mentor") {
+      // Mentors can only update requests sent to them
+      const mentor = await Mentor.findOne({ userId: req.user.id });
+      if (!mentor || existingRequest.mentorId.toString() !== mentor._id.toString()) {
+        return res.status(403).json({ message: "You can only update requests sent to you" });
+      }
+      if (!["accepted", "rejected"].includes(status)) {
+        return res.status(400).json({ message: "Mentors can only accept or reject requests" });
+      }
+    } else {
+      return res.status(403).json({ message: "Unauthorized role" });
+    }
 
-    res.json({ request });
+    // Handle cancellation (deletion)
+    if (status === 'cancelled') {
+      await MentorshipRequestSchema.findByIdAndDelete(requestId);
+      return res.json({ message: "Request cancelled successfully" });
+    }
+
+    // Update the request status
+    const updatedRequest = await MentorshipRequestSchema.findByIdAndUpdate(
+      requestId,
+      { status },
+      { new: true }
+    )
+      .populate({
+        path: 'studentId',
+        populate: { path: 'userId', select: 'name email' },
+        select: 'instituteName profileImage'
+      })
+      .populate({
+        path: 'mentorId',
+        populate: { path: 'userId', select: 'name email' },
+        select: 'currentPosition profileImage'
+      })
+      .select('mentorshipType preferredDuration goals currentExperienceLevel availability preferredMeetingFormat specificQuestionsOrTopics additionalInformation createdAt updatedAt studentId mentorId status');
+
+
+
+    res.json({
+      message: `Request ${status} successfully`,
+      request: updatedRequest
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ message: "Internal Server error" });
+    console.error("Error in updateMentorshipRequest:", error);
+    res.status(500).json({ message: "Internal Server error", error: error.message });
   }
 };

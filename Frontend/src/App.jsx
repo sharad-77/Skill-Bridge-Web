@@ -3,7 +3,6 @@ import { Suspense, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Toaster } from 'sonner';
 import { ErrorBoundary, Footer, Header } from "./components";
-import ProtectedRoute from './pages/authPage/ProtectedRoute';
 import "./index.css";
 import {
   CertificatePage,
@@ -14,8 +13,6 @@ import {
   MentorOnboardingPage,
   MentorPage,
   MentorRequestPage,
-  MentorshipRequestsMentor,
-  MentorshipRequestsStudent,
   ProfilePage,
   ProjectPage,
   SigninPage,
@@ -24,6 +21,8 @@ import {
   SkillPage,
   StudentOnboardingPage
 } from "./pages";
+import ProtectedRoute from './pages/authPage/ProtectedRoute';
+import Mentorship from './pages/Mentorship';
 import useAuthStore from './store/useAuthStore';
 
 const queryClient = new QueryClient();
@@ -84,14 +83,9 @@ function App() {
 
               <Route path="/mentorship-requests" element={
                 <ProtectedRoute>
-                  <MentorshipRequestsStudent />
+                  <Mentorship />
                 </ProtectedRoute>
               } />
-
-              <Route path="/mentorship-requests/mentor" element={
-                <ProtectedRoute>
-                  <MentorshipRequestsMentor />
-                </ProtectedRoute>} />
 
               <Route path="/chat" element={
                 <ProtectedRoute>

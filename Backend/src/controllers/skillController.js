@@ -2,7 +2,6 @@ import z from "zod";
 import SkillModel from "../models/skillModel.js";
 import { Mentor, Student, User } from "../models/userModel.js";
 
-// Fetch all skills
 export const allSkill = async (req, res) => {
     try {
         const featureSkill = await SkillModel.find().populate('createdBy', 'name');
@@ -38,11 +37,9 @@ export const allSkill = async (req, res) => {
     }
 };
 
-// Create a new skill
 export const newSkill = async (req, res) => {
 
     if (!req.user || !req.user.name) {
-        console.log('User not authenticated:', req.user); 
         return res.status(400).json({ message: "User not authenticated or name missing" });
     }
     const userName = req.user.name;
@@ -52,6 +49,24 @@ export const newSkill = async (req, res) => {
     }
 
     try {
+        const parseArrayField = (field) => {
+            if (typeof field === 'string') {
+                try {
+                    const parsed = JSON.parse(field);
+                    return Array.isArray(parsed) ? parsed : [field];
+                } catch {
+                    return [field];
+                }
+            }
+            return Array.isArray(field) ? field : [field];
+        };
+
+        const processedBody = {
+            ...req.body,
+            highlights: parseArrayField(req.body.highlights),
+            knowledgeRequirement: parseArrayField(req.body.knowledgeRequirement),
+        };
+
         const newSkillSchema = z.object({
             title: z.string().min(1, "Title is required"),
             category: z.string().min(1, "Category is required"),
@@ -64,22 +79,19 @@ export const newSkill = async (req, res) => {
             knowledgeRequirement: z.array(z.string()).min(1, "At least one knowledge requirement is required"),
         });
 
-        const validation = newSkillSchema.safeParse(req.body);
+        const validation = newSkillSchema.safeParse(processedBody);
         if (!validation.success) {
             return res.status(400).json({ message: "Invalid skill data", errors: validation.error.errors });
         }
 
         const { title, category, level, description, duration, image, introduction, highlights, knowledgeRequirement } = validation.data;
-L
+
         let skillImage = image || '';
         if (req.file) {
             skillImage = req.file.path;
-            console.log('Skill image URL:', skillImage);
         } else {
-            console.log('No file uploaded, using provided URL:', image);
+            // Use provided URL if no file uploaded
         }
-
-        console.log('User info:', req.user);
 
         let creatorDoc, creatorModel;
         if (req.user.role === "student") {
@@ -120,7 +132,6 @@ L
     }
 };
 
-// Get skill details
 export const detailSkill = async (req, res) => {
     try {
         const skillDetails = await SkillModel.findById(req.params.id).populate('createdBy', 'name');
@@ -197,7 +208,6 @@ export const joinSkill = async (req, res) => {
 };
 
 
-// Make a review
 export const makeReview = async (req, res) => {
     try {
         const reviewSchema = z.object({

@@ -17,7 +17,6 @@ export default function Skill() {
     setShowForm(true);
   };
 
-  // Fixed filtering and sorting logic
   const filteredSkills = useMemo(() => {
     if (!skills || skills.length === 0) return [];
 
@@ -30,15 +29,12 @@ export default function Skill() {
         category.includes(searchText.toLowerCase());
     });
 
-    // Then filter by category
     if (sortby !== "All") {
       filtered = filtered.filter((skill) => skill.category === sortby);
     }
 
-    // Create a copy before sorting to avoid mutation
     let sortedFiltered = [...filtered];
 
-    // Apply sorting
     if (activeSort === "Trending") {
       sortedFiltered = sortedFiltered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     } else if (activeSort === "New") {

@@ -31,12 +31,6 @@ export const useCreateSkill = () => {
   return useMutation({
     mutationFn: async (skillData) => {
       const isFormData = skillData instanceof FormData;
-      console.log('Sending skill data:', isFormData ? 'FormData' : skillData); // Debug log
-      // if (isFormData) {
-      //   for (let [key, value] of skillData.entries()) {
-      //     console.log(key, value); // Debug log
-      //   }
-      // }
       const response = await axiosInstance.post("/Skill-Exchange/", skillData, {
         headers: isFormData ? {
           'Content-Type': 'multipart/form-data',
@@ -68,7 +62,7 @@ export const useJoinSkill = (id, setIsJoined) => {
     onSuccess: () => {
       toast.success("You have joined this skill!");
       if (setIsJoined) setIsJoined(true);
-      queryClient.invalidateQueries(["skill", id]); // refresh details
+      queryClient.invalidateQueries(["skill", id]); 
     },
     onError: (error) => {
       const message = error.response?.data?.message || "Failed to join skill";

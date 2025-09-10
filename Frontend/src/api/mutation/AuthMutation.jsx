@@ -41,7 +41,6 @@ export const UseSignin = () => {
   });
 };
 
-
 export const UseStudentOnboard = () => {
   return useMutation({
     mutationFn: async (formData) => {
@@ -58,7 +57,6 @@ export const UseStudentOnboard = () => {
     },
   });
 };
-
 
 export const UseMentorOnboard = () => {
   return useMutation({

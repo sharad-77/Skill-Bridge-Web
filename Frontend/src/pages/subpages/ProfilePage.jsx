@@ -6,7 +6,6 @@ function ProfilePage() {
   const { user, isAuthenticated } = useAuthStore();
   const role = user?.role;
 
-  // Check if user is authenticated
   if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -18,7 +17,6 @@ function ProfilePage() {
     );
   }
 
-  // Simple role check with fallback
   if (role === "mentor") {
     return <MentorProfilePage />;
   }

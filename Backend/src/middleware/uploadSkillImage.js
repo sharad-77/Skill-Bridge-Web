@@ -21,8 +21,6 @@ const uploadSkillImage = multer({
     fileSize: 5 * 1024 * 1024 // 5MB limit
   },
   fileFilter: (req, file, cb) => {
-    console.log('File received in middleware:', file); // Debug log
-    console.log('File mimetype:', file.mimetype); // Debug log
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {

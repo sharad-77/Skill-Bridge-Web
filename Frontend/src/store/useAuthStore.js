@@ -1,6 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
 import { create } from 'zustand';
-import axiosInstance from '../api/axiosInstance'; // Import your axios instance
+import axiosInstance from '../api/axiosInstance';
 
 const useAuthStore = create((set) => ({
   user: null,
@@ -21,7 +21,7 @@ const useAuthStore = create((set) => ({
       token,
       isAuthenticated: true,
       role: user.role,
-      userId: user.id || user.userId, // Handle different user ID fields
+      userId: user.id || user.userId,
     });
   },
 
@@ -37,7 +37,6 @@ const useAuthStore = create((set) => ({
         return set({ isInitializing: false });
       }
 
-      // Set the token in the store before making the API call
       set({ token });
 
       const decodedToken = jwtDecode(token);

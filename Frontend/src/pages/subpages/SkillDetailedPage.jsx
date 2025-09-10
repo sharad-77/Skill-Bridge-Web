@@ -23,27 +23,23 @@ import { useState, useEffect } from 'react';
 const SkillDetailedPage = () => {
   const { id } = useParams();
   const { data: skillData, isLoading, isError, error } = useGetSkillById(id);
-
+  const [isJoined, setIsJoined] = useState(false);
   const { user } = useAuthStore();
   const userId = user?._id;
 
   const skill = skillData?.Skill || skillData;
-
-  if (!id || id === 'undefined' || id === 'null') {
-    return <div>Invalid skill ID</div>;
-  }
-
-  // Check if user already joined
-  const alreadyJoined = skill?.enrolledStudents?.includes(userId);
-  const [isJoined, setIsJoined] = useState(false);
-
   const joinSkill = useJoinSkill(id, setIsJoined);
+  const alreadyJoined = skill?.enrolledStudents?.includes(userId);
 
   useEffect(() => {
     if (alreadyJoined !== undefined) {
       setIsJoined(alreadyJoined);
     }
   }, [alreadyJoined]);
+
+  if (!id || id === 'undefined' || id === 'null') {
+    return <div>Invalid skill ID</div>;
+  }
 
   const defaultSocialIcons = [
     { icon: Facebook, color: "text-blue-600" },

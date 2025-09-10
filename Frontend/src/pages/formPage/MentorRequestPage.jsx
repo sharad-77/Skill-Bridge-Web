@@ -1,11 +1,27 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Star } from 'lucide-react';
-import { AvailabilityCard, ExpertiseAreasCard, MentorInfoCard } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
+import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useDetailsMentor } from '../../api/mutation/MentorMutation';
+import { toast } from 'sonner';
+import { z } from 'zod';
+import { useCreateMentorshipRequest, useDetailsMentor } from '../../api/mutation/MentorMutation';
+import Button from '../../components/ui/Button';
+import { AvailabilityCard, ExpertiseAreasCard, MentorInfoCard } from '../../components/ui/Card';
+
+const mentorshipRequestSchema = z.object({
+  typeOfMentorship: z.string().min(1, { message: "Type Must Be Selected" }),
+  PreferredDuration: z.string().min(1, { message: "Preferred Duration Must Be Selected" }),
+  Goals: z.string().min(1, { message: "Goal Required, It Cannot Be Empty" }),
+  currentExperienceLevel: z.string().min(1, { message: "Experience Level Required" }),
+  availability: z.string().min(1, { message: "Availability Must Be Selected" }),
+  preferredMeetingFormat: z.string().min(1, { message: "Meeting Format Must Be Selected" }),
+  specificQuestionsOrTopics: z.string().optional(),
+  additionalInformation: z.string().optional(),
+});
 
 const MentorRequest = () => {
   const { mentorId } = useParams();
+  // console.log(mentorId);
   const navigate = useNavigate();
   const {
     data,
@@ -13,6 +29,28 @@ const MentorRequest = () => {
     isError,
     error
   } = useDetailsMentor(mentorId);
+  const { mutate: NewRequest } = useCreateMentorshipRequest();
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(mentorshipRequestSchema)
+  });
+
+  const onSubmit = async (data) => {
+
+    NewRequest(
+      { mentorId, ...data },
+      {
+        onSuccess: async (response) => {
+          toast.success("Your Request Has Been Sent");
+          // console.log("Success Response:", response);
+          // console.log("After Upload", data);
+        },
+        onError: (error) => {
+          console.log(error.response.data);
+          toast.error(error.message || "An error occurred");
+        }
+      }
+    );
+  };
 
   if (isLoading) {
     return (
@@ -24,7 +62,6 @@ const MentorRequest = () => {
       </div>
     );
   }
-
   if (isError) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -35,25 +72,19 @@ const MentorRequest = () => {
       </div>
     );
   }
-
   const { mentorDetails } = data;
-
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-cyan-400 text-white">
         <div className="container mx-auto px-4 py-8 w-full max-w-5xl">
-          {/* Back Link */}
           <div className="mb-6">
             <Button
               onClick={() => navigate("/mentor")}
-            className="bg-indigo-600 hover:bg-white hover:text-black"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 font-semibold text-md"
             >
-             <ArrowLeft></ArrowLeft> Back To Mentor Page
+              <ArrowLeft /> Back To Mentor Page
             </Button>
           </div>
-
-          {/* Mentor Info Section */}
           <div className="flex flex-col md:flex-row gap-8 items-start">
             <img
               src={mentorDetails.image}
@@ -65,38 +96,31 @@ const MentorRequest = () => {
               <p className="text-white text-lg mb-4">
                 Send a mentorship request to {mentorDetails?.name} and start your learning journey
               </p>
-
               <div className="flex items-center gap-4">
-                {/* Rating Section */}
                 <div className="flex items-center">
                   <Star className="h-5 w-5 text-yellow-400 fill-current" />
                   <span className="ml-1 font-medium">{mentorDetails.reting}</span>
                   <span className="ml-1 text-blue-100">{mentorDetails.Student}</span>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
       </div>
-
       <div className="container mx-auto px-4 py-8 w-full h-full flex justify-center">
         <div className="flex flex-col sm:flex-row justify-center gap-5 max-w-5xl w-full h-full">
-          {/* Main Form */}
           <div className="bg-white rounded-2xl p-8 shadow-md border border-gray-100 sm:w-[70%] w-full max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold mb-8 text-gray-800">Mentorship Request Form</h2>
-
-            <form className="space-y-6">
-              {/* Type of Mentorship */}
+            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-1.5">
-                <label htmlFor="mentorshipType" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="typeOfMentorship" className="block text-sm font-semibold text-gray-700">
                   Type of Mentorship
                 </label>
                 <select
-                  id="mentorshipType"
-                  name="mentorshipType"
-                  required
+                  id="typeOfMentorship"
+                  name="typeOfMentorship"
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  {...register("typeOfMentorship")}
                 >
                   <option value="">Select mentorship type</option>
                   <option value="career">Career Development</option>
@@ -105,18 +129,17 @@ const MentorRequest = () => {
                   <option value="leadership">Leadership & Management</option>
                   <option value="general">General Guidance</option>
                 </select>
+                {errors.typeOfMentorship && <p className="text-red-500 text-sm font-medium">{errors.typeOfMentorship.message}</p>}
               </div>
-
-              {/* Preferred Duration */}
               <div className="space-y-1.5">
-                <label htmlFor="duration" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="PreferredDuration" className="block text-sm font-semibold text-gray-700">
                   Preferred Duration
                 </label>
                 <select
-                  id="duration"
-                  name="duration"
-                  required
+                  id="PreferredDuration"
+                  name="PreferredDuration"
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  {...register("PreferredDuration")}
                 >
                   <option value="">Select duration</option>
                   <option value="one-time">One-time session (1–2 hours)</option>
@@ -124,37 +147,34 @@ const MentorRequest = () => {
                   <option value="long-term">Long-term (3–6 months)</option>
                   <option value="ongoing">Ongoing relationship</option>
                 </select>
+                {errors.PreferredDuration && <p className="text-red-500 text-sm font-medium">{errors.PreferredDuration.message}</p>}
               </div>
-
-              {/* Your Goals */}
               <div className="space-y-1.5">
-                <label htmlFor="goals" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="Goals" className="block text-sm font-semibold text-gray-700">
                   Your Goals
                 </label>
                 <textarea
-                  id="goals"
-                  name="goals"
-                  required
+                  id="Goals"
+                  name="Goals"
                   placeholder="What do you hope to achieve through this mentorship? Be specific about your goals and expectations."
                   className="w-full min-h-[100px] rounded-lg border border-gray-300 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-y"
+                  {...register("Goals")}
                 ></textarea>
+                {errors.Goals && <p className="text-red-500 text-sm font-medium">{errors.Goals.message}</p>}
               </div>
-
-              {/* Experience Level */}
               <div className="space-y-1.5">
-                <label htmlFor="experience" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="currentExperienceLevel" className="block text-sm font-semibold text-gray-700">
                   Your Current Experience Level
                 </label>
                 <textarea
-                  id="experience"
-                  name="experience"
-                  required
+                  id="currentExperienceLevel"
+                  name="currentExperienceLevel"
                   placeholder="Tell us about your current experience, skills, and background relevant to the mentorship area."
                   className="w-full min-h-[80px] rounded-lg border border-gray-300 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-y"
+                  {...register("currentExperienceLevel")}
                 ></textarea>
+                {errors.currentExperienceLevel && <p className="text-red-500 text-sm font-medium">{errors.currentExperienceLevel.message}</p>}
               </div>
-
-              {/* Availability */}
               <div className="space-y-1.5">
                 <label htmlFor="availability" className="block text-sm font-semibold text-gray-700">
                   Your Availability
@@ -162,8 +182,8 @@ const MentorRequest = () => {
                 <select
                   id="availability"
                   name="availability"
-                  required
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  {...register("availability")}
                 >
                   <option value="">Select your availability</option>
                   <option value="weekday-morning">Weekday mornings</option>
@@ -173,18 +193,17 @@ const MentorRequest = () => {
                   <option value="weekend-afternoon">Weekend afternoons</option>
                   <option value="flexible">Flexible</option>
                 </select>
+                {errors.availability && <p className="text-red-500 text-sm font-medium">{errors.availability.message}</p>}
               </div>
-
-              {/* Meeting Format */}
               <div className="space-y-1.5">
-                <label htmlFor="preferredMeeting" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="preferredMeetingFormat" className="block text-sm font-semibold text-gray-700">
                   Preferred Meeting Format
                 </label>
                 <select
-                  id="preferredMeeting"
-                  name="preferredMeeting"
-                  required
+                  id="preferredMeetingFormat"
+                  name="preferredMeetingFormat"
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  {...register("preferredMeetingFormat")}
                 >
                   <option value="">Select meeting format</option>
                   <option value="video-call">Video call</option>
@@ -193,35 +212,34 @@ const MentorRequest = () => {
                   <option value="messaging">Text/messaging</option>
                   <option value="mixed">Mixed approach</option>
                 </select>
+                {errors.preferredMeetingFormat && <p className="text-red-500 text-sm font-medium">{errors.preferredMeetingFormat.message}</p>}
               </div>
-
-              {/* Specific Questions */}
               <div className="space-y-1.5">
-                <label htmlFor="specificQuestions" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="specificQuestionsOrTopics" className="block text-sm font-semibold text-gray-700">
                   Specific Questions or Topics
                 </label>
                 <textarea
-                  id="specificQuestions"
-                  name="specificQuestions"
+                  id="specificQuestionsOrTopics"
+                  name="specificQuestionsOrTopics"
                   placeholder="Are there specific questions, challenges, or topics you'd like to discuss?"
                   className="w-full min-h-[100px] rounded-lg border border-gray-300 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-y"
+                  {...register("specificQuestionsOrTopics")}
                 ></textarea>
+                {errors.specificQuestionsOrTopics && <p className="text-red-500 text-sm font-medium">{errors.specificQuestionsOrTopics.message}</p>}
               </div>
-
-              {/* Additional Info */}
               <div className="space-y-1.5">
-                <label htmlFor="additionalInfo" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="additionalInformation" className="block text-sm font-semibold text-gray-700">
                   Additional Information
                 </label>
                 <textarea
-                  id="additionalInfo"
-                  name="additionalInfo"
+                  id="additionalInformation"
+                  name="additionalInformation"
                   placeholder="Any additional information you'd like to share with the mentor?"
                   className="w-full min-h-[80px] rounded-lg border border-gray-300 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-y"
+                  {...register("additionalInformation")}
                 ></textarea>
+                {errors.additionalInformation && <p className="text-red-500 text-sm font-medium">{errors.additionalInformation.message}</p>}
               </div>
-
-              {/* Submit */}
               <div className="pt-6">
                 <button
                   type="submit"
@@ -235,11 +253,7 @@ const MentorRequest = () => {
               </div>
             </form>
           </div>
-
-
-          {/* Mentor Info Sidebar */}
           <div className="space-y-6 sm:w-[30%] w-full">
-            {/* Mentor Summary */}
             <MentorInfoCard
               image={mentorDetails.image}
               name={mentorDetails.name}
@@ -247,16 +261,12 @@ const MentorRequest = () => {
               location={mentorDetails.location}
               experience={mentorDetails.experience}
             />
-
             <ExpertiseAreasCard
               areas={mentorDetails.expertise}
             />
-
             <AvailabilityCard
               availability={mentorDetails.availability}
             />
-
-
           </div>
         </div>
       </div>

@@ -470,21 +470,22 @@ const MentorReviewCard = ({ imageUrl, name, title, rating, review, tags }) => {
 }
 
 const MentorShipRequestStudentCard = ({
-  imageUrl,
-  name,
-  title,
-  rating,
-  review,
-  tags,
+  mentorName,
+  mentorProfilePhoto,
+  mentorCurrentPosition,
+  mentorshipType,
+  duration,
+  dateOfReq,
+  goalOfReq,
+  lastUpdate,
   status,
-  goals,
-  requestedAt,
-  lastUpdatedAt,
+  rating,
   onDetails,
   onCancel,
   onChat,
-  mentorResponse, // For declined requests with mentor feedback
-  rejectionReason, // Additional rejection details
+  mentorResponse,
+  rejectionReason,
+  isLoading = false, // Loading state for actions
 }) => {
 
   const getStatusConfig = (status) => {
@@ -520,6 +521,16 @@ const MentorShipRequestStudentCard = ({
           icon: X,
           label: 'Declined'
         };
+      case 'cancelled':
+        return {
+          bg: 'bg-gray-50',
+          border: 'border-gray-200',
+          text: 'text-gray-600',
+          badgeBg: 'bg-gray-100',
+          badgeText: 'text-gray-700',
+          icon: X,
+          label: 'Cancelled'
+        };
       default:
         return {
           bg: 'bg-gray-50',
@@ -552,7 +563,7 @@ const MentorShipRequestStudentCard = ({
             <img
               alt="Mentor"
               className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-100"
-              src={imageUrl}
+              src={mentorProfilePhoto}
             />
             {rating && (
               <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-md ring-1 ring-gray-100">
@@ -565,11 +576,11 @@ const MentorShipRequestStudentCard = ({
           </div>
 
           <div className="flex-1 min-w-0">
-            {/* Header with Name, Title and Status */}
+            {/* Header with Name, Position and Status */}
             <div className="flex items-start justify-between mb-3">
               <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate">{name}</h3>
-                <p className="text-gray-600 text-sm mt-0.5">{title}</p>
+                <h3 className="text-lg font-semibold text-gray-900 truncate">{mentorName}</h3>
+                <p className="text-gray-600 text-sm mt-0.5">{mentorCurrentPosition}</p>
               </div>
               <div className="flex-shrink-0 ml-4">
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${statusConfig.badgeBg} ${statusConfig.badgeText}`}>
@@ -579,23 +590,19 @@ const MentorShipRequestStudentCard = ({
               </div>
             </div>
 
-            {/* Tags/Info Grid */}
+            {/* Mentorship Details Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-              {tags?.[0] && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <BookOpen className="h-4 w-4 text-gray-400" />
-                  <span className="truncate">{tags[0]}</span>
-                </div>
-              )}
-              {tags?.[1] && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <User className="h-4 w-4 text-gray-400" />
-                  <span className="truncate">{tags[1]}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <BookOpen className="h-4 w-4 text-gray-400" />
+                <span className="truncate">{mentorshipType}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="h-4 w-4 text-gray-400" />
+                <span className="truncate">{duration}</span>
+              </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Calendar className="h-4 w-4 text-gray-400" />
-                <span className="truncate">Requested {requestedAt}</span>
+                <span className="truncate">Requested {dateOfReq}</span>
               </div>
             </div>
 
@@ -605,7 +612,7 @@ const MentorShipRequestStudentCard = ({
                 <Target className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-900 mb-1">Learning Goals:</p>
-                  <p className="text-sm text-gray-700 leading-relaxed">{goals}</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{goalOfReq}</p>
                 </div>
               </div>
             </div>
@@ -628,7 +635,7 @@ const MentorShipRequestStudentCard = ({
             {/* Footer with Last Updated and Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
               <div className="text-sm text-gray-500">
-                Last updated: <span className="font-medium">{lastUpdatedAt}</span>
+                Last updated: <span className="font-medium">{lastUpdate}</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -642,19 +649,19 @@ const MentorShipRequestStudentCard = ({
                   Details
                 </Button>
 
-                {/* Cancel Button (only for pending) */}
+                {/* Action Buttons based on status */}
                 {showCancelButton && (
                   <Button
                     variant="destructive"
                     size="sm"
                     leftIcon={<X className="h-4 w-4" />}
                     onClick={onCancel}
+                    disabled={isLoading}
                   >
-                    Cancel Request
+                    {isLoading ? 'Cancelling...' : 'Cancel Request'}
                   </Button>
                 )}
 
-                {/* Chat Button (only for accepted) */}
                 {showChatButton && (
                   <Button
                     variant="primary"
@@ -663,6 +670,39 @@ const MentorShipRequestStudentCard = ({
                     onClick={onChat}
                   >
                     Open Chat
+                  </Button>
+                )}
+
+                {isDeclined && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<X className="h-4 w-4" />}
+                    disabled
+                  >
+                    Request Declined
+                  </Button>
+                )}
+
+                {status?.toLowerCase() === 'cancelled' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<X className="h-4 w-4" />}
+                    disabled
+                  >
+                    Request Cancelled
+                  </Button>
+                )}
+
+                {status?.toLowerCase() === 'accepted' && !showChatButton && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Check className="h-4 w-4" />}
+                    disabled
+                  >
+                    Request Accepted
                   </Button>
                 )}
               </div>
@@ -675,100 +715,131 @@ const MentorShipRequestStudentCard = ({
 };
 
 const MentorShipRequestMentorCard = ({
-  imageUrl,
-  name,
-  university,
-  email,
-  skills,
+  userName,
+  studentProfilePhoto,
+  instituteName,
+  mentorshipType,
   duration,
-  goals,
-  requestedAt,
-  lastUpdatedAt,
+  dateOfReq,
+  goalOfReq,
+  lastUpdate,
   onViewDetails,
   onAccept,
   onDecline,
-  urgency = 'normal', // low, normal, high
-  additionalInfo, // Any extra student information
+  status = 'pending', // pending, accepted, rejected
+  email, // Optional email field
+  isLoading = false, // Loading state for actions
 }) => {
 
-  const getUrgencyConfig = (urgency) => {
-    switch (urgency) {
-      case 'high':
+  const getStatusConfig = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
         return {
-          border: 'border-red-200',
-          bg: 'bg-red-50',
-          indicator: 'bg-red-100 text-red-700'
+          bg: 'bg-amber-50',
+          border: 'border-amber-200',
+          text: 'text-amber-800',
+          badgeBg: 'bg-amber-100',
+          badgeText: 'text-amber-700',
+          icon: Clock,
+          label: 'Pending Review',
+          indicator: 'bg-amber-400'
         };
-      case 'low':
+      case 'accepted':
         return {
-          border: 'border-blue-200',
-          bg: 'bg-blue-50',
-          indicator: 'bg-blue-100 text-blue-700'
+          bg: 'bg-emerald-50',
+          border: 'border-emerald-200',
+          text: 'text-emerald-800',
+          badgeBg: 'bg-emerald-100',
+          badgeText: 'text-emerald-700',
+          icon: Check,
+          label: 'Accepted',
+          indicator: 'bg-emerald-400'
+        };
+      case 'rejected':
+        return {
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+          text: 'text-red-800',
+          badgeBg: 'bg-red-100',
+          badgeText: 'text-red-700',
+          icon: X,
+          label: 'Rejected',
+          indicator: 'bg-red-400'
+        };
+      case 'cancelled':
+        return {
+          bg: 'bg-gray-50',
+          border: 'border-gray-200',
+          text: 'text-gray-600',
+          badgeBg: 'bg-gray-100',
+          badgeText: 'text-gray-700',
+          icon: X,
+          label: 'Cancelled',
+          indicator: 'bg-gray-400'
         };
       default:
         return {
-          border: 'border-gray-100',
-          bg: 'bg-white',
-          indicator: 'bg-yellow-100 text-yellow-700'
+          bg: 'bg-gray-50',
+          border: 'border-gray-200',
+          text: 'text-gray-800',
+          badgeBg: 'bg-gray-100',
+          badgeText: 'text-gray-700',
+          icon: AlertCircle,
+          label: status || 'Unknown',
+          indicator: 'bg-gray-400'
         };
     }
   };
 
-  const urgencyConfig = getUrgencyConfig(urgency);
+  const statusConfig = getStatusConfig(status);
+  const StatusIcon = statusConfig.icon;
 
   return (
-    <div className={`${urgencyConfig.bg} rounded-xl border ${urgencyConfig.border} shadow-sm hover:shadow-md transition-all duration-300 w-full overflow-hidden`}>
-      {/* Urgency indicator bar */}
-      {urgency === 'high' && (
-        <div className="h-1 bg-red-400"></div>
-      )}
+    <div className={`${statusConfig.bg} rounded-xl border ${statusConfig.border} shadow-sm hover:shadow-md transition-all duration-300 w-full overflow-hidden`}>
+      {/* Status indicator bar */}
+      <div className={`h-1 ${statusConfig.indicator}`}></div>
 
       <div className="px-6 py-3">
         <div className="flex items-start gap-4">
-          {/* Student Avatar */}
           <div className="flex-shrink-0">
             <img
-              alt={name}
+              alt={userName || 'Student'}
               className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-100"
-              src={imageUrl}
+              src={studentProfilePhoto || '/default-avatar.png'}
+              onError={(e) => {
+                e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userName || 'Student') + '&background=6366f1&color=fff&size=64';
+              }}
             />
           </div>
 
           <div className="flex-1 min-w-0">
-            {/* Header with Student Info and Status */}
             <div className="flex items-start justify-between mb-2">
               <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 truncate">{name}</h3>
-                <p className="text-gray-600 text-sm mt-0.5">{university}</p>
-                <p className="text-sm text-gray-500 mt-1">{email}</p>
+                <h3 className="text-lg font-semibold text-gray-900 truncate">{userName}</h3>
+                <p className="text-gray-600 text-sm mt-0.5">{instituteName}</p>
+                {email && <p className="text-sm text-gray-500 mt-1">{email}</p>}
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-                {urgency === 'high' && (
-                  <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-medium flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    Urgent
-                  </span>
-                )}
-                <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${urgencyConfig.indicator}`}>
-                  <Clock className="h-4 w-4" />
-                  Pending
-                </span>
-              </div>
+               <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                 <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${statusConfig.badgeBg} ${statusConfig.badgeText}`}>
+                   <StatusIcon className="h-4 w-4" />
+                   {statusConfig.label}
+                 </span>
+               </div>
             </div>
 
             {/* Student Details Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <User className="h-4 w-4 text-gray-400" />
-                <span className="truncate">{skills || 'Career Development'}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="h-4 w-4 text-gray-400" />
-                <span className="truncate">{duration || 'Long-term (3-6 months)'}</span>
+                <BookOpen className="h-4 w-4 text-gray-400" />
+                <span className="truncate">{mentorshipType}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="h-4 w-4 text-gray-400" />
-                <span className="truncate">Requested {requestedAt}</span>
+                <span className="truncate">{duration}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Calendar className="h-4 w-4 text-gray-400" />
+                <span className="truncate">Requested {dateOfReq}</span>
               </div>
             </div>
 
@@ -778,17 +849,15 @@ const MentorShipRequestMentorCard = ({
                 <Target className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-900 mb-1">Student Goals:</p>
-                  <p className="text-sm text-gray-700 leading-relaxed">{goals}</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{goalOfReq}</p>
                 </div>
               </div>
             </div>
 
-
-
             {/* Footer with Last Updated and Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
               <div className="text-sm text-gray-500">
-                Last updated: <span className="font-medium">{lastUpdatedAt}</span>
+                Last updated: <span className="font-medium">{lastUpdate}</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -802,25 +871,65 @@ const MentorShipRequestMentorCard = ({
                   View Details
                 </Button>
 
-                {/* Accept Button */}
-                <Button
-                  variant="success"
-                  size="sm"
-                  leftIcon={<CheckCircle className="h-4 w-4" />}
-                  onClick={onAccept}
-                >
-                  Accept
-                </Button>
+                {/* Action Buttons based on status */}
+                {status?.toLowerCase() === 'pending' && (
+                  <>
+                    {/* Accept Button */}
+                    <Button
+                      variant="success"
+                      size="sm"
+                      leftIcon={<CheckCircle className="h-4 w-4" />}
+                      onClick={onAccept}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Accepting...' : 'Accept'}
+                    </Button>
 
-                {/* Decline Button */}
-                <Button
-                  variant="destructive-outline"
-                  size="sm"
-                  leftIcon={<XCircle className="h-4 w-4" />}
-                  onClick={onDecline}
-                >
-                  Decline
-                </Button>
+                    {/* Decline Button */}
+                    <Button
+                      variant="destructive-outline"
+                      size="sm"
+                      leftIcon={<XCircle className="h-4 w-4" />}
+                      onClick={onDecline}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Rejecting...' : 'Decline'}
+                    </Button>
+                  </>
+                )}
+
+                {status?.toLowerCase() === 'accepted' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Check className="h-4 w-4" />}
+                    disabled
+                  >
+                    Accepted
+                  </Button>
+                )}
+
+                {status?.toLowerCase() === 'rejected' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<X className="h-4 w-4" />}
+                    disabled
+                  >
+                    Rejected
+                  </Button>
+                )}
+
+                {status?.toLowerCase() === 'cancelled' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<X className="h-4 w-4" />}
+                    disabled
+                  >
+                    Cancelled by Student
+                  </Button>
+                )}
               </div>
             </div>
           </div>

@@ -1,69 +1,87 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useFetchRequestforStudent, useUpdateMentorshipRequest } from '../../api/mutation/MentorMutation';
 import { MentorShipRequestMentorCard } from '../../components/ui/Card';
+import { toast } from 'sonner';
 
 const MentorshipRequestsMentor = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const { data, isLoading, error } = useFetchRequestforStudent();
+  const updateRequestMutation = useUpdateMentorshipRequest();
+  const requests = data?.requests || [];
+
+  const filteredRequests = useMemo(() => {
+    let filtered = requests;
+    if (activeTab !== 'all') {
+      filtered = filtered.filter(req => req.status.toLowerCase() === activeTab);
+    }
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(req =>
+        (req.userName || '').toLowerCase().includes(lowerQuery) ||
+        (req.email || '').toLowerCase().includes(lowerQuery) ||
+        (req.instituteName || '').toLowerCase().includes(lowerQuery)
+      );
+    }
+    return filtered;
+  }, [requests, activeTab, searchQuery]);
+
+  const tabCounts = useMemo(() => {
+    const counts = {
+      all: requests.length,
+      pending: requests.filter(req => req.status.toLowerCase() === 'pending').length,
+      accepted: requests.filter(req => req.status.toLowerCase() === 'accepted').length,
+      rejected: requests.filter(req => req.status.toLowerCase() === 'rejected').length,
+    };
+    return counts;
+  }, [requests]);
+
+  const handleAcceptRequest = async (requestId, studentName) => {
+    try {
+      await updateRequestMutation.mutateAsync({
+        requestId,
+        status: 'accepted'
+      });
+      toast.success(`✅ Request Accepted!`, {
+        description: `Mentorship request from ${studentName} has been accepted. The student will be notified and can now start chatting with you.`,
+        duration: 5000,
+      });
+    } catch (error) {
+      toast.error(`Failed to accept request`, {
+        description: error.response?.data?.message || error.message,
+        duration: 5000,
+      });
+    }
+  };
+
+  const handleRejectRequest = async (requestId, studentName) => {
+    try {
+      await updateRequestMutation.mutateAsync({
+        requestId,
+        status: 'rejected'
+      });
+      toast(`❌ Request Rejected`, {
+        description: `Mentorship request from ${studentName} has been rejected. The student will be notified of your decision.`,
+        duration: 5000,
+      });
+    } catch (error) {
+      toast.error(`Failed to reject request`, {
+        description: error.response?.data?.message || error.message,
+        duration: 5000,
+      });
+    }
+  };
+
   const tabs = [
-    { id: 'all', name: 'All Requests (5)' },
-    { id: 'pending', name: 'Pending (2)' },
-    { id: 'accepted', name: 'Accepted (2)' },
-    { id: 'rejected', name: 'Rejected (1)' },
+    { id: 'all', name: `All Requests (${tabCounts.all})` },
+    { id: 'pending', name: `Pending (${tabCounts.pending})` },
+    { id: 'accepted', name: `Accepted (${tabCounts.accepted})` },
+    { id: 'rejected', name: `Rejected (${tabCounts.rejected})` },
   ];
 
-  const mentorshipRequests = [
-    {
-      id: 1,
-      imageUrl: '/placeholder.svg?height=60&width=60',
-      name: 'Sarah Chen',
-      university: 'MIT - Computer Science',
-      email: 'sarah.chen@mit.edu',
-      skills: 'Full Stack Development',
-      duration: 'Long-term (3-6 months)',
-      goals:
-        'I want to transition from academic projects to real-world applications. Looking for guidance on system design, code architecture, and industry best practices for scalable web applications.',
-      requestedAt: 'Jan 15, 2024',
-      lastUpdatedAt: 'Jan 15, 2024',
-      urgency: 'high',
-      additionalInfo:
-        'Currently working on final year project involving microservices architecture. Has experience with React, Node.js, and PostgreSQL.'
-    },
-    {
-      id: 2,
-      imageUrl: '/placeholder.svg?height=60&width=60',
-      name: 'Marcus Rodriguez',
-      university: 'Stanford University',
-      email: 'marcus.rodriguez@stanford.edu',
-      skills: 'Machine Learning & AI',
-      duration: 'Medium-term (2-4 months)',
-      goals:
-        'Seeking mentorship to bridge the gap between theoretical ML knowledge and practical industry applications. Interested in computer vision and NLP projects.',
-      requestedAt: 'Jan 18, 2024',
-      lastUpdatedAt: 'Jan 18, 2024',
-      urgency: 'normal',
-      additionalInfo:
-        'Published 2 research papers on deep learning. Proficient in Python, TensorFlow, and PyTorch. Looking to transition into industry after graduation.'
-    },
-    {
-      id: 3,
-      imageUrl: '/placeholder.svg?height=60&width=60',
-      name: 'Emma Thompson',
-      university: 'UC Berkeley - EECS',
-      email: 'emma.thompson@berkeley.edu',
-      skills: 'Mobile App Development',
-      duration: 'Short-term (1-3 months)',
-      goals:
-        'I have built several iOS apps as personal projects but want to learn about professional mobile development practices, app store optimization, and monetization strategies.',
-      requestedAt: 'Jan 20, 2024',
-      lastUpdatedAt: 'Jan 20, 2024',
-      urgency: 'normal',
-      additionalInfo:
-        'Self-taught iOS developer with 3 apps on the App Store. Currently learning React Native for cross-platform development.'
-    },
-  ];
-
-  // You can add real filter/search handling logic here if you want
+  if (isLoading) return <div className="container mx-auto px-4 py-8 text-center">Loading mentorship requests...</div>;
+  if (error) return <div className="container mx-auto px-4 py-8 text-center text-red-600">Error fetching requests: {error.message}</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -92,8 +110,8 @@ const MentorshipRequestsMentor = () => {
                 <button
                   key={tab.id}
                   className={`px-4 py-2 rounded-full whitespace-nowrap transition-all cursor-pointer ${activeTab === tab.id
-                      ? 'bg-purple-100 text-purple-700 font-medium'
-                      : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-purple-100 text-purple-700 font-medium'
+                    : 'text-gray-600 hover:bg-gray-100'
                     }`}
                   onClick={() => setActiveTab(tab.id)}
                 >
@@ -147,18 +165,36 @@ const MentorshipRequestsMentor = () => {
         </div>
       </div>
 
-      {/* Mentorship Requests */}
-      <div className="container mx-auto px-4 py-8 h-full w-full flex justify-center items-center ">
+      <div className="container mx-auto px-4 py-8 h-full w-full flex justify-center items-center">
         <div className="space-y-6 max-w-5xl flex flex-col justify-center items-center h-full w-full">
-          {mentorshipRequests.map((request) => (
-            <MentorShipRequestMentorCard
-              key={request.id}
-              {...request}
-              onViewDetails={() => console.log('View details for', request.name)}
-              onAccept={() => console.log('Accept for', request.name)}
-              onDecline={() => console.log('Decline for', request.name)}
-            />
-          ))}
+          {filteredRequests.length === 0 ? (
+            <p className="text-gray-500 text-center">No requests found for the current filters.</p>
+          ) : (
+            filteredRequests.map((request) => (
+              <MentorShipRequestMentorCard
+                key={request._id}
+                userName={request.userName || 'Unknown Student'}
+                studentProfilePhoto={request.studentProfilePhoto || '/default-avatar.png'}
+                instituteName={request.instituteName || 'Institute not specified'}
+                email={request.email || ''}
+                mentorshipType={request.mentorshipType || 'Not specified'}
+                preferredMeetingFormat={request.preferredMeetingFormat || 'Not specified'}
+                duration={request.duration || 'Not specified'}
+                dateOfReq={request.dateOfReq || ''}
+                goalOfReq={request.goalOfReq || 'No goals specified'}
+                goals={request.goals || ''}
+                lastUpdate={request.lastUpdate || ''}
+                experienceLevel={request.experienceLevel || ''}
+                availability={request.availability || ''}
+                additionalInfo={request.additionalInfo || ''}
+                status={request.status || 'pending'}
+                isLoading={updateRequestMutation.isPending}
+                onViewDetails={() => console.log('View details for', request.userName || 'Unknown Student')}
+                onAccept={() => handleAcceptRequest(request._id, request.userName || 'Unknown Student')}
+                onDecline={() => handleRejectRequest(request._id, request.userName || 'Unknown Student')}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

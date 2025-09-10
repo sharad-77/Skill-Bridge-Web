@@ -9,10 +9,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   server: {
     proxy: {
-      "/api": "http://localhost:8000",
+      "/api": {
+        target: process.env.VITE_API_URL || "http://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
+        configure: (proxy, ) => {
+          proxy.on('error', (err, ) => {
+            console.error('Proxy error:', err);
+          });
+          proxy.on('proxyReq', (proxyReq ) => {
+            proxyReq.removeHeader('referer');
+            proxyReq.setHeader('X-Forwarded-Proto', 'http');
+          });
+          proxy.on('proxyRes', (proxyRes) => {
+            delete proxyRes.headers['server'];
+            delete proxyRes.headers['x-powered-by'];
+          });
+        },
+      },
     },
   },
-  logLevel: "error",
   plugins: [
     tailwindcss({
       theme: {
@@ -38,7 +55,7 @@ export default defineConfig({
       },
     }),
     react({
-      jsxRuntime: 'automatic', // <-- important
+      jsxRuntime: 'automatic',
     }),
   ],
   resolve: {

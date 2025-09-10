@@ -193,7 +193,6 @@ export const studentSignup = async (req, res) => {
         const studentValidation = studentSchema.safeParse(validationData);
 
         if (!studentValidation.success) {
-            console.log("Validation errors:", studentValidation.error.errors);
             return res.status(400).json({
                 message: "Please Enter Valid Information",
                 errors: studentValidation.error.errors.map(error => ({
@@ -338,7 +337,7 @@ export const mentorSignup = async (req, res) => {
                 publicId: req.file.filename,
             };
         } else {
-            console.log('No profile image provided');
+            // No profile image provided
         }
 
         const newMentor = await Mentor.create(mentorData);

@@ -173,7 +173,6 @@ export default function Header() {
             {/* Auth Section - Desktop */}
             <div className="hidden lg:flex items-center space-x-3">
               {isAuthenticated ? (
-                /* Profile Dropdown */
                 <div
                   ref={(el) => (dropdownRefs.current.profile = el)}
                   className="relative"
