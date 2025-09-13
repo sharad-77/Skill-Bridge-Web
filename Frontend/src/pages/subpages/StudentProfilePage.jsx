@@ -56,13 +56,8 @@ export default function StudentProfilePage() {
   return (
     <main className="min-h-screen bg-gray-100">
       {/* Cover Header */}
-      <section className="relative h-60 bg-gray-700">
-        <img
-          alt="Cover"
-          src={profile?.coverImage || "/default-cover.png"}
-          className="absolute inset-0 w-full h-full object-cover opacity-50"
-        />
-        <div className="absolute inset-0 bg-black/40"></div>
+      <section className="relative h-60 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700">
+        <div className="absolute inset-0 bg-black/20"></div>
       </section>
 
       {/* Profile Card */}

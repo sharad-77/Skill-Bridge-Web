@@ -92,12 +92,13 @@ const Signup = () => {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input
-                      className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4  text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 h-12"
-                      placeholder="Enter your email"
-                      type="text"
-                      {...register("email", { required: true })}
-                    />
+                     <input
+                       className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4  text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 h-12"
+                       placeholder="Enter your email"
+                       type="email"
+                       autoComplete="username"
+                       {...register("email", { required: true })}
+                     />
                     {errors.email && <p className='text-md font-medium text-red-500'>{errors.email.message}</p>}
                   </div>
                 </div>
@@ -111,12 +112,13 @@ const Signup = () => {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Lock className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input
-                      className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4  text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 pr-14 h-12"
-                      placeholder="Create a strong password"
-                      type={showPassword ? "text" : "password"} // Dynamic type based on state
-                      {...register("password", { required: true })}
-                    />
+                     <input
+                       className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4  text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 pr-14 h-12"
+                       placeholder="Create a strong password"
+                       type={showPassword ? "text" : "password"} // Dynamic type based on state
+                       autoComplete="new-password"
+                       {...register("password", { required: true })}
+                     />
                     {errors.password && <p className='text-md font-medium text-red-500'>{errors.password?.message}</p>}
                     <button
                       type="button"

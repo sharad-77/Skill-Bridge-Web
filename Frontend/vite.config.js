@@ -1,67 +1,32 @@
+// vite.config.js
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-export default defineConfig({
-  server: {
-    proxy: {
-      "/api": {
-        target: process.env.VITE_API_URL || "http://localhost:8000",
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, "/api"),
-        configure: (proxy, ) => {
-          proxy.on('error', (err, ) => {
-            console.error('Proxy error:', err);
-          });
-          proxy.on('proxyReq', (proxyReq ) => {
-            proxyReq.removeHeader('referer');
-            proxyReq.setHeader('X-Forwarded-Proto', 'http');
-          });
-          proxy.on('proxyRes', (proxyRes) => {
-            delete proxyRes.headers['server'];
-            delete proxyRes.headers['x-powered-by'];
-          });
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
+    logLevel: 'warn',
+    plugins: [react(), tailwindcss()],
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+          secure: false
         },
       },
     },
-  },
-  plugins: [
-    tailwindcss({
-      theme: {
-        extend: {
-          fontFamily: {
-            custom: [
-              'ui-sans-serif',
-              'system-ui',
-              'sans-serif',
-              '"Apple Color Emoji"',
-              '"Segoe UI Emoji"',
-              '"Segoe UI Symbol"',
-              '"Noto Color Emoji"',
-            ],
-          },
-          backgroundImage: {
-            'dot-pattern': "radial-gradient(currentColor 1px, transparent 1px)",
-          },
-          backgroundSize: {
-            'dots': '16px 16px',
-          },
-        },
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
       },
-    }),
-    react({
-      jsxRuntime: 'automatic',
-    }),
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
-    }
-  },
-
-})
+    },
+  };
+});

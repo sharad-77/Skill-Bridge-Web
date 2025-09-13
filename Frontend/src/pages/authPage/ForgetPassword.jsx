@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import Button from '../../components/ui/Button.jsx';
-import { UseForgetPassword } from '../../api/mutation/AuthMutation.jsx';
+import { UseChangePassword } from '../../api/mutation/AuthMutation.jsx';
 
 const forgetPasswordSchema = z.object({
   oldPassword: z.string().min(1, { message: "Current password is required" }),
@@ -25,7 +25,7 @@ const ForgetPassword = () => {
     resolver: zodResolver(forgetPasswordSchema),
     mode: "onChange",
   });
-  const usePasswordForget = UseForgetPassword();
+  const useChangePassword = UseChangePassword();
 
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -34,7 +34,7 @@ const ForgetPassword = () => {
   const toggleNewPasswordVisibility = () => setShowNewPassword((prev) => !prev);
 
   const onSubmit = async (data) => {
-    usePasswordForget.mutate(data, {
+    useChangePassword.mutate(data, {
       onSuccess: (res) => {
         toast.success("Password changed successfully!");
         navigate("/signin");
@@ -67,6 +67,7 @@ const ForgetPassword = () => {
             {/* Form Container */}
             <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-10 backdrop-blur-sm">
               <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+                <input type="text" autoComplete="username" style={{ display: 'none' }} />
 
                 {/* Current Password Field */}
                 <div className="space-y-2">
@@ -77,13 +78,14 @@ const ForgetPassword = () => {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Lock className="h-6 w-6 text-gray-400" />
                     </div>
-                    <input
-                      className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-4 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 pr-14 h-12"
-                      id="oldPassword"
-                      placeholder="Enter your current password"
-                      type={showOldPassword ? "text" : "password"}
-                      {...register("oldPassword")}
-                    />
+                     <input
+                       className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-4 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 pr-14 h-12"
+                       id="oldPassword"
+                       placeholder="Enter your current password"
+                       type={showOldPassword ? "text" : "password"}
+                       autoComplete="current-password"
+                       {...register("oldPassword")}
+                     />
                     <button
                       type="button"
                       onClick={toggleOldPasswordVisibility}
@@ -111,13 +113,14 @@ const ForgetPassword = () => {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Lock className="h-6 w-6 text-gray-400" />
                     </div>
-                    <input
-                      className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-4 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 pr-14 h-12"
-                      id="newPassword"
-                      placeholder="Enter your new password"
-                      type={showNewPassword ? "text" : "password"}
-                      {...register("newPassword")}
-                    />
+                     <input
+                       className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-4 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 pr-14 h-12"
+                       id="newPassword"
+                       placeholder="Enter your new password"
+                       type={showNewPassword ? "text" : "password"}
+                       autoComplete="new-password"
+                       {...register("newPassword")}
+                     />
                     <button
                       type="button"
                       onClick={toggleNewPasswordVisibility}

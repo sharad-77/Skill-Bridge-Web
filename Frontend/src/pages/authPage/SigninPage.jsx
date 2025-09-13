@@ -95,12 +95,13 @@ const Signin = () => {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Mail className="h-6 w-6 text-gray-400" />
                     </div>
-                    <input
-                      className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-4 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 h-12"
-                      placeholder="Enter your email"
-                      type="email"
-                      {...register("email")}
-                    />
+                     <input
+                       className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-4 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 h-12"
+                       placeholder="Enter your email"
+                       type="email"
+                       autoComplete="username"
+                       {...register("email")}
+                     />
                     {errors.email && <p className='text-red-500 text-sm font-medium'>{errors.email.message}</p>}
                   </div>
                 </div>
@@ -114,12 +115,13 @@ const Signin = () => {
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Lock className="h-6 w-6 text-gray-400" />
                     </div>
-                    <input
-                      className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-4 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 pr-14 h-12"
-                      placeholder="Enter your password"
-                      type={showPassword ? "text" : "password"}
-                      {...register("password")}
-                    />
+                     <input
+                       className="flex w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-4 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 pl-14 pr-14 h-12"
+                       placeholder="Enter your password"
+                       type={showPassword ? "text" : "password"}
+                       autoComplete="current-password"
+                       {...register("password")}
+                     />
                     {errors.password && <p className='text-red-500 text-sm font-medium'>{errors.password.message}</p>}
                     <button
                       type="button"

@@ -14,3 +14,16 @@ export const useGetUserProfile = (userId) => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
+
+const fetchMentorshipRequests = async () => {
+  const { data } = await axiosInstance.get("/Mentor-Match");
+  return data.requests || [];
+};
+
+export const useGetMentorshipRequests = () => {
+  return useQuery({
+    queryKey: ["mentorshipRequests"],
+    queryFn: fetchMentorshipRequests,
+    staleTime: 1000 * 60 * 5,
+  });
+};

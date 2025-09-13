@@ -75,7 +75,7 @@ export const UseMentorOnboard = () => {
   });
 };
 
-export const UseForgetPassword = () => {
+export const UseChangePassword = () => {
   return useMutation({
     mutationFn: async (userData) => {
       const response = await axiosInstance.post("/Authentication/changePassword", userData);

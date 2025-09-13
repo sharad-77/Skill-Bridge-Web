@@ -3,13 +3,14 @@ import { useState } from "react";
 import DashboardSection from "../../components/mini-sections/OverView";
 import SettingsPage from "../../components/mini-sections/SettingsPage";
 import { RecentReviewCard } from "../../components/ui/Card";
-import { useGetUserProfile } from "../../api/query/UserQuery";
+import { useGetUserProfile, useGetMentorshipRequests } from "../../api/query/UserQuery";
 import useAuthStore from "../../store/useAuthStore";
 
 export default function MentorProfilePage() {
   const [activeTab, setActiveTab] = useState("OverView");
   const { userId } = useAuthStore();
   const { data: profile, isLoading, isError } = useGetUserProfile(userId);
+  const { data: requests } = useGetMentorshipRequests();
 
   const tabs = ["OverView", "Mentees & Reviews", "Account Settings"];
 
@@ -30,6 +31,8 @@ export default function MentorProfilePage() {
       rating: review.star || 0,
       comment: review.comment || "No comment provided",
     })) || [];
+
+  const mentees = requests?.filter(req => req.status === 'accepted') || [];
 
   if (isLoading) {
     return (
@@ -57,13 +60,8 @@ export default function MentorProfilePage() {
   return (
     <main className="min-h-screen bg-gray-100">
       {/* Cover Header */}
-      <section className="relative h-60 bg-gray-700">
-        <img
-          alt="Cover"
-          src={profile?.coverImage || "/default-cover.png"}
-          className="absolute inset-0 w-full h-full object-cover opacity-50"
-        />
-        <div className="absolute inset-0 bg-black/40"></div>
+      <section className="relative h-60 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700">
+        <div className="absolute inset-0 bg-black/20"></div>
       </section>
 
       {/* Profile Card */}
@@ -161,7 +159,7 @@ export default function MentorProfilePage() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">
                 Mentorship Impact
               </h2>
-              <div className="grid lg:grid-cols-2 gap-10">
+              <div className="grid lg:grid-cols-3 gap-10">
                 <div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Success Stories
@@ -184,12 +182,34 @@ export default function MentorProfilePage() {
 
                 <div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    My Mentees
+                  </h3>
+                  {mentees.length > 0 ? (
+                    mentees.map((mentee, index) => (
+                      <div
+                        key={mentee._id || `mentee-${index}`}
+                        className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4"
+                      >
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          {mentee.userName}
+                        </h4>
+                        <p className="text-gray-600">Institute: {mentee.instituteName}</p>
+                        <p className="text-gray-600">Email: {mentee.email}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-600">No mentees yet.</p>
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Expertise
                   </h3>
                   {expertise.length > 0 ? (
-                    expertise.map((skill) => (
+                    expertise.map((skill, index) => (
                       <div
-                        key={skill._id}
+                        key={skill._id || `skill-${index}`}
                         className="p-4 bg-gray-50 rounded-lg border border-gray-200"
                       >
                         <h4 className="text-lg font-semibold text-gray-900">

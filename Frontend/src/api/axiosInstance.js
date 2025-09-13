@@ -2,9 +2,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import useAuthStore from "../store/useAuthStore";
 
-// Utility function to get user-friendly error messages
 const getErrorMessage = (error) => {
-  const { response, request, message } = error;
+  const { response, message } = error;
 
   if (!response) {
     return {
@@ -75,16 +74,27 @@ const getErrorMessage = (error) => {
   }
 };
 
+// Simplified base URL logic
+const getBaseURL = () => {
+  // In development, use proxy
+  if (import.meta.env.DEV) {
+    return "/api";
+  }
+  // In production, use the API URL
+  return import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "/api";
+};
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.DEV ? "/api" : (import.meta.env.VITE_API_URL || "/api"),
-  timeout: 15000, // 15 second timeout for better reliability
+  baseURL: getBaseURL(),
+  timeout: 15000, // Increased timeout
   headers: {
     "Content-Type": "application/json",
-    "X-Requested-With": "XMLHttpRequest", // Helps identify AJAX requests
+    "X-Requested-With": "XMLHttpRequest",
   },
-  withCredentials: true, // Important for CORS with credentials
+  withCredentials: true,
 });
 
+// Add request logging for debugging
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().token;
@@ -92,11 +102,9 @@ axiosInstance.interceptors.request.use(
       config.headers["Authorization"] = `Bearer ${token}`;
     }
 
-    // Add security headers
     config.headers["X-Client-Version"] = "1.0.0";
     config.headers["X-Requested-At"] = new Date().toISOString();
 
-    // Add request ID for tracking
     config.metadata = {
       startTime: Date.now(),
       requestId: Math.random().toString(36).substring(7)
@@ -116,18 +124,12 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    // Log successful requests in development
-    if (import.meta.env.DEV) {
-      const duration = Date.now() - response.config.metadata?.startTime;
-      console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status} (${duration}ms)`);
-    }
     return response;
   },
   (error) => {
     const errorInfo = getErrorMessage(error);
     const { response } = error;
 
-    // Handle authentication errors specially
     if (errorInfo.type === "auth") {
       console.warn("Unauthorized request - clearing auth");
       useAuthStore.getState().logout();
@@ -135,18 +137,15 @@ axiosInstance.interceptors.response.use(
         description: errorInfo.description,
         duration: 5000,
       });
-      // Redirect to login page after a short delay
       setTimeout(() => {
         window.location.href = "/signin";
       }, 2000);
     } else {
-      // Show appropriate toast based on error type
       const toastOptions = {
         description: errorInfo.description,
         duration: errorInfo.type === "server" ? 6000 : 4000,
       };
 
-      // Add retry action for server errors
       if (errorInfo.type === "server") {
         toastOptions.action = {
           label: "Retry",
@@ -154,7 +153,6 @@ axiosInstance.interceptors.response.use(
         };
       }
 
-      // Add dismiss action for rate limiting
       if (errorInfo.type === "rate_limit") {
         toastOptions.action = {
           label: "Wait",
@@ -165,15 +163,17 @@ axiosInstance.interceptors.response.use(
       toast.error(errorInfo.title, toastOptions);
     }
 
-    // Log error details in development
     if (import.meta.env.DEV) {
-      console.error("API Error:", {
+      console.error("❌ API Error:", {
         type: errorInfo.type,
         status: response?.status,
         message: response?.data?.message || error.message,
         url: error.config?.url,
         method: error.config?.method?.toUpperCase(),
+        baseURL: error.config?.baseURL,
+        fullURL: error.config ? `${error.config.baseURL}${error.config.url}` : 'Unknown',
         duration: Date.now() - error.config?.metadata?.startTime,
+        code: error.code,
       });
     }
 
