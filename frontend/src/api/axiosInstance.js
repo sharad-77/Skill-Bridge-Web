@@ -74,7 +74,6 @@ const getErrorMessage = (error) => {
   }
 };
 
-// Simplified base URL logic
 const getBaseURL = () => {
   // In development, use proxy
   if (import.meta.env.DEV) {
