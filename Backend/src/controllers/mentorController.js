@@ -252,7 +252,10 @@ export const updateMentorshipRequest = async (req, res) => {
       })
       .select('mentorshipType preferredDuration goals currentExperienceLevel availability preferredMeetingFormat specificQuestionsOrTopics additionalInformation createdAt updatedAt studentId mentorId status');
 
-
+    // If accepted, increment mentor's studentsGuided
+    if (status === 'accepted') {
+      await Mentor.findByIdAndUpdate(existingRequest.mentorId, { $inc: { studentsGuided: 1 } });
+    }
 
     res.json({
       message: `Request ${status} successfully`,
