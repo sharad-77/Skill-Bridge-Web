@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/useAuthStore";
 import { toast } from 'sonner';
@@ -6,36 +6,67 @@ import { toast } from 'sonner';
 const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
   const { isAuthenticated, isOnBoarded, isInitializing, role } = useAuthStore();
-
+  const [toastShown, setToastShown] = useState(false);
+  const loadingToastId = useRef(null);
+  const hasNavigated = useRef(false);
 
   useEffect(() => {
-    if (!isInitializing) {
-      if (!isAuthenticated) {
-        toast.dismiss();
-        toast.warning("Please Login First To Explore The App");
-        navigate("/signin", { replace: true });
-      } else if (!isOnBoarded) {
-        toast.dismiss();
-        toast.warning("Please Complete Your Profile First To Explore The App");
-        if (role === "student") {
-          navigate("/onboarding/student", { replace: true });
-        } else if (role === "mentor") {
-          navigate("/onboarding/mentor", { replace: true });
-        } else {
-          navigate("/signup", { replace: true });
-        }
-      }
+    if (isInitializing && !loadingToastId.current) {
+      toast.dismiss();
+      loadingToastId.current = toast.loading("Loading The App");
+    } else if (!isInitializing && loadingToastId.current) {
+      toast.dismiss(loadingToastId.current);
+      loadingToastId.current = null;
     }
-  }, [isInitializing, isAuthenticated, isOnBoarded, role, navigate]);
+  }, [isInitializing]);
 
   useEffect(() => {
     if (isInitializing) {
-      toast.dismiss();
-      toast.loading("Loading The App");
-    } else {
-      toast.dismiss(); // Dismiss loading toast when done
+      setToastShown(false);
+      hasNavigated.current = false;
+      return;
     }
-  }, [isInitializing]);
+
+    if (toastShown || hasNavigated.current) return;
+
+    const showToastAndNavigate = (message, path) => {
+      setToastShown(true);
+      hasNavigated.current = true;
+
+      setTimeout(() => {
+        toast.warning(message);
+        setTimeout(() => navigate(path, { replace: true }), 500);
+      }, 100);
+    };
+
+    if (!isAuthenticated) {
+      showToastAndNavigate(
+        "Please Login First To Explore The App",
+        "/signin"
+      );
+    } else if (!isOnBoarded) {
+      let redirectPath = "/signup";
+
+      if (role === "student") {
+        redirectPath = "/onboarding/student";
+      } else if (role === "mentor") {
+        redirectPath = "/onboarding/mentor";
+      }
+
+      showToastAndNavigate(
+        "Please Complete Your Profile First To Explore The App",
+        redirectPath
+      );
+    }
+  }, [isInitializing, isAuthenticated, isOnBoarded, role, navigate, toastShown]);
+
+  useEffect(() => {
+    return () => {
+      if (loadingToastId.current) {
+        toast.dismiss(loadingToastId.current);
+      }
+    };
+  }, []);
 
   if (isInitializing) {
     return (
